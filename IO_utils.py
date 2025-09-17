@@ -34,7 +34,12 @@ def get_request_def(control_word: bool = False, MC_interface: bool = False, real
     bytes
         4 byte request definition.
     """
-    return struct.pack("I", control_word*1 + MC_interface*2 + realtime_config*4)
+    return struct.pack("I",
+       #|Variable       |  |Bit position|
+        (control_word    <<      0       ) |
+        (MC_interface    <<      1       ) |
+        (realtime_config <<      2       )
+    )
 
 def get_response_def(status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
                      current: bool = False, warm_word: bool = False, error_code: bool = False, monitoring_channel: bool = False,
@@ -63,4 +68,15 @@ def get_response_def(status_word: bool = False, state_var: bool = False, actual_
     realtime_config : bool, optional
         If true the requested realtime parameter is returned.
     """
-    return struct.pack("I", status_word*1 + state_var*2 + actual_pos*4 + demand_pos*8 + current*16 + warm_word*32 + error_code*64 + monitoring_channel*128 + realtime_config*256)
+    return struct.pack("I",
+       #|Variable           |  |Bit position|
+        (status_word         <<      0       ) |
+        (state_var           <<      1       ) |
+        (actual_pos          <<      2       ) |
+        (demand_pos          <<      3       ) |
+        (current             <<      4       ) |
+        (warm_word           <<      5       ) |
+        (error_code          <<      6       ) |
+        (monitoring_channel  <<      7       ) |
+        (realtime_config     <<      8       )
+    )
