@@ -27,8 +27,7 @@ class Control_Word:
         self.include_linearizing = linearizing
         self.include_phase_search = phase_search
 
-    @property
-    def binary(self) -> bytes:
+    def get_binary(self) -> bytes:
         return struct.pack("H",
             (self.include_switch_on              <<  0  ) |
             (self.include_go_to_position         <<  6  ) |

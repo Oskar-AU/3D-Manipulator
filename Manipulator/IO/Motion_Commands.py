@@ -2,7 +2,6 @@ from .Motion_Command_Parameters import MC_Parameters, MC_Parameter
 import struct
 from abc import ABC, abstractmethod
 from typing import Any
-from . import MC_COUNT
 
 class Motion_Commmand_Interface(ABC):
     
@@ -32,11 +31,10 @@ class Motion_Commmand_Interface(ABC):
         format = "".join([MC_parameter['type']['format'] for MC_parameter in self.MC_PARAMETERS])
         return "H" + format
 
-    @property
-    def binary(self) -> bytes:
+    def get_binary(self, MC_COUNT: int) -> bytes:
         MC_parameter_values = [MC_parameter['value'] for MC_parameter in self.MC_PARAMETERS]
         return struct.pack(self.format, 
-                          (MC_COUNT.value  <<  0  ) |
+                          (MC_COUNT        <<  0  ) |
                           (self.SUB_ID     <<  4  ) | 
                           (self.MASTER_ID  <<  8  ), 
                           *MC_parameter_values)
