@@ -17,3 +17,7 @@ class Drivers:
         address = "192.168.131.253",
         port = 49360
     )
+    all = Driver(
+        address = "192.168.131.255",
+        port = 49360
+    )

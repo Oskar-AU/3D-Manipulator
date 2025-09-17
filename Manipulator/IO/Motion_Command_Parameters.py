@@ -1,16 +1,16 @@
 from typing import TypedDict
 
 class linType(TypedDict):
-    size: int
+    format: str
 
 class linTypes:
-    Uint16 = linType(size=16)
-    Uint32 = linType(size=32)
-    Sint32 = linType(size=32)
+    Uint16 = linType(format="H")
+    Uint32 = linType(format="I")
+    Sint32 = linType(format="i")
 
 class MC_Parameter(TypedDict):
     description: str
-    bite_size: int
+    type: linType
     unit: str
     conversion_factor: int
     value: int

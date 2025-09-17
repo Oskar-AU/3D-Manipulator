@@ -1,16 +1,22 @@
-import IO
-from Motion_Commands import *
-from Drivers import Drivers
+from Manipulator import IO
+
+import Manipulator
+
+Manipulator.IO
 
 connection = IO.Connection()
 
 home_on_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True, home=True))
 home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
 
-move_command = IO.Request(IO.Response(), MC_interface=VAI_go_to_pos(0, 0.1, 10, 10))
+get_state_var = IO.Request(IO.Response(state_var=True))
 
-connection.send(move_command, Drivers.drive_2)
+move_command = IO.Request(IO.Response(), MC_interface=IO.Motion_Commands.VAI_go_to_pos(50, 0.1, 10, 10))
+
+# connection.send(get_state_var, Drivers.drive_3)
+connection.send(move_command, IO.Drivers.drive_2)
+# connection.send(home_on_request, Drivers.all)
 # connection.send(home_on_request, Drivers.drive_2)
 # connection.send(home_on_request, Drivers.drive_3)
-# connection.send(home_off_request, Drivers.drive_2)
+# connection.send(home_off_request, Drivers.all)
 # connection.send(home_off_request, Drivers.drive_3)

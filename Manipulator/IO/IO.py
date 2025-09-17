@@ -1,7 +1,7 @@
-from Motion_Commands import Motion_Commmand_Interface
-from Control_Words import Control_Word
-from Realtime_Configs import Realtime_Config
-from Drivers import Driver
+from .Motion_Commands import Motion_Commmand_Interface
+from .Control_Words import Control_Word
+from .Realtime_Configs import Realtime_Config
+from .Drivers import Driver
 import socket
 import struct
 
@@ -44,6 +44,20 @@ class Response:
         self.include_realtime_config = realtime_config
 
     @property
+    def format(self) -> str:
+        return "".join([
+            self.include_status_word,
+            self.include_state_var,
+            self.include_actual_pos,
+            self.include_demand_pos,
+            self.include_current,
+            self.include_warm_word,
+            self.include_error_code,
+            self.include_monitoring_channel,
+            self.include_realtime_config
+        ])
+
+    @property
     def response_def(self) -> bytes:
         return struct.pack("I",
             (self.include_status_word         <<      0       ) |
@@ -64,7 +78,19 @@ class Request:
                  control_word: Control_Word | None = None, 
                  MC_interface: Motion_Commmand_Interface | None = None) -> None:
                 #  realtime_config: Realtime_Config | None = None) -> None:
-        
+        """
+        Parameters
+        ----------
+        response : Response
+            The response to be expected.
+        control_word : bool, optional
+            If true the main state machine of the drive can be accessed.
+        MC_interface : bool, optional
+            If true a motion command can be sent.
+        realtime_config : bool, optional
+            If true parameters, variables, curves, error log, and command tables can be accessed. Also restart, start, stop
+            of the drive can be initiated.
+        """
         self.response = response
         self.control_word = control_word
         self.MC_interface = MC_interface
@@ -94,6 +120,7 @@ class Connection:
         self.socket.settimeout(1.0)
 
     def send(self, request: Request, driver: Driver) -> None:
+        
         # print(struct.unpack("2IH4I", request.binary))
         print(request.binary)
         self.socket.sendto(request.binary, (driver['address'], driver['port']))

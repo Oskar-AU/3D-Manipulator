@@ -1,7 +1,8 @@
-from Motion_Command_Parameters import MC_Parameters, MC_Parameter
+from .Motion_Command_Parameters import MC_Parameters, MC_Parameter
 import struct
 from abc import ABC, abstractmethod
 from typing import Any
+from . import MC_COUNT
 
 class Motion_Commmand_Interface(ABC):
     
@@ -27,14 +28,18 @@ class Motion_Commmand_Interface(ABC):
             self.MC_PARAMETERS.append(MC_parameter)
 
     @property
+    def format(self) -> str:
+        format = "".join([MC_parameter['type']['format'] for MC_parameter in self.MC_PARAMETERS])
+        return "H" + format
+
+    @property
     def binary(self) -> bytes:
         MC_parameter_values = [MC_parameter['value'] for MC_parameter in self.MC_PARAMETERS]
-        format = f"H{len(MC_parameter_values)}I"
-        return struct.pack(format, 
-                           (self.COUNT) << 0 |
-                           (self.SUB_ID << 4) | 
-                           (self.MASTER_ID << 8), 
-                           *MC_parameter_values)
+        return struct.pack(self.format, 
+                          (MC_COUNT.value  <<  0  ) |
+                          (self.SUB_ID     <<  4  ) | 
+                          (self.MASTER_ID  <<  8  ), 
+                          *MC_parameter_values)
 
 class VAI_go_to_pos(Motion_Commmand_Interface):
     
