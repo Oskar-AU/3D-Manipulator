@@ -1,8 +1,9 @@
 from .Drivers import Driver
 from .Requests import Request
+from .Responses import Translated_Response
 import socket
 
-class Connection:
+class linUDP:
 
     def __init__(self) -> None:
         main_port = 41136
@@ -10,7 +11,7 @@ class Connection:
         self.socket.bind(("", main_port))
         self.socket.settimeout(1.0)
 
-    def send(self, request: Request, driver: Driver, MC_count: int | None = None) -> None:
+    def sendto(self, request: Request, driver: Driver, MC_count: int | None = None) -> Translated_Response | None:
         """
         Parameters
         ----------
