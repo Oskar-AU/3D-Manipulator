@@ -29,7 +29,7 @@ class linUDP:
             The count of the realtime config command (4 bits). Must be different than the 
             previous command otherwise it is ignored by the drive.
         """
-        self.socket.sendto(request.get_binary(MC_count), (driver['IP'], driver['port']))
+        self.socket.sendto(request.get_binary(MC_count, realtime_config_command_count), (driver['IP'], driver['port']))
         
         # Logging the send.
         logger.log(request.logging_level, f"Request sent to '{driver['name']}': {request}")
