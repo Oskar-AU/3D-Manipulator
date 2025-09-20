@@ -1,6 +1,6 @@
+from .Motion_Command_Parameters import MC_Parameters
 import struct
 from typing import TypedDict
-from Motion_Command_Parameters import MC_Parameters
 
 class Status_Word(TypedDict):
     operation_enabled:     bool

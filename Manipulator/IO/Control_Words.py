@@ -15,29 +15,44 @@ class Control_Word:
                  linearizing: bool = False,
                  phase_search: bool = False) -> None:
         
-        self.include_switch_on = switch_on
-        self.include_go_to_position = go_to_position
-        self.include_Error_acknowledge = Error_acknowledge
-        self.include_jog_move_plus = jog_move_plus
-        self.include_jog_move_minus = jog_move_minus
-        self.include_special_mode = special_mode
-        self.include_home = home
-        self.include_clerance_check = clerance_check
-        self.include_go_to_initial_position = go_to_initial_position
-        self.include_linearizing = linearizing
-        self.include_phase_search = phase_search
+        self.control_words_included = {
+            "switch_on": switch_on,
+            "go_to_position": go_to_position,
+            "Error_acknowledge": Error_acknowledge,
+            "jog_move_plus": jog_move_plus,
+            "jog_move_minus": jog_move_minus,
+            "special_mode": special_mode,
+            "home": home,
+            "clerance_check": clerance_check,
+            "go_to_initial_position": go_to_initial_position,
+            "linearizing": linearizing,
+            "phase_search": phase_search
+        }
+
+    @property
+    def format() -> str:
+        return "H"
+    
+    @property
+    def decimal(self) -> int:
+        return (self.control_words_included['include_switch_on'             ]  <<  0  ) | \
+               (self.control_words_included['include_go_to_position'        ]  <<  6  ) | \
+               (self.control_words_included['include_Error_acknowledge'     ]  <<  7  ) | \
+               (self.control_words_included['include_jog_move_plus'         ]  <<  8  ) | \
+               (self.control_words_included['include_jog_move_minus'        ]  <<  9  ) | \
+               (self.control_words_included['include_special_mode'          ]  <<  10 ) | \
+               (self.control_words_included['include_home'                  ]  <<  11 ) | \
+               (self.control_words_included['include_clerance_check'        ]  <<  12 ) | \
+               (self.control_words_included['include_go_to_initial_position']  <<  13 ) | \
+               (self.control_words_included['include_linearizing'           ]  <<  14 ) | \
+               (self.control_words_included['include_phase_search'          ]  <<  15 )
 
     def get_binary(self) -> bytes:
-        return struct.pack("H",
-            (self.include_switch_on              <<  0  ) |
-            (self.include_go_to_position         <<  6  ) |
-            (self.include_Error_acknowledge      <<  7  ) |
-            (self.include_jog_move_plus          <<  8  ) |
-            (self.include_jog_move_minus         <<  9  ) |
-            (self.include_special_mode           <<  10 ) |
-            (self.include_home                   <<  11 ) |
-            (self.include_clerance_check         <<  12 ) |
-            (self.include_go_to_initial_position <<  13 ) |
-            (self.include_linearizing            <<  14 ) |
-            (self.include_phase_search           <<  15 )
-        )
+        return struct.pack(self.format, self.decimal)
+    
+    @property
+    def hex(self) -> str:
+        return hex(self.decimal)
+    
+    def __repr__(self) -> str:
+        return self.hex

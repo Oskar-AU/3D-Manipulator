@@ -28,16 +28,25 @@ class Motion_Commmand_Interface(ABC):
 
     @property
     def format(self) -> str:
-        format = "".join([MC_parameter['type']['format'] for MC_parameter in self.MC_PARAMETERS])
-        return "H" + format
+        parameter_format = "".join([MC_parameter['type']['format'] for MC_parameter in self.MC_PARAMETERS])
+        return "H" + parameter_format
+
+    def get_header_decimal(self, MC_COUNT: int) -> int:
+        return (MC_COUNT        <<  0  ) | \
+               (self.SUB_ID     <<  4  ) | \
+               (self.MASTER_ID  <<  8  )
+
+    def get_header_hex(self, MC_COUNT: int) -> str:
+        return hex(self.get_header_decimal(MC_COUNT))
 
     def get_binary(self, MC_COUNT: int) -> bytes:
         MC_parameter_values = [MC_parameter['value'] for MC_parameter in self.MC_PARAMETERS]
-        return struct.pack(self.format, 
-                          (MC_COUNT        <<  0  ) |
-                          (self.SUB_ID     <<  4  ) | 
-                          (self.MASTER_ID  <<  8  ), 
-                          *MC_parameter_values)
+        return struct.pack(self.format, self.get_header_decimal(MC_COUNT), *MC_parameter_values)
+    
+    def __repr__(self) -> str:
+        header = self.get_header_hex(0)
+        parameters = {MC_parameter['description']: MC_parameter['value'] + MC_parameter['unit'] for MC_parameter in self.MC_PARAMETERS}
+        return header + " with params " + f"{parameters}"
 
 class VAI_go_to_pos(Motion_Commmand_Interface):
     
@@ -51,7 +60,7 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
     
     @property
     def DESCRIPTION(self) -> str:
-        return "something"
+        return "VAI_go_to_pos"
 
     def __init__(self, target_position: float, maximal_velocity: float, acceleration: float, deceleration: float) -> None:
         """
