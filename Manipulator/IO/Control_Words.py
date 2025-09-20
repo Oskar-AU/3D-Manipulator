@@ -16,36 +16,36 @@ class Control_Word:
                  phase_search: bool = False) -> None:
         
         self.control_words_included = {
-            "switch_on": switch_on,
-            "go_to_position": go_to_position,
-            "Error_acknowledge": Error_acknowledge,
-            "jog_move_plus": jog_move_plus,
-            "jog_move_minus": jog_move_minus,
-            "special_mode": special_mode,
-            "home": home,
-            "clerance_check": clerance_check,
+            "switch_on":              switch_on,
+            "go_to_position":         go_to_position,
+            "Error_acknowledge":      Error_acknowledge,
+            "jog_move_plus":          jog_move_plus,
+            "jog_move_minus":         jog_move_minus,
+            "special_mode":           special_mode,
+            "home":                   home,
+            "clerance_check":         clerance_check,
             "go_to_initial_position": go_to_initial_position,
-            "linearizing": linearizing,
-            "phase_search": phase_search
+            "linearizing":            linearizing,
+            "phase_search":           phase_search
         }
 
     @property
-    def format() -> str:
+    def format(self) -> str:
         return "H"
     
     @property
     def decimal(self) -> int:
-        return (self.control_words_included['include_switch_on'             ]  <<  0  ) | \
-               (self.control_words_included['include_go_to_position'        ]  <<  6  ) | \
-               (self.control_words_included['include_Error_acknowledge'     ]  <<  7  ) | \
-               (self.control_words_included['include_jog_move_plus'         ]  <<  8  ) | \
-               (self.control_words_included['include_jog_move_minus'        ]  <<  9  ) | \
-               (self.control_words_included['include_special_mode'          ]  <<  10 ) | \
-               (self.control_words_included['include_home'                  ]  <<  11 ) | \
-               (self.control_words_included['include_clerance_check'        ]  <<  12 ) | \
-               (self.control_words_included['include_go_to_initial_position']  <<  13 ) | \
-               (self.control_words_included['include_linearizing'           ]  <<  14 ) | \
-               (self.control_words_included['include_phase_search'          ]  <<  15 )
+        return (self.control_words_included['switch_on'             ]  <<  0  ) | \
+               (self.control_words_included['go_to_position'        ]  <<  6  ) | \
+               (self.control_words_included['Error_acknowledge'     ]  <<  7  ) | \
+               (self.control_words_included['jog_move_plus'         ]  <<  8  ) | \
+               (self.control_words_included['jog_move_minus'        ]  <<  9  ) | \
+               (self.control_words_included['special_mode'          ]  <<  10 ) | \
+               (self.control_words_included['home'                  ]  <<  11 ) | \
+               (self.control_words_included['clerance_check'        ]  <<  12 ) | \
+               (self.control_words_included['go_to_initial_position']  <<  13 ) | \
+               (self.control_words_included['linearizing'           ]  <<  14 ) | \
+               (self.control_words_included['phase_search'          ]  <<  15 )
 
     def get_binary(self) -> bytes:
         return struct.pack(self.format, self.decimal)

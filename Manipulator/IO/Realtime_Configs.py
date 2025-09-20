@@ -29,15 +29,12 @@ class Realtime_Config(ABC):
         return (COMMAND_COUNT    <<  0  ) | \
                (self.COMMAND_ID  <<  8  )
 
-    def get_header_hex(self, COMMAND_COUNT: int) -> str:
-        return hex(self.get_header_decimal(COMMAND_COUNT))
-
     def get_binary(self, COMMAND_COUNT: int) -> bytes:
         realtime_config_parameter_values = [realtime_config_parameter['value'] for realtime_config_parameter in self.REALTIME_CONFIG_PARAMETERS]
         return struct.pack(self.format, self.get_header_decimal(COMMAND_COUNT), *realtime_config_parameter_values)
 
     def __repr__(self) -> str:
-        header = self.get_header_hex(0)
+        header = self.DESCRIPTION
         parameters = {realtime_config_parameter['description']: realtime_config_parameter['value'] for realtime_config_parameter in self.REALTIME_CONFIG_PARAMETERS}
         return header + " with params " + f"{parameters}"
 

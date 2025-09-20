@@ -1,4 +1,7 @@
+from Manipulator import setup_logging
 from Manipulator import IO
+
+setup_logging()
 
 datagram = IO.linUDP()
 
@@ -9,10 +12,10 @@ get_state_var = IO.Request(IO.Response(state_var=True, status_word=True, warm_wo
 
 move_command = IO.Request(IO.Response(), MC_interface=IO.Motion_Commands.VAI_go_to_pos(50, 0.1, 10, 10))
 
-datagram.sendto(get_state_var, IO.Drivers.drive_3)
-# connection.send(move_command, IO.Drivers.drive_2, MC_count=2)
-# connection.send(home_on_request, Drivers.all)
-# connection.send(home_on_request, Drivers.drive_2)
-# connection.send(home_on_request, Drivers.drive_3)
-# connection.send(home_off_request, Drivers.all)
-# connection.send(home_off_request, Drivers.drive_3)
+# datagram.sendto(get_state_var, IO.Drivers.drive_3)
+datagram.sendto(move_command, IO.Drivers.drive_2, MC_count=2)
+datagram.sendto(home_on_request, IO.Drivers.all)
+# datagram.sendto(home_on_request, IO.Drivers.drive_2)
+# datagram.sendto(home_on_request, IO.Drivers.drive_3)
+# datagram.sendto(home_off_request, IO.Drivers.all)
+# datagram.sendto(home_off_request, IO.Drivers.drive_3)
