@@ -1,6 +1,8 @@
 import IO
 
-def home(driver: Driver):
+
+
+def home(driver: IO.Driver):
     """
     Sends a command to home the LinMot motors.
     """
