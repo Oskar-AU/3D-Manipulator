@@ -84,7 +84,7 @@ class Response:
         }
 
     def translate_response(self, response_raw: bytes) -> Translated_Response:
-        response_unpacked: tuple[int] = struct.unpack("LL" + self.format, response_raw)[2:]
+        response_unpacked: tuple[int] = struct.unpack("<LL" + self.format, response_raw)[2:]
         response_dict = dict()
         i = 0
         for response_name, response_type_included in self.response_types_included.items():
@@ -283,7 +283,7 @@ class Response:
 
     @property
     def response_def(self) -> bytes:
-        return struct.pack("I",
+        return struct.pack("<I",
             (self.response_types_included['status_word'        ]  <<      0       ) |
             (self.response_types_included['state_var'          ]  <<      1       ) |
             (self.response_types_included['actual_pos'         ]  <<      2       ) |
