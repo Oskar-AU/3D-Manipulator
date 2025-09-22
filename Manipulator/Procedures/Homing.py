@@ -10,7 +10,7 @@ def home(driver: IO.Driver):
     # Create a response and control word with home and switch_on set to True
     response = IO.Response()
     control = IO.Control_Word(switch_on=True, home=True)
-    #babaabba
+    #ba
     IO.Request(response, control)
 
     # Create a response and control word with home and switch_on set to False
