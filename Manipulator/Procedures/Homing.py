@@ -1,5 +1,8 @@
-import IO
+from .. import IO
+import logging
+from TurnOn import turn_on
 
+logger = logging.getLogger(__name__)
 
 
 def home(driver: IO.Driver):
@@ -7,16 +10,17 @@ def home(driver: IO.Driver):
     Sends a command to home the LinMot motors.
     """
     datagram = IO.linUDP()
-    # Create a response and control word with home and switch_on set to True
-    response = IO.Response()
-    control = IO.Control_Word(switch_on=True, home=True)
-    #ba
-    IO.Request(response, control)
-
-    # Create a response and control word with home and switch_on set to False
-    response = IO.Response()
-    control = IO.Control_Word(switch_on=True)
-    IO.Request(response, control)
-
+    turn_on(driver)
+    home_request = IO.Request(IO.Response(state_var=True), IO.Control_Word(switch_on=True, home=True))
+    
+    translated_response = datagram.sendto(home_request, driver)
+    
+    while not translated_response.get('state_var').get('homing_finished'):
+        status_request = IO.Request(IO.Response(state_var=True))
+        translated_response = datagram.sendto(status_request, driver)
+    
+    home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
+    datagram.sendto(home_off_request, driver)
+    logger.info("Homing procedure completed.")
 if __name__ == "__main__":
     home()
