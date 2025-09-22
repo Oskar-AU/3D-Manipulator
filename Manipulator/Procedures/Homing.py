@@ -1,6 +1,8 @@
 import IO
 
-def home(driver: Driver):
+
+
+def home(driver: IO.Driver):
     """
     Sends a command to home the LinMot motors.
     """
@@ -8,6 +10,7 @@ def home(driver: Driver):
     # Create a response and control word with home and switch_on set to True
     response = IO.Response()
     control = IO.Control_Word(switch_on=True, home=True)
+    #ba
     IO.Request(response, control)
 
     # Create a response and control word with home and switch_on set to False
