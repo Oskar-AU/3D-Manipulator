@@ -38,6 +38,7 @@ class State_Var(TypedDict):
     jogging_negative_finished:          bool
 
 class Warn_Word(TypedDict):
+    bit:        int
     name:       str
     meaning:    str
 
@@ -45,7 +46,7 @@ Translated_Response = dict[str, Status_Word | State_Var | float | Warn_Word]
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
-                 current: bool = False, warm_word: bool = False, error_code: bool = False, monitoring_channel: bool = False,
+                 current: bool = False, warn_word: bool = False, error_code: bool = False, monitoring_channel: bool = False,
                  realtime_config: bool = False) -> bytes:
         """
         Defines a response by selecting which options the response should include.
@@ -62,7 +63,7 @@ class Response:
             If true the demand position of the motor as 4 bytes is requested in the response.
         current : bool, optional
             If true the set current as 2 bytes is requested in the response.
-        warm_word : bool, optional
+        warn_word : bool, optional
             If true the warm word as 2 bytes is requested in the response.
         error_code : bool, optional
             If true the error code as 2 bytes is requested in the response.
@@ -77,7 +78,7 @@ class Response:
             "actual_pos": actual_pos,
             "demand_pos": demand_pos,
             "current": current,
-            "warm_word": warm_word,
+            "warn_word": warn_word,
             "error_code": error_code,
             "monitoring_channel": monitoring_channel,
             "realtime_config": realtime_config
@@ -174,73 +175,88 @@ class Response:
                         response_type_translated_value = response_type_value / 1000     # Converts from mA to A.
 
                     case "warn_word":
+                        print(response_type_value)
                         if   response_type_value & (1 << 0 ): 
                             response_type_translated_value = Warn_Word(
+                                bit     =   0,
                                 name    =   "Motor hot sensor", 
                                 meaning =   "Motor temperature sensor on"
                             )
                         elif response_type_value & (1 << 1 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   1,
                                 name    =   "Motor short time overload I^2t", 
                                 meaning =   "Calculated motor temperature reached warn limit"
                             )
                         elif response_type_value & (1 << 2 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   2,
                                 name    =   "Motor supply voltage low", 
                                 meaning =   "Motor supply voltage reached low warn limit"
                             )
                         elif response_type_value & (1 << 3 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   3,
                                 name    =   "Motor supply voltage high", 
                                 meaning =   "Motor supplt voltage reached high warn limit"
                             )
                         elif response_type_value & (1 << 4 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   4,
                                 name    =   "Position lag always", 
                                 meaning =   "Position error during moving reached warn limit"
                             )
                         elif response_type_value & (1 << 6 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   6,
                                 name    =   "Drive hot", 
                                 meaning =   "Temperature on servo drive high"
                             )
                         elif response_type_value & (1 << 7 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   7,
                                 name    =   "Motor not homed", 
                                 meaning =   "Motor not homed yet"
                             )
                         elif response_type_value & (1 << 8 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   8,
                                 name    =   "PTC sensor 1 hot", 
                                 meaning =   "PTC temperature sensor 1 on"
                             )
                         elif response_type_value & (1 << 9 ):
                             response_type_translated_value = Warn_Word(
+                                bit     =   9,
                                 name    =   "Reserved PTC 2", 
                                 meaning =   "PTC temperature sensor 2 on"
                             )
                         elif response_type_value & (1 << 10):
                             response_type_translated_value = Warn_Word(
+                                bit     =   10,
                                 name    =   "RR hot calculated", 
                                 meaning =   "Regenerative resistor temperature hot calculated"
                             )
                         elif response_type_value & (1 << 11):
                             response_type_translated_value = Warn_Word(
+                                bit     =   11,
                                 name    =   "Speed lag always", 
                                 meaning =   "Speed lag is above warn limit"
                             )
                         elif response_type_value & (1 << 12):
                             response_type_translated_value = Warn_Word(
+                                bit     =   12,
                                 name    =   "Position sensor", 
                                 meaning =   "Position is in warn condition"
                             )
                         elif response_type_value & (1 << 14):
                             response_type_translated_value = Warn_Word(
+                                bit     =   14,
                                 name    =   "Interface warn flag", 
                                 meaning =   "Warn flag of interface SW layer"
                             )
                         elif response_type_value & (1 << 15):
                             response_type_translated_value = Warn_Word(
+                                bit     =   15,
                                 name    =   "Application warn flag", 
                                 meaning =   "Warn flag of application SW layer"
                             )
@@ -267,7 +283,7 @@ class Response:
             "i"   if self.response_types_included['actual_pos'         ] else "",
             "i"   if self.response_types_included['demand_pos'         ] else "",
             "h"   if self.response_types_included['current'            ] else "",   # Is current signed?
-            "H"   if self.response_types_included['warm_word'          ] else "",
+            "H"   if self.response_types_included['warn_word'          ] else "",
             "H"   if self.response_types_included['error_code'         ] else "",
             "16s" if self.response_types_included['monitoring_channel' ] else "",   # Format of monitoring channel depends on what the type of the selected UPID is.
             "8s"  if self.response_types_included['realtime_config'    ] else ""    # Format of realtime config arguments depend on the parameter command ID.
@@ -289,7 +305,7 @@ class Response:
             (self.response_types_included['actual_pos'         ]  <<      2       ) |
             (self.response_types_included['demand_pos'         ]  <<      3       ) |
             (self.response_types_included['current'            ]  <<      4       ) |
-            (self.response_types_included['warm_word'          ]  <<      5       ) |
+            (self.response_types_included['warn_word'          ]  <<      5       ) |
             (self.response_types_included['error_code'         ]  <<      6       ) |
             (self.response_types_included['monitoring_channel' ]  <<      7       ) |
             (self.response_types_included['realtime_config'    ]  <<      8       )
