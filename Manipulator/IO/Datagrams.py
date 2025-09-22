@@ -46,7 +46,7 @@ class linUDP:
             translated_response = request.response.translate_response(response_raw)
             
             #Logging the recieve.
-            logger.log(request.logging_level, f"Response recieved from '{driver['name']}': NotImplementedError")    # TODO: Finish log.
+            logger.log(request.logging_level, f"Response recieved from '{driver['name']}': {translated_response}")
 
             return translated_response
         except socket.timeout:

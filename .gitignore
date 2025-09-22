@@ -1,4 +1,5 @@
 __pycache__/
 *.py[cod]
 test.py
-.vscode
+.vscode/
+log.log

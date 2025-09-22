@@ -1,6 +1,6 @@
 from .Motion_Command_Parameters import MC_Parameters
 import struct
-from typing import TypedDict
+from typing import TypedDict, Literal
 
 class Status_Word(TypedDict):
     operation_enabled:     bool
@@ -42,7 +42,15 @@ class Warn_Word(TypedDict):
     name:       str
     meaning:    str
 
-Translated_Response = dict[str, Status_Word | State_Var | float | Warn_Word]
+Translated_Response = dict[Literal['status_word', 
+                                   'state_var', 
+                                   'actual_pos', 
+                                   'demand_pos', 
+                                   'current', 
+                                   'warn_word', 
+                                   'error_code', 
+                                   'monitoring_channel', 
+                                   'realtime_config'], Status_Word | State_Var | Warn_Word | float | int]
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
@@ -175,7 +183,6 @@ class Response:
                         response_type_translated_value = response_type_value / 1000     # Converts from mA to A.
 
                     case "warn_word":
-                        print(response_type_value)
                         if   response_type_value & (1 << 0 ): 
                             response_type_translated_value = Warn_Word(
                                 bit     =   0,
@@ -262,7 +269,7 @@ class Response:
                             )
 
                     case "error_code":
-                        raise NotImplementedError("Translating error codes from response is not supported yet.")
+                        response_type_translated_value = response_type_value
 
                     case "monitoring_channel":
                         raise NotImplementedError("Translating monitoring channel from response is not supported yet.")
