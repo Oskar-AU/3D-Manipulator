@@ -86,9 +86,10 @@ class Response:
     def translate_response(self, response_raw: bytes) -> Translated_Response:
         response_unpacked: tuple[int] = struct.unpack("LL" + self.format, response_raw)[2:]
         response_dict = dict()
-        for i, (response_name, response_type_included) in enumerate(self.response_types_included.items()):
-            response_type_value = response_unpacked[i]
+        i = 0
+        for response_name, response_type_included in self.response_types_included.items():
             if response_type_included:
+                response_type_value = response_unpacked[i]
                 match response_name:
 
                     case "status_word":
@@ -254,7 +255,8 @@ class Response:
                         raise NotImplementedError("Translating realtime config from response is not supported yet.")
 
                 response_dict.update({response_name: response_type_translated_value})
-        
+                i += 1
+
         return response_dict
 
     @property
