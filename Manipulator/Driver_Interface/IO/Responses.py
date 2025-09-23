@@ -121,7 +121,7 @@ class Response:
                         )
 
                     case "state_var":
-                        main_state, sub_state = struct.unpack('BB', response_type_value)
+                        sub_state, main_state = struct.unpack('BB', response_type_value)
                         match main_state:
                             case 3:     # Setup error.
                                 response_type_translated_value = State_Var(main_state=main_state, 
