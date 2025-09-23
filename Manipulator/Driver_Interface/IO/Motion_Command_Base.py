@@ -29,7 +29,7 @@ class Motion_Commmand_Interface(ABC):
     @property
     def format(self) -> str:
         parameter_format = "".join([MC_parameter['type']['format'] for MC_parameter in self.MC_PARAMETERS])
-        return "H" + parameter_format
+        return "<H" + parameter_format
 
     def get_header_decimal(self, MC_COUNT: int) -> int:
         return (MC_COUNT        <<  0  ) | \

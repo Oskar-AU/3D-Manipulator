@@ -1,4 +1,3 @@
-from .Motion_Command_Parameters import MC_Parameters
 import struct
 from typing import TypedDict, Literal
 
@@ -174,10 +173,10 @@ class Response:
                                 response_type_translated_value = State_Var(main_state=main_state)
                     
                     case "actual_pos":
-                        response_type_translated_value = response_type_value / MC_Parameters.target_position['conversion_factor']   # Converts from mym to unit set in target_pos.
+                        response_type_translated_value = response_type_value / 10000   # Converts from mym to mm.
 
                     case "demand_pos":
-                        response_type_translated_value = response_type_value / MC_Parameters.target_position['conversion_factor']   # Converts from mym to unit set in target_pos.
+                        response_type_translated_value = response_type_value / 10000   # Converts from mym to mm.
 
                     case "current":
                         response_type_translated_value = response_type_value / 1000     # Converts from mA to A.

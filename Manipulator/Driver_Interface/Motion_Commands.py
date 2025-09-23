@@ -5,11 +5,11 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
     
     @property
     def MASTER_ID(self) -> int:
-        return 0x00
+        return 0x01
     
     @property
     def SUB_ID(self) -> int:
-        return 0x1
+        return 0x0
     
     @property
     def DESCRIPTION(self) -> str:

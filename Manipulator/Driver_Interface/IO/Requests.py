@@ -35,7 +35,7 @@ class Request:
         self.logging_level = logging_level
 
     def get_binary(self, MC_count: int, realtime_config_command_count: int) -> bytes:
-        request_def = struct.pack("I", 
+        request_def = struct.pack("<I", 
             ((self.control_word     is not None) << 0) | 
             ((self.MC_interface     is not None) << 1) |
             ((self.realtime_config  is not None) << 2)

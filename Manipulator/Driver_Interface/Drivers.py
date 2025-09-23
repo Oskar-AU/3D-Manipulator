@@ -1,4 +1,4 @@
-from IO import linUDP, Request, Translated_Response
+from .IO import linUDP, Request, Translated_Response
 import logging
 from socket import timeout
 
@@ -51,7 +51,7 @@ class Driver:
         except timeout:
             logger.warning(f"Response from '{self.name}' timed out (1s).")
 
-class Drivers:
+""" class Drivers:
     drive_1 = Driver(
         IP = "192.168.131.251",
         port = 49360,
@@ -71,4 +71,4 @@ class Drivers:
         IP = "192.168.131.255",
         port = 49360,
         name = "all"
-    )
+    ) """
