@@ -1,21 +1,20 @@
-from .IO import linUDP, Request, Translated_Response
-import logging
+from . import IO
 from socket import timeout
+from typing import Callable
+import logging
+import time
 
 logger = logging.getLogger(__name__)
 
 class Driver:
-    
-    # Procedure methods
-    # ...
 
-    def __init__(self, IP: str, name: str, datagram: linUDP) -> None:
+    def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
         self.IP = IP
         self.port = 49360
         self.name = name
         self.datagram = datagram
 
-    def send(self, request: Request, MC_count: int | None = None, realtime_config_command_count: int | None = None) -> Translated_Response | None:
+    def send(self, request: IO.Request, MC_count: int | None = None, realtime_config_command_count: int | None = None) -> IO.Translated_Response | None:
         """
         Parameters
         ----------
@@ -51,24 +50,38 @@ class Driver:
         except timeout:
             logger.warning(f"Response from '{self.name}' timed out (1s).")
 
-""" class Drivers:
-    drive_1 = Driver(
-        IP = "192.168.131.251",
-        port = 49360,
-        name = "drive_1"
-    )
-    drive_2 = Driver(
-        IP = "192.168.131.252",
-        port = 49360,
-        name = "drive_2"
-    )
-    drive_3 = Driver(
-        IP = "192.168.131.253",
-        port = 49360,
-        name = "drive_3"
-    )
-    all = Driver(
-        IP = "192.168.131.255",
-        port = 49360,
-        name = "all"
-    ) """
+    def home(self, timeout: float = 30, delay: float = 1) -> bool:
+        """
+        Sends a command to home the LinMot motors.
+        """
+        # Sending home request.
+        home_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True, home=True))
+        self.send(home_request)
+        logger.info(f"Homing procedure for '{self.name}' initiated.")
+
+        # Waiting for homing to finish.
+        is_homing_finished_request = IO.Request(IO.Response(state_var=True))
+        is_homing_finished = lambda: self.send(is_homing_finished_request).get('state_var').get('homing_finished')
+        if not self.wait_for_change(is_homing_finished, timeout, delay):
+            logger.error(f"Homing of '{self.name}' failed to complete within timeout ({timeout}s). Switchinf off drive.")
+            self.send(IO.Request(IO.Response(), IO.Control_Word()))
+            return False
+        
+        # Finialzing.
+        home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
+        self.send(home_off_request)
+        logger.info(f"Homing procedure for '{self.name}' completed.")
+        return True
+
+    def wait_for_change(self, change_checker: Callable[[None], bool], timeout: float, delay: float = 0.0) -> bool:
+        """
+        
+        """
+        start_time = time.time()
+        current_time = time.time()
+        while not change_checker():
+            if current_time - start_time >= timeout:
+                return False
+            current_time = time.time()
+            time.sleep(delay)
+        return True
