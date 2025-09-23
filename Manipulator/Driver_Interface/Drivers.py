@@ -56,9 +56,14 @@ class Driver:
         """
         return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
 
-    def home(self, timeout: float = 30, delay: float = 1) -> bool:
+    def home(self, timeout: float = 30) -> bool:
         """
-        Sends a command to home the LinMot motors.
+        Sends a command to home the LinMot motors. The drive must be in state 8.
+
+        Parameters
+        ----------
+        timeout : float, optional
+            The time (s) to wait before the homing procedure is considered failed. Default is 30s.
         """
         logger.info(f"Homing procedure for '{self.name}' initiated.")
 
@@ -75,7 +80,7 @@ class Driver:
         # Waiting for homing to finish.
         is_homing_finished_request = IO.Request(IO.Response(state_var=True))
         is_homing_finished = lambda: self.send(is_homing_finished_request).get('state_var').get('homing_finished')
-        if not self.wait_for_change(is_homing_finished, timeout, delay):
+        if not self.wait_for_change(is_homing_finished, timeout, 1):
             logger.error(f"Homing procedure for '{self.name}' failed: Timed out ({timeout}s). Switching off drive.")
             self.send(IO.Request(IO.Response(), IO.Control_Word()))
             return False
