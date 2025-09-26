@@ -1,20 +1,73 @@
 from . import IO
-from socket import timeout
-from typing import Callable
+from typing import Callable, Self, Any, TypeVar, ParamSpec
 import logging
 import time
+import queue
+import threading
+import functools
+from concurrent.futures import Future
 
+return_type = TypeVar("R")
+parameter_types = ParamSpec("T")
 logger = logging.getLogger(__name__)
 
-class Driver:
+class Async_Worker:
+    def __init__(self, thread_name: str) -> None:
+        """
+        Base class for any class that needs to be threaded. Use the @Asyn_cWorker.async_method decorator
+        to specifiy a method that should run on the class thread instead of the main thread.
+
+        Parameters
+        ----------
+        thread_name : str
+            The name of the class thread.
+
+        Attributes
+        ----------
+        _method_queue : queue.Queue
+            The queue of child methods waiting to run on the class thread.
+        _thread : threading.Thread
+            The class thread object.
+        """
+        self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
+        self._thread = threading.Thread(target=self._run, name=thread_name)
+        self._thread.start()
+
+    def _run(self) -> None:
+        """
+        The method targeted by the class thread which runs child methods waiting in queue be run on the
+        class thread.
+        """
+        while threading.main_thread().is_alive() or self._method_queue.qsize() != 0:
+            try:
+                method, args, kwargs, future = self._method_queue.get(timeout=1)
+            except queue.Empty:
+                # Ensures that the driver thread is not blocked forever if the main thread is killed while waiting.
+                continue
+            future.set_result(method(*args, **kwargs))
+
+    @staticmethod
+    def async_method(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
+        """
+        The decorator method which methods will be put into the class thread queue.
+        """
+        @functools.wraps(method)
+        def wrapper(self: Self, *args, **kwargs) -> Future:
+            future = Future()
+            self._method_queue.put((method.__get__(self, type(self)), args, kwargs, future))
+            return future
+        return wrapper
+
+class Driver(Async_Worker):
 
     def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
+        super().__init__(name)
         self.IP = IP
-        self.port = 49360
         self.name = name
         self.datagram = datagram
+        self._send_attempt = 1
 
-    def send(self, request: IO.Request, MC_count: int | None = None, realtime_config_command_count: int | None = None, attempt: int = 1) -> IO.Translated_Response:
+    def send(self, request: IO.Request, MC_count: int | None = None, realtime_config_command_count: int | None = None, max_attemps: int = 5) -> IO.Translated_Response:
         """
         Parameters
         ----------
@@ -39,19 +92,18 @@ class Driver:
         TimedOutError
             If no response is recieved after 5 attempts.
         """
-        self.datagram.socket.sendto(request.get_binary(MC_count, realtime_config_command_count), (self.IP, self.port))
+        self.datagram.send(request.get_binary(MC_count, realtime_config_command_count), self.IP)
         
         # Logging the send.
         logger.log(request.logging_level, f"Request sent to '{self.name}': {request}")
 
         try:
-            response_raw, response_address = self.datagram.socket.recvfrom(64)
+            # Wait for response (default timeout 2 seconds).
+            response_raw = self.datagram.recieve(self.IP)
             
-            # Checks if the response came from the same driver as the request was sent to.
-            response_IP, _ = response_address
-            if response_IP != self.IP:
-                logger.warning(f"Recieved response from {response_IP} but expected {self.IP}")
-            
+            # Reset attempt counter.
+            self._send_attempt = 0
+
             # Translating the response.
             translated_response = request.response.translate_response(response_raw)
             
@@ -59,10 +111,11 @@ class Driver:
             logger.log(request.logging_level, f"Response recieved from '{self.name}': {translated_response}")
 
             return translated_response
-        except timeout:
-            logger.warning(f"Response from '{self.name}' timed out (1s) at attempt {attempt}/5.")
-            if attempt < 5:
-                return self.send(request, MC_count, realtime_config_command_count, attempt + 1)
+        except queue.Empty:
+            logger.warning(f"Response from '{self.name}' timed out (2s) at attempt {self._send_attempt}/5.")
+            if self._send_attempt < max_attemps:
+                self._send_attempt += 1
+                return self.send(request, MC_count, realtime_config_command_count, max_attemps)
             else:
                 logger.critical(f"Unable to recieve from '{self.name}'.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")
@@ -78,6 +131,7 @@ class Driver:
         """
         return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
 
+    @Async_Worker.async_method
     def home(self, timeout: float = 30) -> bool:
         """
         Sends a command to home the LinMot motors. The drive must be in state 8.
@@ -118,6 +172,7 @@ class Driver:
         logger.info(f"Homing procedure for '{self.name}' completed.")
         return True
 
+    @Async_Worker.async_method
     def switch_on(self, timeout: float = 5) -> bool:
         """
         Switches on the drive by setting the main state to 8 from either state 0 or 2.
@@ -136,7 +191,7 @@ class Driver:
         main_state = self.get_main_state()
         
         if main_state == 8:
-            logger.info(f"'{self.name}' already swicthed on. Finishing procedure.")
+            logger.info(f"Switch on procedure for '{self.name}' completed (already swicthed on).")
             return True
         if main_state != 2:
             # Requesting state 2.
