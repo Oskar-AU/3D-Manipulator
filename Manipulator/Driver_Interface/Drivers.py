@@ -18,31 +18,21 @@ class DriveError(Exception):
         self.drive = drive
         super().__init__(message)
 
-class Async_Worker:
-    def __init__(self, thread_name: str) -> None:
-        """
-        Base class for any class that needs to be threaded. Use the @Asyn_cWorker.async_method decorator
-        to specifiy a method that should run on the class thread instead of the main thread.
+class Driver:
 
-        Parameters
-        ----------
-        thread_name : str
-            The name of the class thread.
-
-        Attributes
-        ----------
-        _method_queue : queue.Queue
-            The queue of child methods waiting to run on the class thread.
-        _thread : threading.Thread
-            The class thread object.
-        """
+    def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
+        self.IP = IP
+        self.name = name
+        self.datagram = datagram
+        self._send_attempt = 1
+        self.awaiting_error_acknowledgement = False
         self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
-        self._thread = threading.Thread(target=self._run, name=thread_name)
+        self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
 
-    def _run(self) -> None:
+    def _run_method_queue(self) -> None:
         """
-        The method targeted by the class thread which runs child methods waiting in queue be run on the
+        The method targeted by the class thread which runs methods waiting in queue be run on the
         class thread.
         """
         while threading.main_thread().is_alive() or self._method_queue.qsize() != 0:
@@ -59,7 +49,7 @@ class Async_Worker:
                 future.set_exception(e)
 
     @staticmethod
-    def async_method(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
+    def run_on_driver_thread(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
         """
         The decorator method which methods will be put into the class thread queue.
         """
@@ -69,16 +59,6 @@ class Async_Worker:
             self._method_queue.put((method.__get__(self, type(self)), args, kwargs, future))
             return future
         return wrapper
-
-class Driver(Async_Worker):
-
-    def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
-        super().__init__(name)
-        self.IP = IP
-        self.name = name
-        self.datagram = datagram
-        self._send_attempt = 1
-        self.awaiting_error_acknowledgement = False
 
     @staticmethod
     def ignored_if_awaiting_error_acknowledgement(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, return_type]:
@@ -155,7 +135,7 @@ class Driver(Async_Worker):
         """
         return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
 
-    @Async_Worker.async_method
+    @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def home(self, timeout: float = 30) -> bool:
         """
@@ -197,7 +177,7 @@ class Driver(Async_Worker):
         logger.info(f"Homing procedure for '{self.name}' completed.")
         return True
 
-    @Async_Worker.async_method
+    @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def switch_on(self, timeout: float = 5) -> bool:
         """
@@ -269,6 +249,6 @@ class Driver(Async_Worker):
         
         error_code = translated_response.get('error_code')
         if error_code is not None and error_code != 0:
-            logger.error(f"Error code {error_code} raised by '{self.name}'. Awaiting error acknowledgement.")
+            logger.error(f"Error code {error_code} raised by '{self.name}'. Drive awaiting error acknowledgement.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)
