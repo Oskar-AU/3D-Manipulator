@@ -1,1 +1,1 @@
-from .Drivers import Driver
+from .Drivers import Driver, DriveError

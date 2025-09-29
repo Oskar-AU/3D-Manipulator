@@ -53,7 +53,7 @@ Translated_Response = dict[Literal['status_word',
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
-                 current: bool = False, warn_word: bool = False, error_code: bool = False, monitoring_channel: bool = False,
+                 current: bool = False, warn_word: bool = False, error_code: bool = True, monitoring_channel: bool = False,
                  realtime_config: bool = False) -> bytes:
         """
         Defines a response by selecting which options the response should include.
@@ -73,7 +73,7 @@ class Response:
         warn_word : bool, optional
             If true the warm word as 2 bytes is requested in the response.
         error_code : bool, optional
-            If true the error code as 2 bytes is requested in the response.
+            If true the error code as 2 bytes is requested in the response (Default true).
         monitoring_channel : bool, optional
             If true the value of the monitored UPID set in the parameters of the drive is requested in the response.
         realtime_config : bool, optional
@@ -266,6 +266,8 @@ class Response:
                                 name    =   "Application warn flag", 
                                 meaning =   "Warn flag of application SW layer"
                             )
+                        else:
+                            response_type_translated_value = None
 
                     case "error_code":
                         response_type_translated_value = response_type_value
@@ -275,6 +277,8 @@ class Response:
 
                     case "realtime_config":
                         raise NotImplementedError("Translating realtime config from response is not supported yet.")
+                    case _:
+                        raise ValueError(f"")
 
                 response_dict.update({response_name: response_type_translated_value})
                 i += 1

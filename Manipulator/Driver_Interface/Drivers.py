@@ -11,6 +11,13 @@ return_type = TypeVar("R")
 parameter_types = ParamSpec("T")
 logger = logging.getLogger(__name__)
 
+class DriveError(Exception):
+    def __init__(self, drive: "Driver", error_code: int, post_message: str = "") -> None:
+        message = f"Error code {error_code} raised by '{drive.name}'." + post_message
+        self.error_code = error_code
+        self.drive = drive
+        super().__init__(message)
+
 class Async_Worker:
     def __init__(self, thread_name: str) -> None:
         """
@@ -44,7 +51,12 @@ class Async_Worker:
             except queue.Empty:
                 # Ensures that the driver thread is not blocked forever if the main thread is killed while waiting.
                 continue
-            future.set_result(method(*args, **kwargs))
+            
+            # Runs the method.
+            try:
+                future.set_result(method(*args, **kwargs))
+            except DriveError as e:
+                future.set_exception(e)
 
     @staticmethod
     def async_method(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
@@ -66,6 +78,15 @@ class Driver(Async_Worker):
         self.name = name
         self.datagram = datagram
         self._send_attempt = 1
+        self.awaiting_error_acknowledgement = False
+
+    @staticmethod
+    def ignored_if_awaiting_error_acknowledgement(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, return_type]:
+        @functools.wraps(method)
+        def wrapper(self: Self, *args, **kwargs) -> return_type:
+            if not self.awaiting_error_acknowledgement:
+                return method(self, *args, **kwargs)
+        return wrapper
 
     def send(self, request: IO.Request, MC_count: int | None = None, realtime_config_command_count: int | None = None, max_attemps: int = 5) -> IO.Translated_Response:
         """
@@ -95,7 +116,7 @@ class Driver(Async_Worker):
         self.datagram.send(request.get_binary(MC_count, realtime_config_command_count), self.IP)
         
         # Logging the send.
-        logger.log(request.logging_level, f"Request sent to '{self.name}': {request}")
+        logger.log(request.logging_level, f"Request sent to '{self.name}': {request}.")
 
         try:
             # Wait for response (default timeout 2 seconds).
@@ -107,8 +128,11 @@ class Driver(Async_Worker):
             # Translating the response.
             translated_response = request.response.translate_response(response_raw)
             
-            #Logging the recieve.
-            logger.log(request.logging_level, f"Response recieved from '{self.name}': {translated_response}")
+            # Logging the recieve.
+            logger.log(request.logging_level, f"Response recieved from '{self.name}': {translated_response}.")
+
+            # Error handling.
+            self._error_handler(translated_response)
 
             return translated_response
         except queue.Empty:
@@ -132,6 +156,7 @@ class Driver(Async_Worker):
         return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
 
     @Async_Worker.async_method
+    @ignored_if_awaiting_error_acknowledgement
     def home(self, timeout: float = 30) -> bool:
         """
         Sends a command to home the LinMot motors. The drive must be in state 8.
@@ -173,6 +198,7 @@ class Driver(Async_Worker):
         return True
 
     @Async_Worker.async_method
+    @ignored_if_awaiting_error_acknowledgement
     def switch_on(self, timeout: float = 5) -> bool:
         """
         Switches on the drive by setting the main state to 8 from either state 0 or 2.
@@ -238,3 +264,11 @@ class Driver(Async_Worker):
             current_time = time.time()
             time.sleep(delay)
         return True
+    
+    def _error_handler(self, translated_response: IO.Translated_Response) -> None:
+        
+        error_code = translated_response.get('error_code')
+        if error_code is not None and error_code != 0:
+            logger.error(f"Error code {error_code} raised by '{self.name}'. Awaiting error acknowledgement.")
+            self.awaiting_error_acknowledgement = True
+            raise DriveError(self, error_code)
