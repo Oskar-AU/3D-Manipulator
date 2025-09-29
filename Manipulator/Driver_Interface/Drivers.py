@@ -102,7 +102,7 @@ class Driver(Async_Worker):
             response_raw = self.datagram.recieve(self.IP)
             
             # Reset attempt counter.
-            self._send_attempt = 0
+            self._send_attempt = 1
 
             # Translating the response.
             translated_response = request.response.translate_response(response_raw)

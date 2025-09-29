@@ -1,4 +1,6 @@
 from .Driver_Interface import IO
+from .Manipulator import Manipulator
+from .Stream import Stream
 import logging
 
 def setup_logging(level: int = logging.DEBUG):
