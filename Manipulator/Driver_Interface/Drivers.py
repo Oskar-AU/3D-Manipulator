@@ -9,7 +9,6 @@ from concurrent.futures import Future
 
 return_type = TypeVar("R")
 parameter_types = ParamSpec("T")
-logger = logging.getLogger(__name__)
 
 class DriveError(Exception):
     def __init__(self, drive: "Driver", error_code: int, post_message: str = "") -> None:
@@ -29,6 +28,7 @@ class Driver:
         self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
+        self.logger = logging.getLogger(self.name)
 
     def _run_method_queue(self) -> None:
         """
@@ -61,9 +61,9 @@ class Driver:
         return wrapper
 
     @staticmethod
-    def ignored_if_awaiting_error_acknowledgement(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, return_type]:
+    def ignored_if_awaiting_error_acknowledgement(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, return_type | None]:
         @functools.wraps(method)
-        def wrapper(self: Self, *args, **kwargs) -> return_type:
+        def wrapper(self: Self, *args, **kwargs) -> return_type | None:
             if not self.awaiting_error_acknowledgement:
                 return method(self, *args, **kwargs)
         return wrapper
@@ -96,7 +96,7 @@ class Driver:
         self.datagram.send(request.get_binary(MC_count, realtime_config_command_count), self.IP)
         
         # Logging the send.
-        logger.log(request.logging_level, f"Request sent to '{self.name}': {request}.")
+        self.logger.log(request.logging_level, f"Request sent: {request}.")
 
         try:
             # Wait for response (default timeout 2 seconds).
@@ -109,19 +109,19 @@ class Driver:
             translated_response = request.response.translate_response(response_raw)
             
             # Logging the recieve.
-            logger.log(request.logging_level, f"Response recieved from '{self.name}': {translated_response}.")
+            self.logger.log(request.logging_level, f"Response recieved: {translated_response}.")
 
             # Error handling.
             self._error_handler(translated_response)
 
             return translated_response
         except queue.Empty:
-            logger.warning(f"Response from '{self.name}' timed out (2s) at attempt {self._send_attempt}/5.")
+            self.logger.warning(f"Response timed out (2s) at attempt {self._send_attempt}/5.")
             if self._send_attempt < max_attemps:
                 self._send_attempt += 1
                 return self.send(request, MC_count, realtime_config_command_count, max_attemps)
             else:
-                logger.critical(f"Unable to recieve from '{self.name}'.")
+                self.logger.critical(f"Unable to recieve.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")
 
     def get_main_state(self) -> int:
@@ -151,12 +151,12 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        logger.info(f"Homing procedure for '{self.name}' initiated.")
+        self.logger.info(f"Homing procedure initiated.")
 
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
         if self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state') != 8:
-            logger.error(f"Homing procedure for '{self.name}' failed: Not in correct state ({main_state} != 8).")
+            self.logger.error(f"Homing procedure failed: Not in correct state ({main_state} != 8).")
             return False
 
         # Sending home request.
@@ -167,14 +167,14 @@ class Driver:
         is_homing_finished_request = IO.Request(IO.Response(state_var=True))
         is_homing_finished = lambda: self.send(is_homing_finished_request).get('state_var').get('homing_finished')
         if not self.wait_for_change(is_homing_finished, timeout, 1):
-            logger.error(f"Homing procedure for '{self.name}' failed: Timed out ({timeout}s). Switching off drive.")
+            self.logger.error(f"Homing procedure failed: Timed out ({timeout}s). Switching off drive.")
             self.send(IO.Request(IO.Response(), IO.Control_Word()))
             return False
         
         # Finialzing.
         home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
         self.send(home_off_request)
-        logger.info(f"Homing procedure for '{self.name}' completed.")
+        self.logger.info(f"Homing procedure completed.")
         return True
 
     @run_on_driver_thread
@@ -193,11 +193,11 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        logger.info(f"Switch on procedure for '{self.name}' initiated.")
+        self.logger.info(f"Switch on procedure initiated.")
         main_state = self.get_main_state()
         
         if main_state == 8:
-            logger.info(f"Switch on procedure for '{self.name}' completed (already swicthed on).")
+            self.logger.info(f"Switch on procedure completed (already swicthed on).")
             return True
         if main_state != 2:
             # Requesting state 2.
@@ -205,7 +205,7 @@ class Driver:
 
             # Waiting for main state to go state 2.
             if not self.wait_for_change(lambda: self.get_main_state() == 2, timeout=timeout, delay=0.2):
-                logger.error(f"Switch on procedure for '{self.name}' failed: Timed out going to state 2 ({timeout}s). Current state is {self.get_main_state()}.")
+                self.logger.error(f"Switch on procedure failed: Timed out going to state 2 ({timeout}s). Current state is {self.get_main_state()}.")
                 return False
 
             main_state = self.get_main_state()
@@ -216,11 +216,11 @@ class Driver:
 
             # Waiting for state 8.
             if not self.wait_for_change(lambda: self.get_main_state() == 8, timeout=timeout, delay=0.2):
-                logger.error(f"Switch on procedure for '{self.name}' failed: Timed out going from state 2 to 8 ({timeout}s). Current state is {self.get_main_state()}.")
+                self.logger.error(f"Switch on procedure failed: Timed out going from state 2 to 8 ({timeout}s). Current state is {self.get_main_state()}.")
                 return False
             
             # Finalizing.
-            logger.info(f"Switch on procedure for '{self.name}' completed.")
+            self.logger.info(f"Switch on procedure for completed.")
             return True
 
     def wait_for_change(self, change_checker: Callable[[None], bool], timeout: float, delay: float = 0.0) -> bool:
@@ -246,9 +246,8 @@ class Driver:
         return True
     
     def _error_handler(self, translated_response: IO.Translated_Response) -> None:
-        
         error_code = translated_response.get('error_code')
         if error_code is not None and error_code != 0:
-            logger.error(f"Error code {error_code} raised by '{self.name}'. Drive awaiting error acknowledgement.")
+            self.logger.error(f"Error code {error_code} raised by drive. Drive awaiting error acknowledgement.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)

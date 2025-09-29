@@ -7,9 +7,9 @@ class Manipulator:
     def __init__(self):
         self.datagram = IO.linUDP()
         self.drivers = (
-            Driver('192.168.131.251', 'drive_1', self.datagram),
-            Driver('192.168.131.252', 'drive_2', self.datagram),
-            Driver('192.168.131.253', 'drive_3', self.datagram)
+            Driver('192.168.131.251', 'DRIVE_1', self.datagram),
+            Driver('192.168.131.252', 'DRIVE_2', self.datagram),
+            Driver('192.168.131.253', 'DRIVE_3', self.datagram)
         )
 
     def home_all(self) -> None:
