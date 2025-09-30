@@ -29,6 +29,7 @@ class Driver:
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
         self.logger = logging.getLogger(self.name)
+        self.warning_words: list[IO.Responses.Warn_Word] = list()
 
     def _run_method_queue(self) -> None:
         """
@@ -113,6 +114,9 @@ class Driver:
 
             # Error handling.
             self._error_handler(translated_response)
+
+            # Warning handling.
+            self._warning_handler(translated_response)
 
             return translated_response
         except queue.Empty:
@@ -246,8 +250,37 @@ class Driver:
         return True
     
     def _error_handler(self, translated_response: IO.Translated_Response) -> None:
-        error_code = translated_response.get('error_code')
+        error_code: int = translated_response.get('error_code')
         if error_code is not None and error_code != 0:
             self.logger.error(f"Error code {error_code} raised by drive. Drive awaiting error acknowledgement.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)
+        
+    def _warning_handler(self, translated_response: IO.Translated_Response) -> None:
+        """
+        Ensures that the warning list within this class is up to date with the physical drives
+        warning word.
+
+        Parameters
+        ----------
+        translated_response : Translated_Response
+            The translated response from the drive.
+        """
+        # Gets the new warning word.
+        warning_words: list[IO.Responses.Warn_Word] = translated_response.get('warn_word')
+        
+        # Gets the already present and new warning bits (to make it easier for comparison).
+        already_present_warning_bits = {warning_word['bit'] for warning_word in self.warning_words}
+        new_warning_bits = {warning_word['bit'] for warning_word in warning_words}
+        
+        # Inserts new warnings into the warnings list if present.
+        for new_warning_word in warning_words:
+            if new_warning_word['bit'] not in already_present_warning_bits:
+                self.warning_words.append(new_warning_word)
+                self.logger.warning(f"{new_warning_word['name']}: {new_warning_word['meaning']}.")
+        
+        # Removes lifted warnings from the list.
+        for i, already_present_warning in enumerate(self.warning_words):
+            if already_present_warning['bit'] not in new_warning_bits:
+                self.logger.info(f"Warning cleared: '{already_present_warning['name']}'.")
+                self.warning_words.pop(i)

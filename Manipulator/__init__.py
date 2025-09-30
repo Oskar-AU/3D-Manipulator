@@ -1,4 +1,4 @@
-from .Driver_Interface import IO
+from .Driver_Interface import IO, Motion_Commands
 from .Manipulator import Manipulator
 from .Stream import Stream
 import logging
