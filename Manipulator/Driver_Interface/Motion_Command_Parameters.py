@@ -25,3 +25,37 @@ class MC_Parameters:
         unit="m/s^2",
         conversion_factor=1e5
     )
+
+        # --- Streaming style parameters (instantaneous setpoints) ---
+    demand_position = MC_Parameter(
+        description="Demand position",
+        type=linTypes.Sint32,
+        unit="mm",
+        conversion_factor=1e4   # 0.0001 mm resolution
+    )
+    demand_velocity = MC_Parameter(
+        description="Demand velocity",
+        type=linTypes.Sint32,
+        unit="mm/s",
+        conversion_factor=1e3   # 0.001 mm/s resolution
+    )
+    demand_acceleration = MC_Parameter(
+        description="Demand acceleration",
+        type=linTypes.Sint32,
+        unit="mm/s^2",
+        conversion_factor=1e2   # 0.01 mm/s² resolution
+    )
+
+
+    # --- Write Live Parameters ---
+    Parameter_name = MC_Parameter(
+        description="Parameter name",
+        unit="",
+        conversion_factor=1 
+    )
+
+    Parameter_value = MC_Parameter(
+        description="UPID - (unique parameter ID)",
+        unit="",
+        conversion_factor=1
+    )

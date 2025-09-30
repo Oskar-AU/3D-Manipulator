@@ -1,5 +1,6 @@
 from .IO import Motion_Commmand_Interface
 from .Motion_Command_Parameters import MC_Parameters
+import copy
 
 class No_Operation(Motion_Commmand_Interface):
     
@@ -54,8 +55,114 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
             The deceleration used in m/s^2.
         """
         super().__init__(
-            (MC_Parameters.target_position, target_position),
-            (MC_Parameters.maximal_velocity, maximal_velocity), 
-            (MC_Parameters.acceleration, acceleration), 
-            (MC_Parameters.deceleration, deceleration)
+            (copy.deepcopy(MC_Parameters.target_position), target_position),
+            (copy.deepcopy(MC_Parameters.maximal_velocity), maximal_velocity), 
+            (copy.deepcopy(MC_Parameters.acceleration), acceleration), 
+            (copy.deepcopy(MC_Parameters.deceleration), deceleration)
+        )
+
+class P(Motion_Commmand_Interface):    
+
+        @property
+        def MASTER_ID(self) -> int:
+            return 0x03
+    
+        @property
+        def SUB_ID(self) -> int:
+            return 0x2
+
+        @property
+        def DESCRIPTION(self) -> str:
+            return "PVA Motion Command"
+
+        def __init__(self, demand_position: float) -> None:
+
+            super().__init__(
+                (copy.deepcopy(MC_Parameters.demand_position), demand_position)
+            )
+
+class PV(Motion_Commmand_Interface):    
+
+        @property
+        def MASTER_ID(self) -> int:
+            return 0x03
+    
+        @property
+        def SUB_ID(self) -> int:
+            return 0x3
+
+        @property
+        def DESCRIPTION(self) -> str:
+            return "P Motion Command"
+
+        def __init__(self, demand_position: float, demand_velocity: float) -> None:
+
+            super().__init__(
+                (copy.deepcopy(MC_Parameters.demand_position), demand_position),
+                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity), 
+            )
+
+class PVA(Motion_Commmand_Interface):    
+
+    @property
+    def MASTER_ID(self) -> int:
+            return 0x03
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0x5
+
+    @property
+    def DESCRIPTION(self) -> str:
+        return "PVA Motion Command"
+
+    def __init__(self, demand_position: float, demand_velocity: float, demand_acceleration: float) -> None:
+
+            super().__init__(
+                (copy.deepcopy(MC_Parameters.demand_position), ('value': demand_position),
+                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity), 
+                (copy.deepcopy(MC_Parameters.demand_acceleration), demand_acceleration), 
+                )
+    
+class Stop(Motion_Commmand_Interface):
+    """
+    LinMot 'Stop Streaming' (03Fxh).
+    """
+     
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x03
+
+    @property
+    def SUB_ID(self) -> int:     # 0xF = 03Fxh
+        return 0xF
+
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Stop Streaming"
+
+    def __init__(self) -> None:
+        super().__init__()
+
+
+class WriteLiveParameter(Motion_Commmand_Interface):
+    """
+    LinMot 'Write Live Parameter' (04F1h).
+    """
+     
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x04
+
+    @property
+    def SUB_ID(self) -> int:     # 0xF1 = 04F1h
+        return 0xF1
+
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Write Live Parameter"
+
+    def __init__(self, parameter: MC_Parameter, value: float) -> None:
+        super().__init__(
+            (copy.deepcopy(parameter), value)
         )
