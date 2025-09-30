@@ -1,6 +1,24 @@
 from .IO import Motion_Commmand_Interface
 from .Motion_Command_Parameters import MC_Parameters
 
+class No_Operation(Motion_Commmand_Interface):
+    
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x00
+ 
+    @property
+    def SUB_ID(self) -> int:
+        return 0x0
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "No operation"
+
+    def __init__(self) -> None:
+        
+        super().__init__()
+
 class VAI_go_to_pos(Motion_Commmand_Interface):
     
     @property
