@@ -48,14 +48,9 @@ class MC_Parameters:
 
 
     # --- Write Live Parameters ---
-    Parameter_name = MC_Parameter(
-        description="Parameter name",
+    UPID = MC_Parameter(
+        description="UPID",
+        type=linTypes.Uint16,
         unit="",
         conversion_factor=1 
-    )
-
-    Parameter_value = MC_Parameter(
-        description="UPID - (unique parameter ID)",
-        unit="",
-        conversion_factor=1
     )

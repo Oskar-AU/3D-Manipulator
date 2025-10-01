@@ -1,6 +1,7 @@
-from .IO import Motion_Commmand_Interface
-from .Motion_Command_Parameters import MC_Parameters
+from .IO import Motion_Commmand_Interface, linType
+from .Motion_Command_Parameters import MC_Parameters, MC_Parameter, linTypes
 import copy
+from typing import Any
 
 class No_Operation(Motion_Commmand_Interface):
     
@@ -61,7 +62,7 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
             (copy.deepcopy(MC_Parameters.deceleration), deceleration)
         )
 
-class P(Motion_Commmand_Interface):    
+class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
 
         @property
         def MASTER_ID(self) -> int:
@@ -73,7 +74,7 @@ class P(Motion_Commmand_Interface):
 
         @property
         def DESCRIPTION(self) -> str:
-            return "PVA Motion Command"
+            return "P stream with slave generated time stamp and configured period time"
 
         def __init__(self, demand_position: float) -> None:
 
@@ -81,7 +82,7 @@ class P(Motion_Commmand_Interface):
                 (copy.deepcopy(MC_Parameters.demand_position), demand_position)
             )
 
-class PV(Motion_Commmand_Interface):    
+class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):
 
         @property
         def MASTER_ID(self) -> int:
@@ -93,16 +94,16 @@ class PV(Motion_Commmand_Interface):
 
         @property
         def DESCRIPTION(self) -> str:
-            return "P Motion Command"
+            return "PV stream with slave generated time stamp and configured period time"
 
         def __init__(self, demand_position: float, demand_velocity: float) -> None:
 
             super().__init__(
                 (copy.deepcopy(MC_Parameters.demand_position), demand_position),
-                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity), 
+                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity)
             )
 
-class PVA(Motion_Commmand_Interface):    
+class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
 
     @property
     def MASTER_ID(self) -> int:
@@ -114,27 +115,24 @@ class PVA(Motion_Commmand_Interface):
 
     @property
     def DESCRIPTION(self) -> str:
-        return "PVA Motion Command"
+        return "PVA stream with slave generated time stamp and configured period time"
 
     def __init__(self, demand_position: float, demand_velocity: float, demand_acceleration: float) -> None:
 
-            super().__init__(
-                (copy.deepcopy(MC_Parameters.demand_position), ('value': demand_position),
-                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity), 
-                (copy.deepcopy(MC_Parameters.demand_acceleration), demand_acceleration), 
-                )
+        super().__init__(
+            (copy.deepcopy(MC_Parameters.demand_position),      demand_position),
+            (copy.deepcopy(MC_Parameters.demand_velocity),      demand_velocity), 
+            (copy.deepcopy(MC_Parameters.demand_acceleration),  demand_acceleration),
+        )
     
-class Stop(Motion_Commmand_Interface):
-    """
-    LinMot 'Stop Streaming' (03Fxh).
-    """
+class Stop_Streaming(Motion_Commmand_Interface):
      
     @property
     def MASTER_ID(self) -> int:
         return 0x03
 
     @property
-    def SUB_ID(self) -> int:     # 0xF = 03Fxh
+    def SUB_ID(self) -> int:
         return 0xF
 
     @property
@@ -145,24 +143,30 @@ class Stop(Motion_Commmand_Interface):
         super().__init__()
 
 
-class WriteLiveParameter(Motion_Commmand_Interface):
-    """
-    LinMot 'Write Live Parameter' (04F1h).
-    """
-     
+class Write_Live_Parameter(Motion_Commmand_Interface):
+
     @property
     def MASTER_ID(self) -> int:
-        return 0x04
+        return 0x00
 
     @property
     def SUB_ID(self) -> int:     # 0xF1 = 04F1h
-        return 0xF1
+        return 0x2
 
     @property
     def DESCRIPTION(self) -> str:
         return "Write Live Parameter"
 
-    def __init__(self, parameter: MC_Parameter, value: float) -> None:
+    def __init__(self, UPID: int, parameter_value: int, parameter_type: linType) -> None:
+
+        raw_parameter = MC_Parameter(
+            description="Write live parameter",
+            type=parameter_type,
+            unit="",
+            conversion_factor=1
+        )
+
         super().__init__(
-            (copy.deepcopy(parameter), value)
+            (copy.deepcopy(MC_Parameters.UPID), UPID),
+            (raw_parameter, parameter_value)
         )
