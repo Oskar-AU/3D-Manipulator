@@ -39,7 +39,10 @@ class Motion_Commmand_Interface(ABC):
     def get_binary(self, MC_COUNT: int) -> bytes:
         MC_parameter_values = [MC_parameter['value'] for MC_parameter in self.MC_PARAMETERS]
         return struct.pack(self.format, self.get_header_decimal(MC_COUNT), *MC_parameter_values)
-    
+
+    def set_MC_parameter_value(self, index: int, MC_value: Any) -> None:
+        self.MC_PARAMETERS[index]['value'] = int(MC_value*self.MC_PARAMETERS[index]['conversion_factor'])
+
     def __repr__(self) -> str:
         header = self.DESCRIPTION
         parameters = {MC_parameter['description']: str(MC_parameter['value']/MC_parameter['conversion_factor']) + MC_parameter['unit'] for MC_parameter in self.MC_PARAMETERS}

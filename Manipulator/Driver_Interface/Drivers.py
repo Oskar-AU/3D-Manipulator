@@ -1,5 +1,5 @@
-from . import IO
-from typing import Callable, Self, Any, TypeVar, ParamSpec
+from . import IO, Motion_Commands
+from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
 import queue
@@ -30,6 +30,9 @@ class Driver:
         self._thread.start()
         self.logger = logging.getLogger(self.name)
         self.warning_words: list[IO.Responses.Warn_Word] = list()
+        self.MC_count = 0
+        self.realtime_config_command_count = 0
+        self.MC_count_up_to_date = False
 
     def _run_method_queue(self) -> None:
         """
@@ -69,17 +72,17 @@ class Driver:
                 return method(self, *args, **kwargs)
         return wrapper
 
-    def send(self, request: IO.Request, MC_count: int | None = None, realtime_config_command_count: int | None = None, max_attemps: int = 5) -> IO.Translated_Response:
+    def send(self, request: IO.Request, max_attemps: int = 5) -> IO.Translated_Response:
         """
         Parameters
         ----------
         request : Request
             The request to send to the drive.
         MC_count : int, optional
-            The count of the motion command (4 bits). Must be different than the 
+            The count of the motion command. Must be different than the 
             previous motion command otherwise it is ignored by the drive.
         realtime_config_command_count : int, optional
-            The count of the realtime config command (4 bits). Must be different than the 
+            The count of the realtime config command. Must be different than the 
             previous command otherwise it is ignored by the drive.
         attempt : int, optional
             The attempt number for the request. Should not be used.
@@ -94,7 +97,19 @@ class Driver:
         TimedOutError
             If no response is recieved after 5 attempts.
         """
-        self.datagram.send(request.get_binary(MC_count, realtime_config_command_count), self.IP)
+        # If the request is a motion command, ensure that the count is incremented and up to date.
+        if request.MC_interface is not None:
+            if not self.MC_count_up_to_date:
+                self.MC_count = self.get_MC_count()
+                self.MC_count_up_to_date = True
+            self.MC_count += 1
+
+        # Maps the counts from 'python int' to Uint4 with overflow.
+        mapped_MC_count = self.MC_count & 0xF
+        mapped_realtime_config_command_count = self.realtime_config_command_count & 0xF
+
+        # Sends the request.
+        self.datagram.send(request.get_binary(mapped_MC_count, mapped_realtime_config_command_count), self.IP)
         
         # Logging the send.
         self.logger.log(request.logging_level, f"Request sent: {request}.")
@@ -112,18 +127,18 @@ class Driver:
             # Logging the recieve.
             self.logger.log(request.logging_level, f"Response recieved: {translated_response}.")
 
-            # Error handling.
-            self._error_handler(translated_response)
-
             # Warning handling.
             self._warning_handler(translated_response)
+
+            # Error handling.
+            self._error_handler(translated_response)
 
             return translated_response
         except queue.Empty:
             self.logger.warning(f"Response timed out (2s) at attempt {self._send_attempt}/5.")
             if self._send_attempt < max_attemps:
                 self._send_attempt += 1
-                return self.send(request, MC_count, realtime_config_command_count, max_attemps)
+                return self.send(request, max_attemps)
             else:
                 self.logger.critical(f"Unable to recieve.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")
@@ -137,7 +152,13 @@ class Driver:
         int
             The main state of the drive.
         """
+        self.logger.debug("Requesting main state.")
         return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
+
+    def get_MC_count(self) -> int:
+        self.logger.debug("Requesting MC_count.")
+        MC_count = self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('MC_count')
+        return MC_count if MC_count is not None else 0
 
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
@@ -224,7 +245,7 @@ class Driver:
                 return False
             
             # Finalizing.
-            self.logger.info(f"Switch on procedure for completed.")
+            self.logger.info(f"Switch on procedure completed.")
             return True
 
     def wait_for_change(self, change_checker: Callable[[None], bool], timeout: float, delay: float = 0.0) -> bool:
@@ -268,7 +289,10 @@ class Driver:
         """
         # Gets the new warning word.
         warning_words: list[IO.Responses.Warn_Word] = translated_response.get('warn_word')
-        
+
+        # Exit warning handler if the resonse didn't request a warning.        
+        if warning_words is None: return None
+
         # Gets the already present and new warning bits (to make it easier for comparison).
         already_present_warning_bits = {warning_word['bit'] for warning_word in self.warning_words}
         new_warning_bits = {warning_word['bit'] for warning_word in warning_words}
@@ -284,3 +308,57 @@ class Driver:
             if already_present_warning['bit'] not in new_warning_bits:
                 self.logger.info(f"Warning cleared: '{already_present_warning['name']}'.")
                 self.warning_words.pop(i)
+
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def initialize_stream(self, stream_type: Literal['P', 'PV', 'PVA']) -> None:
+        self.logger.info('Initializing stream.')
+
+        # Ensuring that the drive is in an opereational state.
+        main_state = self.get_main_state()
+        if main_state != 8:
+            self.logger.error(f"Drive not in correct state for streaming ({main_state != 8}).")
+
+        self.stream_type: Literal['P', 'PV', 'PVA'] = stream_type
+        match stream_type:
+            case 'P':
+                self.stream_request = IO.Request(
+                    MC_interface=Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
+            case 'PV':
+                self.stream_request = IO.Request(
+                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0))
+            case 'PVA':
+                self.stream_request = IO.Request(
+                    MC_interface=Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))
+            case _:
+                raise ValueError(f"Parameter 'stream_type' expected eiter 'P', 'PV', or 'PVA' but got {stream_type}.")
+
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def stream(self, target_position: float, target_velocity: float | None = None, target_acceleration: float | None = None) -> None:
+        # Structure is for speed.
+        match self.stream_type:
+            case 'P':
+                self.stream_request.MC_interface.set_MC_parameter_value(0, target_position)
+            case 'PV':
+                self.stream_request.MC_interface.set_MC_parameter_value(0, target_position)
+                self.stream_request.MC_interface.set_MC_parameter_value(1, target_velocity)
+            case 'PVA':
+                self.stream_request.MC_interface.set_MC_parameter_value(0, target_position)
+                self.stream_request.MC_interface.set_MC_parameter_value(1, target_velocity)
+                self.stream_request.MC_interface.set_MC_parameter_value(2, target_acceleration)
+            case _:
+                raise ValueError
+        self.send(self.stream_request)
+
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def stop_stream(self) -> None:
+        self.send(IO.Request(MC_interface=Motion_Commands.Stop_Streaming()))
+
+    @run_on_driver_thread
+    def acknowledge_error(self) -> None:
+        self.logger.info("Acknowledging error.")
+        self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
+        self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word()))
+        self.awaiting_error_acknowledgement = False

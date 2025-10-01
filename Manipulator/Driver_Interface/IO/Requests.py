@@ -8,7 +8,7 @@ import logging
 class Request:
     
     def __init__(self, 
-                 response: Response,
+                 response: Response = Response(),
                  control_word: Control_Word | None = None, 
                  MC_interface: Motion_Commmand_Interface | None = None,
                  realtime_config: Realtime_Config | None = None,
