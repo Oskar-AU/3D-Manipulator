@@ -49,11 +49,11 @@ Translated_Response = dict[Literal['status_word',
                                    'warn_word', 
                                    'error_code', 
                                    'monitoring_channel', 
-                                   'realtime_config'], Status_Word | State_Var | Warn_Word | float | int]
+                                   'realtime_config'], Status_Word | State_Var | list[Warn_Word] | float | int]
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
-                 current: bool = False, warn_word: bool = False, error_code: bool = False, monitoring_channel: bool = False,
+                 current: bool = False, warn_word: bool = True, error_code: bool = True, monitoring_channel: bool = False,
                  realtime_config: bool = False) -> bytes:
         """
         Defines a response by selecting which options the response should include.
@@ -71,9 +71,9 @@ class Response:
         current : bool, optional
             If true the set current as 2 bytes is requested in the response.
         warn_word : bool, optional
-            If true the warm word as 2 bytes is requested in the response.
+            If true the warm word as 2 bytes is requested in the response (Default true).
         error_code : bool, optional
-            If true the error code as 2 bytes is requested in the response.
+            If true the error code as 2 bytes is requested in the response (Default true).
         monitoring_channel : bool, optional
             If true the value of the monitored UPID set in the parameters of the drive is requested in the response.
         realtime_config : bool, optional
@@ -182,90 +182,91 @@ class Response:
                         response_type_translated_value = response_type_value / 1000     # Converts from mA to A.
 
                     case "warn_word":
+                        response_type_translated_value = list()
                         if   response_type_value & (1 << 0 ): 
-                            response_type_translated_value = Warn_Word(
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   0,
                                 name    =   "Motor hot sensor", 
                                 meaning =   "Motor temperature sensor on"
-                            )
-                        elif response_type_value & (1 << 1 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 1 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   1,
                                 name    =   "Motor short time overload I^2t", 
                                 meaning =   "Calculated motor temperature reached warn limit"
-                            )
-                        elif response_type_value & (1 << 2 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 2 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   2,
                                 name    =   "Motor supply voltage low", 
                                 meaning =   "Motor supply voltage reached low warn limit"
-                            )
-                        elif response_type_value & (1 << 3 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 3 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   3,
                                 name    =   "Motor supply voltage high", 
                                 meaning =   "Motor supplt voltage reached high warn limit"
-                            )
-                        elif response_type_value & (1 << 4 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 4 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   4,
                                 name    =   "Position lag always", 
                                 meaning =   "Position error during moving reached warn limit"
-                            )
-                        elif response_type_value & (1 << 6 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 6 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   6,
                                 name    =   "Drive hot", 
                                 meaning =   "Temperature on servo drive high"
-                            )
-                        elif response_type_value & (1 << 7 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 7 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   7,
                                 name    =   "Motor not homed", 
                                 meaning =   "Motor not homed yet"
-                            )
-                        elif response_type_value & (1 << 8 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 8 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   8,
                                 name    =   "PTC sensor 1 hot", 
                                 meaning =   "PTC temperature sensor 1 on"
-                            )
-                        elif response_type_value & (1 << 9 ):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 9 ):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   9,
                                 name    =   "Reserved PTC 2", 
                                 meaning =   "PTC temperature sensor 2 on"
-                            )
-                        elif response_type_value & (1 << 10):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 10):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   10,
                                 name    =   "RR hot calculated", 
                                 meaning =   "Regenerative resistor temperature hot calculated"
-                            )
-                        elif response_type_value & (1 << 11):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 11):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   11,
                                 name    =   "Speed lag always", 
                                 meaning =   "Speed lag is above warn limit"
-                            )
-                        elif response_type_value & (1 << 12):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 12):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   12,
                                 name    =   "Position sensor", 
                                 meaning =   "Position is in warn condition"
-                            )
-                        elif response_type_value & (1 << 14):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 14):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   14,
                                 name    =   "Interface warn flag", 
                                 meaning =   "Warn flag of interface SW layer"
-                            )
-                        elif response_type_value & (1 << 15):
-                            response_type_translated_value = Warn_Word(
+                            ))
+                        if response_type_value & (1 << 15):
+                            response_type_translated_value.append(Warn_Word(
                                 bit     =   15,
                                 name    =   "Application warn flag", 
                                 meaning =   "Warn flag of application SW layer"
-                            )
+                            ))
 
                     case "error_code":
                         response_type_translated_value = response_type_value
@@ -275,6 +276,8 @@ class Response:
 
                     case "realtime_config":
                         raise NotImplementedError("Translating realtime config from response is not supported yet.")
+                    case _:
+                        raise ValueError(f"")
 
                 response_dict.update({response_name: response_type_translated_value})
                 i += 1
@@ -296,7 +299,7 @@ class Response:
         ])
         
         # If the size of the response is less than 14 bytes (including request and response defs) 
-        # padding is added up till 14 bytes. Documentation says padding is added up till 64 bytes 
+        # pappending is appended up till 14 bytes. Documentation says pappending is appended up till 64 bytes 
         # but that is not the case.
         size = struct.calcsize(format)
         if size < 6:
