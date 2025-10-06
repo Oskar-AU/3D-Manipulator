@@ -1,4 +1,4 @@
-from .Realtime_Config_Parameters import Realtime_Config_Parameters, Realtime_Config_Parameter
+from .Realtime_Config_Parameter_Base import Realtime_Config_Parameter
 import struct
 from abc import ABC, abstractmethod
 from typing import Any
@@ -37,20 +37,3 @@ class Realtime_Config(ABC):
         header = self.DESCRIPTION
         parameters = {realtime_config_parameter['description']: realtime_config_parameter['value'] for realtime_config_parameter in self.REALTIME_CONFIG_PARAMETERS}
         return header + " with params " + f"{parameters}"
-
-class Read_ROM_Value_of_Parameter_by_UPID(Realtime_Config):
-    
-    @property
-    def COMMAND_ID(self) -> int:
-        return 0x10
-    
-    @property
-    def DESCRIPTION(self) -> str:
-        return "Read ROM value of parameter by UPID"
-
-    def __init__(self, parameter_UPID: int, parameter_value_low: int, parameter_value_high: int) -> None:
-        super().__init__(
-            (Realtime_Config_Parameters.parameter_UPID, parameter_UPID),
-            (Realtime_Config_Parameters.parameter_value_low, parameter_value_low), 
-            (Realtime_Config_Parameters.parameter_value_high, parameter_value_high)
-        )

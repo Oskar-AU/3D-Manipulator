@@ -1,8 +1,4 @@
-from typing import TypedDict
-
-class Realtime_Config_Parameter(TypedDict):
-    description: str
-    value: int
+from .IO import Realtime_Config_Parameter
 
 class Realtime_Config_Parameters:
     parameter_UPID = Realtime_Config_Parameter(
