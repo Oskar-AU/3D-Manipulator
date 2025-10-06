@@ -125,6 +125,27 @@ class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Moti
             (copy.deepcopy(MC_Parameters.demand_acceleration),  demand_acceleration),
         )
     
+class PV_Stream_With_Slave_Generated_Time_Stamp(Motion_Commmand_Interface):
+
+        @property
+        def MASTER_ID(self) -> int:
+            return 0x03
+    
+        @property
+        def SUB_ID(self) -> int:
+            return 0x1
+
+        @property
+        def DESCRIPTION(self) -> str:
+            return "PV stream with slave generated time stamp"
+
+        def __init__(self, demand_position: float, demand_velocity: float) -> None:
+
+            super().__init__(
+                (copy.deepcopy(MC_Parameters.demand_position), demand_position),
+                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity)
+            )
+
 class Stop_Streaming(Motion_Commmand_Interface):
      
     @property
