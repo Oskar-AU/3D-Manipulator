@@ -1,4 +1,4 @@
-from .Motion_Command_Parameter_Base import MC_Parameter
+from .Command_Parameter_Base import Command_Parameter
 import struct
 from abc import ABC, abstractmethod
 from typing import Any
@@ -20,8 +20,8 @@ class Motion_Commmand_Interface(ABC):
     def DESCRIPTION(self) -> str:
         pass
 
-    def __init__(self, *MC_parameters: tuple[MC_Parameter, Any]) -> None:
-        self.MC_PARAMETERS: list[MC_Parameter] = list()
+    def __init__(self, *MC_parameters: tuple[Command_Parameter, Any]) -> None:
+        self.MC_PARAMETERS: list[Command_Parameter] = list()
         for MC_parameter, MC_value in MC_parameters:
             MC_parameter['value'] = int(MC_value*MC_parameter['conversion_factor'])
             self.MC_PARAMETERS.append(MC_parameter)

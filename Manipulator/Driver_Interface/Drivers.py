@@ -1,4 +1,4 @@
-from . import IO, Motion_Commands
+from . import IO, Motion_Commands, Realtime_Config_Commands
 from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
@@ -19,10 +19,12 @@ class DriveError(Exception):
 
 class Driver:
 
-    def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
+    def __init__(self, IP: str, name: str, datagram: IO.linUDP, monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None)) -> None:
         self.IP = IP
         self.name = name
         self.datagram = datagram
+        if len(monitoring_channel_parameters) != 4: raise ValueError(f"Length of 'monitoring_channel_parameters' must be 4.")
+        self.monitoring_channel_parameters = monitoring_channel_parameters
         self._send_attempt = 1
         self.awaiting_error_acknowledgement = False
         self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
@@ -33,6 +35,7 @@ class Driver:
         self.MC_count = 0
         self.realtime_config_command_count = 0
         self.MC_count_up_to_date = False
+        self.realtime_config_count_up_to_date = False
 
     def _run_method_queue(self) -> None:
         """
@@ -104,13 +107,21 @@ class Driver:
                 self.MC_count_up_to_date = True
             self.MC_count += 1
 
+        if request.realtime_config is not None:
+            if not self.realtime_config_count_up_to_date:
+                self.realtime_config_count_up_to_date = True
+                self.realtime_config_command_count = self.get_realtime_config_command_count()
+            self.realtime_config_command_count += 1
+
         # Maps the counts from 'python int' to Uint4 with overflow.
         mapped_MC_count = self.MC_count & 0xF
         mapped_realtime_config_command_count = self.realtime_config_command_count & 0xF
 
         # Sends the request.
-        self.datagram.send(request.get_binary(mapped_MC_count, mapped_realtime_config_command_count), self.IP)
-        
+        package = request.get_binary(mapped_MC_count, mapped_realtime_config_command_count)
+        print(package)
+        self.datagram.send(package, self.IP)
+
         # Logging the send.
         self.logger.log(request.logging_level, f"Request sent: {request}.")
 
@@ -118,20 +129,20 @@ class Driver:
             # Wait for response (default timeout 2 seconds).
             response_raw = self.datagram.recieve(self.IP)
             
-            # Reset attempt counter.
-            self._send_attempt = 1
-
             # Translating the response.
-            translated_response = request.response.translate_response(response_raw)
+            translated_response = request.response.translate_response(response_raw, request.realtime_config, self.monitoring_channel_parameters)
             
             # Logging the recieve.
             self.logger.log(request.logging_level, f"Response recieved: {translated_response}.")
-
+            
             # Warning handling.
             self._warning_handler(translated_response)
 
             # Error handling.
             self._error_handler(translated_response)
+            
+            # Reset attempt counter.
+            self._send_attempt = 1
 
             return translated_response
         except queue.Empty:
@@ -362,3 +373,21 @@ class Driver:
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word()))
         self.awaiting_error_acknowledgement = False
+
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def get_driver_time(self) -> float:
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'μm')
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]
+    
+    @ignored_if_awaiting_error_acknowledgement
+    def get_realtime_config_command_count(self) -> int:
+        self.logger.debug("Requesting realtime_config count.")
+        realtime_config_cmd = Realtime_Config_Commands.No_Operation()
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('command_count')
+    
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def get_status_word(self) -> int:
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, IO.linTypes.Uint16, 'status word', '-')
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]

@@ -1,6 +1,6 @@
 from .Stream import Stream
 from . import IO
-from .Driver_Interface import Driver, DriveError
+from .Driver_Interface import Driver, DriveError, Command_Parameters
 from concurrent.futures import Future
 import time
 
@@ -10,7 +10,7 @@ class Manipulator:
         self.datagram = IO.linUDP()
         self.drivers = (
             Driver('192.168.131.251', 'DRIVE_1', self.datagram),
-            Driver('192.168.131.252', 'DRIVE_2', self.datagram),
+            Driver('192.168.131.252', 'DRIVE_2', self.datagram, (Command_Parameters.timer_value, None, None, None)),
             Driver('192.168.131.253', 'DRIVE_3', self.datagram)
         )
         self.futures: list[Future | None] = [None, None, None]
@@ -49,12 +49,16 @@ class Manipulator:
         next_cycle_time = time.time()
         stop_streaming = False
         while not stop_streaming:
-            next_cycle_time += stream.cycle_time
+            cycle_time = stream.cycle_time
+            next_cycle_time += cycle_time
+            current_time = time.time()
             stop_streaming, stream_values = stream.get_next_coordinate_set()
             for i, driver in enumerate(self.drivers):
                 driver.stream(*stream_values[i])
             self._wait_for_response_on_all()
-            time.sleep(next_cycle_time - time.time())
+            sleep_time = next_cycle_time - time.time()
+            time.sleep(sleep_time)
+            print(cycle_time, time.time()-current_time)
         
         # Stops the stream.
         for driver in self.drivers:

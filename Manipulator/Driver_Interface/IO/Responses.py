@@ -1,5 +1,7 @@
 import struct
-from typing import TypedDict, Literal
+from typing import TypedDict, Literal, Any
+from .Realtime_Config_Base import Realtime_Config
+from .Command_Parameter_Base import Command_Parameter
 
 class Status_Word(TypedDict):
     operation_enabled:     bool
@@ -41,6 +43,17 @@ class Warn_Word(TypedDict):
     name:       str
     meaning:    str
 
+class Realtime_Config_Response(TypedDict):
+    status_number: int
+    status_description: str
+    details: tuple[Command_Parameter]
+    values: tuple[int]
+    command_count: int
+
+class Monitoring_Channel_Response(TypedDict):
+    details: tuple[Command_Parameter | None]
+    values: tuple[Any]
+
 Translated_Response = dict[Literal['status_word', 
                                    'state_var', 
                                    'actual_pos', 
@@ -49,7 +62,7 @@ Translated_Response = dict[Literal['status_word',
                                    'warn_word', 
                                    'error_code', 
                                    'monitoring_channel', 
-                                   'realtime_config'], Status_Word | State_Var | list[Warn_Word] | float | int]
+                                   'realtime_config'], Status_Word | State_Var | list[Warn_Word] | float | int | Realtime_Config_Response]
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
@@ -91,8 +104,15 @@ class Response:
             "realtime_config": realtime_config
         }
 
-    def translate_response(self, response_raw: bytes) -> Translated_Response:
-        response_unpacked: tuple[int] = struct.unpack("<LL" + self.format, response_raw)[2:]
+    def translate_response(self, response_raw: bytes, realtime_config_command: Realtime_Config | None, monitoring_channel_parameters: tuple[Command_Parameter | None]) -> Translated_Response:
+        self.response_types_included['realtime_config'] = True if realtime_config_command is not None else False
+        print(response_raw)
+        response_raw_format = "<LL" + self.get_format(realtime_config_command)
+        response_raw_length = struct.calcsize(response_raw_format)
+        # Only unpacking the expected length of the raw response, which is usually the same as the length of the raw response
+        # but realtime config commands can apparently respond with bytes from the previous response, giving more values than
+        # expected. Might be problematic for debugging when a response is wrongly translated.
+        response_unpacked: tuple[int] = struct.unpack(response_raw_format, response_raw[:response_raw_length])[2:]
         response_dict = dict()
         i = 0
         for response_name, response_type_included in self.response_types_included.items():
@@ -272,10 +292,58 @@ class Response:
                         response_type_translated_value = response_type_value
 
                     case "monitoring_channel":
-                        raise NotImplementedError("Translating monitoring channel from response is not supported yet.")
+                        format = ""
+                        for parameter in monitoring_channel_parameters:
+                            if parameter is not None:
+                                format += parameter.get('type').get('format')
+                            else:
+                                format += "4x"
+                        monitoring_channel_values = struct.unpack(format, response_type_value)
+                        response_type_translated_value = Monitoring_Channel_Response(
+                            details=[parameter for parameter in monitoring_channel_parameters if parameter is not None],
+                            values=monitoring_channel_values
+                        )
 
                     case "realtime_config":
-                        raise NotImplementedError("Translating realtime config from response is not supported yet.")
+                        if realtime_config_command is None: raise ValueError(f"realtime_config is flagged for the response but is not in the request.")
+                        command_count, parameter_channel_status, *DO_values = struct.unpack(realtime_config_command.DI_format, response_type_value)
+                        match parameter_channel_status:
+                            case 0x00:
+                                parameter_status_description = "OK, done"
+                            case 0x02:
+                                parameter_status_description = "Command running / busy"
+                            case 0x04:
+                                parameter_status_description = "Block not finished (curve selection)"
+                            case 0x05:
+                                parameter_status_description = "Busy"
+                            case 0xC0:
+                                parameter_status_description = "UPID Error"
+                            case 0xC1:
+                                parameter_status_description = "Parameter type error"
+                            case 0xC2:
+                                parameter_status_description = "Range error"
+                            case 0xC3:
+                                parameter_status_description = "Address usage error"
+                            case 0xC5:
+                                parameter_status_description = "Error: Command 21h “Get next UPID List item” was executed without prior execution of “Start Getting UPID List”"
+                            case 0xC6:
+                                parameter_status_description = "End of UPID list reached (no next UPID list item found)"
+                            case 0xD0:
+                                parameter_status_description = "Odd address"
+                            case 0xD1:
+                                parameter_status_description = "Size error (curve selection)"
+                            case 0xD4:
+                                parameter_status_description = "Curve already defined / curve not present (curve selection)"
+                            case _:
+                                parameter_status_description = "__UNKNOWN__"
+
+                        response_type_translated_value = Realtime_Config_Response(
+                            status_number=parameter_channel_status,
+                            status_description=parameter_status_description,
+                            details=realtime_config_command.DO_parameters,
+                            values=DO_values,
+                            command_count=command_count
+                        )
                     case _:
                         raise ValueError(f"")
 
@@ -284,8 +352,7 @@ class Response:
 
         return response_dict
 
-    @property
-    def format(self) -> str:
+    def get_format(self, realtime_config_command: Realtime_Config | None) -> str:
         format = "".join([
             "H"   if self.response_types_included['status_word'        ] else "",
             "2s"  if self.response_types_included['state_var'          ] else "",
@@ -294,12 +361,17 @@ class Response:
             "h"   if self.response_types_included['current'            ] else "",   # Is current signed?
             "H"   if self.response_types_included['warn_word'          ] else "",
             "H"   if self.response_types_included['error_code'         ] else "",
-            "16s" if self.response_types_included['monitoring_channel' ] else "",   # Format of monitoring channel depends on what the type of the selected UPID is.
-            "8s"  if self.response_types_included['realtime_config'    ] else ""    # Format of realtime config arguments depend on the parameter command ID.
+            "16s" if self.response_types_included['monitoring_channel' ] else ""    # Format of monitoring channel depends on what the type of the selected UPID is.
         ])
         
+        # Realtime config format depends on the parameter command ID and is added to the response if the request 
+        # contains a realtime config, regardless of self.response_types_included['realtime_config']. Therefore it
+        # is needed as an argument for this method.
+        if realtime_config_command is not None:
+            format += f"{realtime_config_command.get_response_byte_size()}s"
+
         # If the size of the response is less than 14 bytes (including request and response defs) 
-        # pappending is appended up till 14 bytes. Documentation says pappending is appended up till 64 bytes 
+        # padding is appended up till 14 bytes. Documentation says pappending is appended up till 64 bytes 
         # but that is not the case.
         size = struct.calcsize(format)
         if size < 6:
