@@ -3,6 +3,8 @@ from . import IO
 from .Driver_Interface import Driver, DriveError, Command_Parameters
 from concurrent.futures import Future
 import time
+import numpy as np
+import numpy.typing as npt
 
 class Manipulator:
 
@@ -63,3 +65,9 @@ class Manipulator:
         # Stops the stream.
         for driver in self.drivers:
             driver.stop_stream()
+
+    def move_with_constant_velocity(velocity: npt.ArrayLike) -> tuple[npt.NDArray, npt.NDArray]:
+        velocity = np.asarray(velocity)
+
+    def feedback(point_cloud: npt.ArrayLike, velocity: float) -> None:
+        pass

@@ -391,3 +391,8 @@ class Driver:
     def get_status_word(self) -> int:
         realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, IO.linTypes.Uint16, 'status word', '-')
         return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]
+    
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def move_with_constant_velocity(velocity: float) -> tuple[float, float]:
+        pass
