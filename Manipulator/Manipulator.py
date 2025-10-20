@@ -69,5 +69,31 @@ class Manipulator:
     def move_with_constant_velocity(velocity: npt.ArrayLike) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
 
-    def feedback(point_cloud: npt.ArrayLike, velocity: float) -> None:
-        pass
+
+
+    def feedback(point_cloud: npt.ArrayLike, velocity: float, eps: float = 5e-4):
+    
+        P = np.asarray(point_cloud, float) * 1e-3  # mm -> m
+        N = len(P)
+        idx = 0  # next point
+
+        def step(current_pos_m: np.ndarray):
+            nonlocal idx
+
+            # Skip already-reached points
+            while idx < N and np.linalg.norm(P[idx] - current_pos_m) <= eps:
+                idx += 1
+
+            if idx >= N:
+                return np.zeros(3, float), True
+
+            target = P[idx]
+            d = target - current_pos_m
+            dist = float(np.linalg.norm(d))
+            if dist <= eps or dist == 0.0:
+                return np.zeros(3, float), (idx >= N)
+
+            v_axis = (d / dist) * float(velocity)  # per-axis velocity in m/s
+            return v_axis, False
+
+        return step
