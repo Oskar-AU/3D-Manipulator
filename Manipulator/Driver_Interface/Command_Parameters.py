@@ -56,6 +56,6 @@ class Command_Parameters:
     timer_value = Command_Parameter(
         description="Slave timer value",
         type=linTypes.Sint32,
-        unit="μm",
+        unit="mym",
         conversion_factor=1
     )

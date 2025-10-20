@@ -106,7 +106,6 @@ class Response:
 
     def translate_response(self, response_raw: bytes, realtime_config_command: Realtime_Config | None, monitoring_channel_parameters: tuple[Command_Parameter | None]) -> Translated_Response:
         self.response_types_included['realtime_config'] = True if realtime_config_command is not None else False
-        print(response_raw)
         response_raw_format = "<LL" + self.get_format(realtime_config_command)
         response_raw_length = struct.calcsize(response_raw_format)
         # Only unpacking the expected length of the raw response, which is usually the same as the length of the raw response

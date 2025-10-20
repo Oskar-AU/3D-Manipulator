@@ -119,7 +119,7 @@ class Driver:
 
         # Sends the request.
         package = request.get_binary(mapped_MC_count, mapped_realtime_config_command_count)
-        print(package)
+        
         self.datagram.send(package, self.IP)
 
         # Logging the send.
