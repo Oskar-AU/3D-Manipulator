@@ -124,6 +124,7 @@ class Driver:
 
         # Logging the send.
         self.logger.log(request.logging_level, f"Request sent: {request}.")
+        self.logger.binary(f"Request binary: {package}.")
 
         try:
             # Wait for response (default timeout 2 seconds).
@@ -134,6 +135,7 @@ class Driver:
             
             # Logging the recieve.
             self.logger.log(request.logging_level, f"Response recieved: {translated_response}.")
+            self.logger.binary(f"Response binary: {response_raw}")
             
             # Warning handling.
             self._warning_handler(translated_response)
@@ -377,7 +379,7 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_driver_time(self) -> float:
-        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'μm')
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'mym')
         return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]
     
     @ignored_if_awaiting_error_acknowledgement
@@ -394,5 +396,25 @@ class Driver:
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
-    def move_with_constant_velocity(velocity: float) -> tuple[float, float]:
-        pass
+    def move_with_constant_velocity(self, velocity: float) -> tuple[float, float]:
+        
+        RT_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(
+            UPID=0x1B8E,
+            UPID_unit="mm/s",
+            UPID_conversion_factor=1e-3,
+            UPID_type=IO.linTypes.Sint32,
+            UPID_description="Demand_velocty"
+        )
+
+        if velocity > 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity)
+        elif velocity < 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity)
+        else:
+            motion_CMD = Motion_Commands.VAI_Stop()
+
+        response_def = IO.Response(realtime_config=True, actual_pos=True)
+        request = IO.Request(response_def, MC_interface=motion_CMD, realtime_config=RT_config_cmd)
+        response = self.send(request)
+        
+        return response.get('actual_pos'), response.get('realtime_config').get('values')[1]

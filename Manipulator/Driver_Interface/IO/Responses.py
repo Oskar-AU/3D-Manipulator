@@ -300,12 +300,12 @@ class Response:
                         monitoring_channel_values = struct.unpack(format, response_type_value)
                         response_type_translated_value = Monitoring_Channel_Response(
                             details=[parameter for parameter in monitoring_channel_parameters if parameter is not None],
-                            values=monitoring_channel_values
+                            values=[monitoring_channel_values[i] / monitoring_channel_parameters[i].get('conversion_factor') for i in range(len(monitoring_channel_values))]
                         )
 
                     case "realtime_config":
                         if realtime_config_command is None: raise ValueError(f"realtime_config is flagged for the response but is not in the request.")
-                        command_count, parameter_channel_status, *DO_values = struct.unpack(realtime_config_command.DI_format, response_type_value)
+                        command_count, parameter_channel_status, *DI_values = struct.unpack(realtime_config_command.DI_format, response_type_value)
                         match parameter_channel_status:
                             case 0x00:
                                 parameter_status_description = "OK, done"
@@ -339,8 +339,8 @@ class Response:
                         response_type_translated_value = Realtime_Config_Response(
                             status_number=parameter_channel_status,
                             status_description=parameter_status_description,
-                            details=realtime_config_command.DO_parameters,
-                            values=DO_values,
+                            details=realtime_config_command.DI_parameters,
+                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].get('conversion_factor') for i in range(len(DI_values))],
                             command_count=command_count
                         )
                     case _:

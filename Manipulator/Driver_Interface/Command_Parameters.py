@@ -46,6 +46,20 @@ class Command_Parameters:
         conversion_factor=1e2   # 0.01 mm/s² resolution
     )
 
+    velocity = Command_Parameter(
+        description="velocity",
+        type=linTypes.Uint32,
+        unit="m/s",
+        conversion_factor=1e6,
+    )
+
+    acceleration = Command_Parameter(
+        description="acceleration",
+        type=linTypes.Uint32,
+        unit="m/s^2",
+        conversion_factor=1e5,
+    )
+
     UPID = Command_Parameter(
         description="UPID",
         type=linTypes.Uint16,

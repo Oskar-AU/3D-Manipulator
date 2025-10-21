@@ -192,3 +192,65 @@ class Write_Live_Parameter(Motion_Commmand_Interface):
             (copy.deepcopy(Command_Parameters.UPID), UPID),
             (raw_parameter, parameter_value)
         )
+
+class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
+    
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x0C
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0xE
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Infinite motion in positive direction."
+    
+    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.velocity), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration), acceleration)
+        )
+
+class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
+    
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x0C
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0xF
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Infinite motion in negative direction."
+    
+    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.velocity), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration), acceleration)
+        )
+
+class VAI_Stop(Motion_Commmand_Interface):
+
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x01
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0x7
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Stop VAI motion."
+    
+    def __init__(self, decceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.acceleration), decceleration)
+        )
