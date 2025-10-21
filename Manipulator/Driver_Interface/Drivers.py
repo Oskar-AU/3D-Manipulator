@@ -17,6 +17,12 @@ class DriveError(Exception):
         self.drive = drive
         super().__init__(message)
 
+class Monitoring_Channel_Missing_Parameter_Error(Exception):
+    def __init__(self, missing_parameter_name: str) -> None:
+        message = f"Monitoring channel not configured correctly. Expected '{missing_parameter_name}' " + \
+                   "but was not found. Check either driver or manipulator configuration."
+        super().__init__(message)
+
 class Driver:
 
     def __init__(self, IP: str, name: str, datagram: IO.linUDP, monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None)) -> None:
@@ -397,14 +403,6 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def move_with_constant_velocity(self, velocity: float) -> tuple[float, float]:
-        
-        RT_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(
-            UPID=0x1B8E,
-            UPID_unit="mm/s",
-            UPID_conversion_factor=1e-3,
-            UPID_type=IO.linTypes.Sint32,
-            UPID_description="Demand_velocty"
-        )
 
         if velocity > 0.0:
             motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity)
@@ -413,8 +411,11 @@ class Driver:
         else:
             motion_CMD = Motion_Commands.VAI_Stop()
 
-        response_def = IO.Response(realtime_config=True, actual_pos=True)
-        request = IO.Request(response_def, MC_interface=motion_CMD, realtime_config=RT_config_cmd)
+        response_def = IO.Response(actual_pos=True, monitoring_channel=True)
+        request = IO.Request(response_def, MC_interface=motion_CMD)
         response = self.send(request)
-        
-        return response.actual_pos, response.realtime_config.values[1]
+
+        try:
+            return response.actual_pos, response.monitoring_channel['velocity']
+        except KeyError:
+            raise Monitoring_Channel_Missing_Parameter_Error('velocity')
