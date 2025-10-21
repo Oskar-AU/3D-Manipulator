@@ -59,7 +59,7 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
         super().__init__(
             (copy.deepcopy(Command_Parameters.target_position), target_position),
             (copy.deepcopy(Command_Parameters.maximal_velocity), maximal_velocity), 
-            (copy.deepcopy(Command_Parameters.acceleration), acceleration), 
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration), 
             (copy.deepcopy(Command_Parameters.deceleration), deceleration)
         )
 
@@ -210,8 +210,8 @@ class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
     def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
         
         super().__init__(
-            (copy.deepcopy(Command_Parameters.velocity), velocity),
-            (copy.deepcopy(Command_Parameters.acceleration), acceleration)
+            (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration)
         )
 
 class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
@@ -231,8 +231,8 @@ class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
     def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
         
         super().__init__(
-            (copy.deepcopy(Command_Parameters.velocity), velocity),
-            (copy.deepcopy(Command_Parameters.acceleration), acceleration)
+            (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration)
         )
 
 class VAI_Stop(Motion_Commmand_Interface):
@@ -252,5 +252,5 @@ class VAI_Stop(Motion_Commmand_Interface):
     def __init__(self, decceleration: float = 10000.0) -> None:
         
         super().__init__(
-            (copy.deepcopy(Command_Parameters.acceleration), decceleration)
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), decceleration)
         )

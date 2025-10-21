@@ -166,11 +166,11 @@ class Driver:
             The main state of the drive.
         """
         self.logger.debug("Requesting main state.")
-        return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
+        return self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state
 
     def get_MC_count(self) -> int:
         self.logger.debug("Requesting MC_count.")
-        MC_count = self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('MC_count')
+        MC_count = self.send(IO.Request(IO.Response(state_var=True))).state_var.MC_count
         return MC_count if MC_count is not None else 0
 
     @run_on_driver_thread
@@ -193,7 +193,7 @@ class Driver:
 
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
-        if self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state') != 8:
+        if self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state != 8:
             self.logger.error(f"Homing procedure failed: Not in correct state ({main_state} != 8).")
             return False
 
@@ -203,7 +203,7 @@ class Driver:
 
         # Waiting for homing to finish.
         is_homing_finished_request = IO.Request(IO.Response(state_var=True))
-        is_homing_finished = lambda: self.send(is_homing_finished_request).get('state_var').get('homing_finished')
+        is_homing_finished = lambda: self.send(is_homing_finished_request).state_var.homing_finished
         if not self.wait_for_change(is_homing_finished, timeout, 1):
             self.logger.error(f"Homing procedure failed: Timed out ({timeout}s). Switching off drive.")
             self.send(IO.Request(IO.Response(), IO.Control_Word()))
@@ -284,7 +284,7 @@ class Driver:
         return True
     
     def _error_handler(self, translated_response: IO.Translated_Response) -> None:
-        error_code: int = translated_response.get('error_code')
+        error_code: int = translated_response.error_code
         if error_code is not None and error_code != 0:
             self.logger.error(f"Error code {error_code} raised by drive. Drive awaiting error acknowledgement.")
             self.awaiting_error_acknowledgement = True
@@ -301,25 +301,25 @@ class Driver:
             The translated response from the drive.
         """
         # Gets the new warning word.
-        warning_words: list[IO.Responses.Warn_Word] = translated_response.get('warn_word')
+        warning_words: list[IO.Responses.Warn_Word] = translated_response.warn_word
 
         # Exit warning handler if the resonse didn't request a warning.        
         if warning_words is None: return None
 
         # Gets the already present and new warning bits (to make it easier for comparison).
-        already_present_warning_bits = {warning_word['bit'] for warning_word in self.warning_words}
-        new_warning_bits = {warning_word['bit'] for warning_word in warning_words}
+        already_present_warning_bits = {warning_word.bit for warning_word in self.warning_words}
+        new_warning_bits = {warning_word.bit for warning_word in warning_words}
         
         # Inserts new warnings into the warnings list if present.
         for new_warning_word in warning_words:
-            if new_warning_word['bit'] not in already_present_warning_bits:
+            if new_warning_word.bit not in already_present_warning_bits:
                 self.warning_words.append(new_warning_word)
-                self.logger.warning(f"{new_warning_word['name']}: {new_warning_word['meaning']}.")
+                self.logger.warning(f"{new_warning_word.name}: {new_warning_word.meaning}.")
         
         # Removes lifted warnings from the list.
         for i, already_present_warning in enumerate(self.warning_words):
-            if already_present_warning['bit'] not in new_warning_bits:
-                self.logger.info(f"Warning cleared: '{already_present_warning['name']}'.")
+            if already_present_warning.bit not in new_warning_bits:
+                self.logger.info(f"Warning cleared: '{already_present_warning.name}'.")
                 self.warning_words.pop(i)
 
     @run_on_driver_thread
@@ -380,19 +380,19 @@ class Driver:
     @ignored_if_awaiting_error_acknowledgement
     def get_driver_time(self) -> float:
         realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'mym')
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @ignored_if_awaiting_error_acknowledgement
     def get_realtime_config_command_count(self) -> int:
         self.logger.debug("Requesting realtime_config count.")
         realtime_config_cmd = Realtime_Config_Commands.No_Operation()
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('command_count')
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.command_count
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_status_word(self) -> int:
         realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, IO.linTypes.Uint16, 'status word', '-')
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).get('realtime_config').get('values')[1]
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
@@ -417,4 +417,4 @@ class Driver:
         request = IO.Request(response_def, MC_interface=motion_CMD, realtime_config=RT_config_cmd)
         response = self.send(request)
         
-        return response.get('actual_pos'), response.get('realtime_config').get('values')[1]
+        return response.actual_pos, response.realtime_config.values[1]

@@ -11,7 +11,7 @@ class Manipulator:
     def __init__(self):
         self.datagram = IO.linUDP()
         self.drivers = (
-            Driver('192.168.131.251', 'DRIVE_1', self.datagram, (Command_Parameters.velocity, None, None, None)),
+            Driver('192.168.131.251', 'DRIVE_1', self.datagram, (Command_Parameters.velocity_signed, None, None, None)),
             Driver('192.168.131.252', 'DRIVE_2', self.datagram, (Command_Parameters.timer_value, None, None, None)),
             Driver('192.168.131.253', 'DRIVE_3', self.datagram)
         )

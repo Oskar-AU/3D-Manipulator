@@ -13,7 +13,7 @@ class Command_Parameters:
         unit="m/s",
         conversion_factor=1e6
     )
-    acceleration = Command_Parameter(
+    acceleration_not_signed = Command_Parameter(
         description="Acceleration",
         type=linTypes.Uint32,
         unit="m/s^2",
@@ -46,14 +46,21 @@ class Command_Parameters:
         conversion_factor=1e2   # 0.01 mm/s² resolution
     )
 
-    velocity = Command_Parameter(
+    velocity_signed = Command_Parameter(
+        description="velocity",
+        type=linTypes.Sint32,
+        unit="m/s",
+        conversion_factor=1e6,
+    )
+
+    velocity_not_signed = Command_Parameter(
         description="velocity",
         type=linTypes.Uint32,
         unit="m/s",
         conversion_factor=1e6,
     )
 
-    acceleration = Command_Parameter(
+    acceleration_not_signed = Command_Parameter(
         description="acceleration",
         type=linTypes.Uint32,
         unit="m/s^2",

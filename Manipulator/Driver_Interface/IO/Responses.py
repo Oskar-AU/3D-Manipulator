@@ -1,9 +1,11 @@
 import struct
-from typing import TypedDict, Literal, Any
+from typing import Any
 from .Realtime_Config_Base import Realtime_Config
 from .Command_Parameter_Base import Command_Parameter
+from dataclasses import dataclass
 
-class Status_Word(TypedDict):
+@dataclass
+class Status_Word:
     operation_enabled:     bool
     switch_on_active:      bool
     enable_operation:      bool
@@ -21,48 +23,49 @@ class Status_Word(TypedDict):
     range_indicator_1:     bool
     range_indicator_2:     bool
 
-class State_Var(TypedDict):
+@dataclass
+class State_Var:
     main_state:                         int
-    error_code:                         int
-    MC_count:                           int
-    event_handler_active:               bool
-    motion_active:                      bool
-    in_target_position:                 bool
-    homed:                              bool
-    homing_finished:                    bool
-    clerance_check_finished:            bool
-    going_to_initial_position_finished: bool
-    going_to_position_finished:         bool
-    moving_positive:                    bool
-    jogging_plus_finished:              bool
-    moving_negative:                    bool
-    jogging_negative_finished:          bool
+    error_code:                         int | None = None
+    MC_count:                           int | None = None
+    event_handler_active:               bool | None = None
+    motion_active:                      bool | None = None
+    in_target_position:                 bool | None = None
+    homed:                              bool | None = None
+    homing_finished:                    bool | None = None
+    clerance_check_finished:            bool | None = None
+    going_to_initial_position_finished: bool | None = None
+    going_to_position_finished:         bool | None = None
+    moving_positive:                    bool | None = None
+    jogging_plus_finished:              bool | None = None
+    moving_negative:                    bool | None = None
+    jogging_negative_finished:          bool | None = None
 
-class Warn_Word(TypedDict):
+@dataclass
+class Warn_Word:
     bit:        int
     name:       str
     meaning:    str
 
-class Realtime_Config_Response(TypedDict):
+@dataclass
+class Realtime_Config_Response:
     status_number: int
     status_description: str
     details: tuple[Command_Parameter]
     values: tuple[int]
     command_count: int
 
-class Monitoring_Channel_Response(TypedDict):
-    details: tuple[Command_Parameter | None]
-    values: tuple[Any]
-
-Translated_Response = dict[Literal['status_word', 
-                                   'state_var', 
-                                   'actual_pos', 
-                                   'demand_pos', 
-                                   'current', 
-                                   'warn_word', 
-                                   'error_code', 
-                                   'monitoring_channel', 
-                                   'realtime_config'], Status_Word | State_Var | list[Warn_Word] | float | int | Realtime_Config_Response]
+@dataclass
+class Translated_Response:
+    status_word: Status_Word | None = None
+    state_var: State_Var | None = None
+    actual_pos: float | None = None
+    demand_pos: float | None = None
+    current: float | None = None
+    warn_word: list[Warn_Word] | None = None
+    error_code: int | None = None
+    monitoring_channel: dict[str, Any] | None = None
+    realtime_config: Realtime_Config_Response | None = None
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
@@ -105,14 +108,16 @@ class Response:
         }
 
     def translate_response(self, response_raw: bytes, realtime_config_command: Realtime_Config | None, monitoring_channel_parameters: tuple[Command_Parameter | None]) -> Translated_Response:
+        # Sets the realtime_config as included if the request included a realtime config command.
         self.response_types_included['realtime_config'] = True if realtime_config_command is not None else False
+        
         response_raw_format = "<LL" + self.get_format(realtime_config_command)
         response_raw_length = struct.calcsize(response_raw_format)
         # Only unpacking the expected length of the raw response, which is usually the same as the length of the raw response
         # but realtime config commands can apparently respond with bytes from the previous response, giving more values than
         # expected. Might be problematic for debugging when a response is wrongly translated.
         response_unpacked: tuple[int] = struct.unpack(response_raw_format, response_raw[:response_raw_length])[2:]
-        response_dict = dict()
+        translated_response = Translated_Response()
         i = 0
         for response_name, response_type_included in self.response_types_included.items():
             if response_type_included:
@@ -298,10 +303,12 @@ class Response:
                             else:
                                 format += "4x"
                         monitoring_channel_values = struct.unpack(format, response_type_value)
-                        response_type_translated_value = Monitoring_Channel_Response(
-                            details=[parameter for parameter in monitoring_channel_parameters if parameter is not None],
-                            values=[monitoring_channel_values[i] / monitoring_channel_parameters[i].get('conversion_factor') for i in range(len(monitoring_channel_values))]
-                        )
+                        response_type_translated_value = dict()
+                        for i, monitoring_channel_parameter in enumerate(monitoring_channel_parameters):
+                            if monitoring_channel_parameter is not None:
+                                response_type_translated_value.update({
+                                    monitoring_channel_parameter.get('description'): monitoring_channel_values[i] / monitoring_channel_parameter.get('conversion_factor')
+                                })
 
                     case "realtime_config":
                         if realtime_config_command is None: raise ValueError(f"realtime_config is flagged for the response but is not in the request.")
@@ -346,10 +353,10 @@ class Response:
                     case _:
                         raise ValueError(f"")
 
-                response_dict.update({response_name: response_type_translated_value})
+                setattr(translated_response, response_name, response_type_translated_value)
                 i += 1
 
-        return response_dict
+        return translated_response
 
     def get_format(self, realtime_config_command: Realtime_Config | None) -> str:
         format = "".join([
