@@ -129,7 +129,7 @@ class Driver:
         self.datagram.send(package, self.IP)
 
         # Logging the send.
-        self.logger.log(request.logging_level, f"Request sent: {request}.")
+        self.logger.log(request.logging_level, f"{request}.")
         self.logger.binary(f"Request binary: {package}.")
 
         try:

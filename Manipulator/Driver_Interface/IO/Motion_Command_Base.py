@@ -44,6 +44,6 @@ class Motion_Commmand_Interface(ABC):
         self.MC_PARAMETERS[index]['value'] = int(MC_value*self.MC_PARAMETERS[index]['conversion_factor'])
 
     def __repr__(self) -> str:
-        header = self.DESCRIPTION
+        header = "'" + self.DESCRIPTION + "'"
         parameters = {MC_parameter['description']: str(MC_parameter['value']/MC_parameter['conversion_factor']) + MC_parameter['unit'] for MC_parameter in self.MC_PARAMETERS}
-        return header + " with params " + f"{parameters}"
+        return header + " w/ params " + f"{parameters}"

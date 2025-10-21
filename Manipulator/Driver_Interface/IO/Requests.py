@@ -49,4 +49,8 @@ class Request:
         return request_header + data
     
     def __repr__(self) -> str:
-        return f"Control_word = {self.control_word}, MC_command = {self.MC_interface}, realtime_config = {self.realtime_config}"
+        commands = []
+        if self.control_word is not None: commands.append(f"control_word: {self.control_word}")
+        if self.MC_interface is not None: commands.append(f"MC_command: {self.MC_interface}")
+        if self.realtime_config is not None: commands.append(f"realtime_config: {self.realtime_config}")
+        return f"Requesting: ({self.response}) w/ cmds: (" + ", ".join(commands) + ")" if len(commands) != 0 else f"Requesting: ({self.response})"
