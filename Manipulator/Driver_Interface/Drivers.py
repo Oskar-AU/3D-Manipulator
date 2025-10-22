@@ -29,7 +29,7 @@ class Driver:
         self.IP = IP
         self.name = name
         self.datagram = datagram
-        if len(monitoring_channel_parameters) != 4: raise ValueError(f"Length of 'monitoring_channel_parameters' must be 4.")
+        if len(monitoring_channel_parameters) != 4: raise ValueError("Length of 'monitoring_channel_parameters' must be 4.")
         self.monitoring_channel_parameters = monitoring_channel_parameters
         self._send_attempt = 1
         self.awaiting_error_acknowledgement = False
@@ -57,9 +57,11 @@ class Driver:
             
             # Runs the method.
             try:
-                future.set_result(method(*args, **kwargs))
-            except DriveError as e:
+                method_result = method(*args, **kwargs)
+            except Exception as e:
                 future.set_exception(e)
+            else:
+                future.set_result(method_result)
 
     @staticmethod
     def run_on_driver_thread(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
@@ -159,7 +161,7 @@ class Driver:
                 self._send_attempt += 1
                 return self.send(request, max_attemps)
             else:
-                self.logger.critical(f"Unable to recieve.")
+                self.logger.critical("Unable to recieve.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")
 
     def get_main_state(self) -> int:
@@ -195,7 +197,7 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        self.logger.info(f"Homing procedure initiated.")
+        self.logger.info("Homing procedure initiated.")
 
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
@@ -218,7 +220,7 @@ class Driver:
         # Finialzing.
         home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
         self.send(home_off_request)
-        self.logger.info(f"Homing procedure completed.")
+        self.logger.info("Homing procedure completed.")
         return True
 
     @run_on_driver_thread
@@ -237,11 +239,11 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        self.logger.info(f"Switch on procedure initiated.")
+        self.logger.info("Switch on procedure initiated.")
         main_state = self.get_main_state()
         
         if main_state == 8:
-            self.logger.info(f"Switch on procedure completed (already swicthed on).")
+            self.logger.info("Switch on procedure completed (already swicthed on).")
             return True
         if main_state != 2:
             # Requesting state 2.
@@ -264,7 +266,7 @@ class Driver:
                 return False
             
             # Finalizing.
-            self.logger.info(f"Switch on procedure completed.")
+            self.logger.info("Switch on procedure completed.")
             return True
 
     def wait_for_change(self, change_checker: Callable[[None], bool], timeout: float, delay: float = 0.0) -> bool:

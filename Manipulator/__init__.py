@@ -3,6 +3,14 @@ from .Manipulator import Manipulator
 import logging
 import os
 
+# Adds 'binary' as a logging level below debug.
+BINARY = 5
+def binary(self: logging.Logger, message: str, *args, **kwargs) -> None:
+    if self.isEnabledFor(BINARY):
+        self._log(BINARY, message, args, **kwargs)
+logging.addLevelName(BINARY, "BINARY")
+logging.Logger.binary = binary
+
 def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level: int = logging.DEBUG, delete_current_log_at_startup: bool = True, file_name: str = "log.log"):
     """
     Optional helper to configure logging. Application can call this but is not automatic.
@@ -16,16 +24,9 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     if not os.path.exists(path):
         os.mkdir(path)
 
-    # Adds 'binary' as a logging level below debug.
-    BINARY = 9
-    def binary(self: logging.Logger, message: str, *args, **kwargs) -> None:
-        if self.isEnabledFor(BINARY):
-            self._log(BINARY, message, args, **kwargs)
-    logging.addLevelName(BINARY, "BINARY")
-    logging.Logger.binary = binary
-
     formatter_all = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     formatter_drive = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter_terminal = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 
     file_mode = 'w' if delete_current_log_at_startup else 'a'
 
@@ -37,7 +38,7 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     # Handler for terminal logging.
     terminal_handler = logging.StreamHandler()
     terminal_handler.setLevel(terminal_handler_level)
-    terminal_handler.setFormatter(formatter_all)
+    terminal_handler.setFormatter(formatter_terminal)
 
     # Driver log handlers.
     driver_1_file_handler = logging.FileHandler(path + '/' + "DRIVE_1.log", file_mode)

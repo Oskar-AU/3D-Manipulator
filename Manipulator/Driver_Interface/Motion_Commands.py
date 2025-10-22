@@ -207,7 +207,7 @@ class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
     def DESCRIPTION(self) -> str:
         return "Infinite motion in positive direction."
     
-    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+    def __init__(self, velocity: float, acceleration: float = 10.0) -> None:
         
         super().__init__(
             (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
@@ -228,7 +228,7 @@ class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
     def DESCRIPTION(self) -> str:
         return "Infinite motion in negative direction."
     
-    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+    def __init__(self, velocity: float, acceleration: float = 10.0) -> None:
         
         super().__init__(
             (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
@@ -249,7 +249,7 @@ class VAI_Stop(Motion_Commmand_Interface):
     def DESCRIPTION(self) -> str:
         return "Stop VAI motion."
     
-    def __init__(self, decceleration: float = 10000.0) -> None:
+    def __init__(self, decceleration: float = 10.0) -> None:
         
         super().__init__(
             (copy.deepcopy(Command_Parameters.acceleration_not_signed), decceleration)
