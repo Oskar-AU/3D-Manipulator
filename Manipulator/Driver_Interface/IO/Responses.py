@@ -1,7 +1,7 @@
 import struct
 from typing import Any
-from .Realtime_Config_Base import Realtime_Config
-from .Command_Parameter_Base import Command_Parameter
+from .Commands import Realtime_Config
+from .Commands import Command_Parameter
 from dataclasses import dataclass, fields
 
 class Response_Base:
