@@ -176,7 +176,7 @@ class IgesToXyz:
 
 def main():
     # Configuration
-    input_file = "xyz line.IGS"
+    input_file = "path3D.IGS"
     output_file = "xyz_coordinates.txt"
     spacing_mm = 0.1  # Distance between points in mm
     
