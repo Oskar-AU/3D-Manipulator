@@ -20,7 +20,6 @@ class Command_Parameter:
     type: linType
     unit: str
     conversion_factor: int
-    value: int | None = None
 
 class Command(ABC):
 
@@ -41,16 +40,11 @@ class Motion_Commmand_Interface(Command):
     def SUB_ID(self) -> int:
         pass
 
-    def __init__(self, *MC_parameters: tuple[Command_Parameter, Any]) -> None:
-        self.MC_PARAMETERS: list[Command_Parameter] = list()
-        for MC_parameter, MC_value in MC_parameters:
-            MC_parameter.value = int(MC_value*MC_parameter.conversion_factor)
-            self.MC_PARAMETERS.append(MC_parameter)
-
-    @property
-    def format(self) -> str:
-        parameter_format = "".join([MC_parameter.type.format for MC_parameter in self.MC_PARAMETERS])
-        return "<H" + parameter_format
+    def __init__(self, MC_parameters: tuple[Command_Parameter], values: tuple[int | float]) -> None:
+        if len(MC_parameters) != len(values): raise ValueError("Amount of parameters didn't match amount of values.")
+        self.MC_PARAMETERS = MC_parameters
+        self.values = [int(value * self.MC_PARAMETERS[i].conversion_factor) for i, value in enumerate(values)]
+        self.format = "<H" + "".join([MC_parameter.type.format for MC_parameter in self.MC_PARAMETERS])
 
     def get_header_decimal(self, MC_COUNT: int) -> int:
         return (MC_COUNT        <<  0  ) | \
@@ -58,15 +52,14 @@ class Motion_Commmand_Interface(Command):
                (self.MASTER_ID  <<  8  )
 
     def get_binary(self, MC_COUNT: int) -> bytes:
-        MC_parameter_values = [MC_parameter.value for MC_parameter in self.MC_PARAMETERS]
-        return struct.pack(self.format, self.get_header_decimal(MC_COUNT), *MC_parameter_values)
+        return struct.pack(self.format, self.get_header_decimal(MC_COUNT), *self.values)
 
     def set_MC_parameter_value(self, index: int, MC_value: Any) -> None:
-        self.MC_PARAMETERS[index].value = int(MC_value*self.MC_PARAMETERS[index].conversion_factor)
+        self.values[index] = int(MC_value*self.MC_PARAMETERS[index].conversion_factor)
 
     def __repr__(self) -> str:
         header = "'" + self.DESCRIPTION + "'"
-        parameters = {MC_parameter.description: str(MC_parameter.value/MC_parameter.conversion_factor) + MC_parameter.unit for MC_parameter in self.MC_PARAMETERS}
+        parameters = {parameter.description: str(self.values[i]/parameter.conversion_factor) + parameter.unit for i, parameter in enumerate(self.MC_PARAMETERS)}
         return header + " w/ params " + f"{parameters}"
 
 class Realtime_Config(Command):
