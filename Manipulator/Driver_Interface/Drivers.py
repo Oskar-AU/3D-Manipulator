@@ -1,4 +1,4 @@
-from . import IO, Motion_Commands
+from . import IO, Motion_Commands, Realtime_Config_Commands
 from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
@@ -17,12 +17,20 @@ class DriveError(Exception):
         self.drive = drive
         super().__init__(message)
 
+class Monitoring_Channel_Missing_Parameter_Error(Exception):
+    def __init__(self, missing_parameter_name: str) -> None:
+        message = f"Monitoring channel not configured correctly. Expected '{missing_parameter_name}' " + \
+                   "but was not found. Check either driver or manipulator configuration."
+        super().__init__(message)
+
 class Driver:
 
-    def __init__(self, IP: str, name: str, datagram: IO.linUDP) -> None:
+    def __init__(self, IP: str, name: str, datagram: IO.linUDP, monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None)) -> None:
         self.IP = IP
         self.name = name
         self.datagram = datagram
+        if len(monitoring_channel_parameters) != 4: raise ValueError(f"Length of 'monitoring_channel_parameters' must be 4.")
+        self.monitoring_channel_parameters = monitoring_channel_parameters
         self._send_attempt = 1
         self.awaiting_error_acknowledgement = False
         self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
@@ -33,6 +41,7 @@ class Driver:
         self.MC_count = 0
         self.realtime_config_command_count = 0
         self.MC_count_up_to_date = False
+        self.realtime_config_count_up_to_date = False
 
     def _run_method_queue(self) -> None:
         """
@@ -104,34 +113,44 @@ class Driver:
                 self.MC_count_up_to_date = True
             self.MC_count += 1
 
+        if request.realtime_config is not None:
+            if not self.realtime_config_count_up_to_date:
+                self.realtime_config_count_up_to_date = True
+                self.realtime_config_command_count = self.get_realtime_config_command_count()
+            self.realtime_config_command_count += 1
+
         # Maps the counts from 'python int' to Uint4 with overflow.
         mapped_MC_count = self.MC_count & 0xF
         mapped_realtime_config_command_count = self.realtime_config_command_count & 0xF
 
         # Sends the request.
-        self.datagram.send(request.get_binary(mapped_MC_count, mapped_realtime_config_command_count), self.IP)
+        package = request.get_binary(mapped_MC_count, mapped_realtime_config_command_count)
         
+        self.datagram.send(package, self.IP)
+
         # Logging the send.
-        self.logger.log(request.logging_level, f"Request sent: {request}.")
+        self.logger.log(request.logging_level, f"{request}.")
+        self.logger.binary(f"Request binary: {package}.")
 
         try:
             # Wait for response (default timeout 2 seconds).
             response_raw = self.datagram.recieve(self.IP)
             
-            # Reset attempt counter.
-            self._send_attempt = 1
-
             # Translating the response.
-            translated_response = request.response.translate_response(response_raw)
+            translated_response = request.response.translate_response(response_raw, request.realtime_config, self.monitoring_channel_parameters)
             
             # Logging the recieve.
             self.logger.log(request.logging_level, f"Response recieved: {translated_response}.")
-
+            self.logger.binary(f"Response binary: {response_raw}")
+            
             # Warning handling.
             self._warning_handler(translated_response)
 
             # Error handling.
             self._error_handler(translated_response)
+            
+            # Reset attempt counter.
+            self._send_attempt = 1
 
             return translated_response
         except queue.Empty:
@@ -153,11 +172,11 @@ class Driver:
             The main state of the drive.
         """
         self.logger.debug("Requesting main state.")
-        return self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state')
+        return self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state
 
     def get_MC_count(self) -> int:
         self.logger.debug("Requesting MC_count.")
-        MC_count = self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('MC_count')
+        MC_count = self.send(IO.Request(IO.Response(state_var=True))).state_var.MC_count
         return MC_count if MC_count is not None else 0
 
     @run_on_driver_thread
@@ -180,7 +199,7 @@ class Driver:
 
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
-        if self.send(IO.Request(IO.Response(state_var=True))).get('state_var').get('main_state') != 8:
+        if self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state != 8:
             self.logger.error(f"Homing procedure failed: Not in correct state ({main_state} != 8).")
             return False
 
@@ -190,7 +209,7 @@ class Driver:
 
         # Waiting for homing to finish.
         is_homing_finished_request = IO.Request(IO.Response(state_var=True))
-        is_homing_finished = lambda: self.send(is_homing_finished_request).get('state_var').get('homing_finished')
+        is_homing_finished = lambda: self.send(is_homing_finished_request).state_var.homing_finished
         if not self.wait_for_change(is_homing_finished, timeout, 1):
             self.logger.error(f"Homing procedure failed: Timed out ({timeout}s). Switching off drive.")
             self.send(IO.Request(IO.Response(), IO.Control_Word()))
@@ -271,7 +290,7 @@ class Driver:
         return True
     
     def _error_handler(self, translated_response: IO.Translated_Response) -> None:
-        error_code: int = translated_response.get('error_code')
+        error_code: int = translated_response.error_code
         if error_code is not None and error_code != 0:
             self.logger.error(f"Error code {error_code} raised by drive. Drive awaiting error acknowledgement.")
             self.awaiting_error_acknowledgement = True
@@ -288,25 +307,25 @@ class Driver:
             The translated response from the drive.
         """
         # Gets the new warning word.
-        warning_words: list[IO.Responses.Warn_Word] = translated_response.get('warn_word')
+        warning_words: list[IO.Responses.Warn_Word] = translated_response.warn_word
 
         # Exit warning handler if the resonse didn't request a warning.        
         if warning_words is None: return None
 
         # Gets the already present and new warning bits (to make it easier for comparison).
-        already_present_warning_bits = {warning_word['bit'] for warning_word in self.warning_words}
-        new_warning_bits = {warning_word['bit'] for warning_word in warning_words}
+        already_present_warning_bits = {warning_word.bit for warning_word in self.warning_words}
+        new_warning_bits = {warning_word.bit for warning_word in warning_words}
         
         # Inserts new warnings into the warnings list if present.
         for new_warning_word in warning_words:
-            if new_warning_word['bit'] not in already_present_warning_bits:
+            if new_warning_word.bit not in already_present_warning_bits:
                 self.warning_words.append(new_warning_word)
-                self.logger.warning(f"{new_warning_word['name']}: {new_warning_word['meaning']}.")
+                self.logger.warning(f"{new_warning_word.name}: {new_warning_word.meaning}.")
         
         # Removes lifted warnings from the list.
         for i, already_present_warning in enumerate(self.warning_words):
-            if already_present_warning['bit'] not in new_warning_bits:
-                self.logger.info(f"Warning cleared: '{already_present_warning['name']}'.")
+            if already_present_warning.bit not in new_warning_bits:
+                self.logger.info(f"Warning cleared: '{already_present_warning.name}'.")
                 self.warning_words.pop(i)
 
     @run_on_driver_thread
@@ -362,3 +381,41 @@ class Driver:
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word()))
         self.awaiting_error_acknowledgement = False
+
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def get_driver_time(self) -> float:
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'mym')
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
+    
+    @ignored_if_awaiting_error_acknowledgement
+    def get_realtime_config_command_count(self) -> int:
+        self.logger.debug("Requesting realtime_config count.")
+        realtime_config_cmd = Realtime_Config_Commands.No_Operation()
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.command_count
+    
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def get_status_word(self) -> int:
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, IO.linTypes.Uint16, 'status word', '-')
+        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
+    
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def move_with_constant_velocity(self, velocity: float) -> tuple[float, float]:
+
+        if velocity > 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity)
+        elif velocity < 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity)
+        else:
+            motion_CMD = Motion_Commands.VAI_Stop()
+
+        response_def = IO.Response(actual_pos=True, monitoring_channel=True)
+        request = IO.Request(response_def, MC_interface=motion_CMD)
+        response = self.send(request)
+
+        try:
+            return response.actual_pos, response.monitoring_channel['velocity']
+        except KeyError:
+            raise Monitoring_Channel_Missing_Parameter_Error('velocity')

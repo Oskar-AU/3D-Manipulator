@@ -1,9 +1,9 @@
-from .Driver_Interface import IO, Motion_Commands
+from .Driver_Interface import IO, Motion_Commands, Realtime_Config_Commands
 from .Manipulator import Manipulator
 import logging
 import os
 
-def setup_logging(terminal_handler_level: int = logging.INFO, delete_current_log_at_startup: bool = True, file_name: str = "log.log"):
+def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level: int = logging.DEBUG, delete_current_log_at_startup: bool = True, file_name: str = "log.log"):
     """
     Optional helper to configure logging. Application can call this but is not automatic.
 
@@ -16,6 +16,14 @@ def setup_logging(terminal_handler_level: int = logging.INFO, delete_current_log
     if not os.path.exists(path):
         os.mkdir(path)
 
+    # Adds 'binary' as a logging level below debug.
+    BINARY = 9
+    def binary(self: logging.Logger, message: str, *args, **kwargs) -> None:
+        if self.isEnabledFor(BINARY):
+            self._log(BINARY, message, args, **kwargs)
+    logging.addLevelName(BINARY, "BINARY")
+    logging.Logger.binary = binary
+
     formatter_all = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     formatter_drive = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
@@ -23,7 +31,7 @@ def setup_logging(terminal_handler_level: int = logging.INFO, delete_current_log
 
     # Handler for logging in external file.
     file_handler = logging.FileHandler(path + '/' + file_name, file_mode)
-    file_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(file_handler_level)
     file_handler.setFormatter(formatter_all)
 
     # Handler for terminal logging.
@@ -43,17 +51,17 @@ def setup_logging(terminal_handler_level: int = logging.INFO, delete_current_log
     driver_3_file_handler.setFormatter(formatter_drive)
 
     DRIVE_1_logger = logging.getLogger('DRIVE_1')
-    DRIVE_1_logger.setLevel(logging.DEBUG)
+    DRIVE_1_logger.setLevel(file_handler_level)
     DRIVE_1_logger.addHandler(driver_1_file_handler)
     DRIVE_1_logger.addHandler(file_handler)
     DRIVE_1_logger.addHandler(terminal_handler)
     DRIVE_2_logger = logging.getLogger('DRIVE_2')
-    DRIVE_2_logger.setLevel(logging.DEBUG)
+    DRIVE_2_logger.setLevel(file_handler_level)
     DRIVE_2_logger.addHandler(driver_2_file_handler)
     DRIVE_2_logger.addHandler(file_handler)
     DRIVE_2_logger.addHandler(terminal_handler)
     DRIVE_3_logger = logging.getLogger('DRIVE_3')
-    DRIVE_3_logger.setLevel(logging.DEBUG)
+    DRIVE_3_logger.setLevel(file_handler_level)
     DRIVE_3_logger.addHandler(driver_3_file_handler)
     DRIVE_3_logger.addHandler(file_handler)
     DRIVE_3_logger.addHandler(terminal_handler)

@@ -1,7 +1,20 @@
 import struct
-from typing import TypedDict, Literal
+from typing import Any
+from .Realtime_Config_Base import Realtime_Config
+from .Command_Parameter_Base import Command_Parameter
+from dataclasses import dataclass, fields
 
-class Status_Word(TypedDict):
+class Response_Base:
+    def __repr__(self) -> str:
+        initialized_fields = []
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if field_value is not None:
+                initialized_fields.append(f"{field.name}={field_value}")
+        return "(" + ", ".join(initialized_fields) + ")"
+
+@dataclass(repr=False)
+class Status_Word(Response_Base):
     operation_enabled:     bool
     switch_on_active:      bool
     enable_operation:      bool
@@ -19,37 +32,49 @@ class Status_Word(TypedDict):
     range_indicator_1:     bool
     range_indicator_2:     bool
 
-class State_Var(TypedDict):
+@dataclass(repr=False)
+class State_Var(Response_Base):
     main_state:                         int
-    error_code:                         int
-    MC_count:                           int
-    event_handler_active:               bool
-    motion_active:                      bool
-    in_target_position:                 bool
-    homed:                              bool
-    homing_finished:                    bool
-    clerance_check_finished:            bool
-    going_to_initial_position_finished: bool
-    going_to_position_finished:         bool
-    moving_positive:                    bool
-    jogging_plus_finished:              bool
-    moving_negative:                    bool
-    jogging_negative_finished:          bool
+    error_code:                         int | None = None
+    MC_count:                           int | None = None
+    event_handler_active:               bool | None = None
+    motion_active:                      bool | None = None
+    in_target_position:                 bool | None = None
+    homed:                              bool | None = None
+    homing_finished:                    bool | None = None
+    clerance_check_finished:            bool | None = None
+    going_to_initial_position_finished: bool | None = None
+    going_to_position_finished:         bool | None = None
+    moving_positive:                    bool | None = None
+    jogging_plus_finished:              bool | None = None
+    moving_negative:                    bool | None = None
+    jogging_negative_finished:          bool | None = None
 
-class Warn_Word(TypedDict):
+@dataclass(repr=False)
+class Warn_Word(Response_Base):
     bit:        int
     name:       str
     meaning:    str
 
-Translated_Response = dict[Literal['status_word', 
-                                   'state_var', 
-                                   'actual_pos', 
-                                   'demand_pos', 
-                                   'current', 
-                                   'warn_word', 
-                                   'error_code', 
-                                   'monitoring_channel', 
-                                   'realtime_config'], Status_Word | State_Var | list[Warn_Word] | float | int]
+@dataclass(repr=False)
+class Realtime_Config_Response(Response_Base):
+    status_number: int
+    status_description: str
+    details: tuple[Command_Parameter]
+    values: tuple[int]
+    command_count: int
+
+@dataclass(repr=False)
+class Translated_Response(Response_Base):
+    status_word: Status_Word | None = None
+    state_var: State_Var | None = None
+    actual_pos: float | None = None
+    demand_pos: float | None = None
+    current: float | None = None
+    warn_word: list[Warn_Word] | None = None
+    error_code: int | None = None
+    monitoring_channel: dict[str, Any] | None = None
+    realtime_config: Realtime_Config_Response | None = None
 
 class Response:
     def __init__(self, status_word: bool = False, state_var: bool = False, actual_pos: bool = False, demand_pos: bool = False,
@@ -91,9 +116,17 @@ class Response:
             "realtime_config": realtime_config
         }
 
-    def translate_response(self, response_raw: bytes) -> Translated_Response:
-        response_unpacked: tuple[int] = struct.unpack("<LL" + self.format, response_raw)[2:]
-        response_dict = dict()
+    def translate_response(self, response_raw: bytes, realtime_config_command: Realtime_Config | None, monitoring_channel_parameters: tuple[Command_Parameter | None]) -> Translated_Response:
+        # Sets the realtime_config as included if the request included a realtime config command.
+        self.response_types_included['realtime_config'] = True if realtime_config_command is not None else False
+        
+        response_raw_format = "<LL" + self.get_format(realtime_config_command)
+        response_raw_length = struct.calcsize(response_raw_format)
+        # Only unpacking the expected length of the raw response, which is usually the same as the length of the raw response
+        # but realtime config commands can apparently respond with bytes from the previous response, giving more values than
+        # expected. Might be problematic for debugging when a response is wrongly translated.
+        response_unpacked: tuple[int] = struct.unpack(response_raw_format, response_raw[:response_raw_length])[2:]
+        translated_response = Translated_Response()
         i = 0
         for response_name, response_type_included in self.response_types_included.items():
             if response_type_included:
@@ -272,20 +305,69 @@ class Response:
                         response_type_translated_value = response_type_value
 
                     case "monitoring_channel":
-                        raise NotImplementedError("Translating monitoring channel from response is not supported yet.")
+                        format = ""
+                        for parameter in monitoring_channel_parameters:
+                            if parameter is not None:
+                                format += parameter.get('type').get('format')
+                            else:
+                                format += "4x"
+                        monitoring_channel_values = struct.unpack(format, response_type_value)
+                        response_type_translated_value = dict()
+                        for i, monitoring_channel_parameter in enumerate(monitoring_channel_parameters):
+                            if monitoring_channel_parameter is not None:
+                                response_type_translated_value.update({
+                                    monitoring_channel_parameter.get('description'): monitoring_channel_values[i] / monitoring_channel_parameter.get('conversion_factor')
+                                })
 
                     case "realtime_config":
-                        raise NotImplementedError("Translating realtime config from response is not supported yet.")
+                        if realtime_config_command is None: raise ValueError(f"realtime_config is flagged for the response but is not in the request.")
+                        command_count, parameter_channel_status, *DI_values = struct.unpack(realtime_config_command.DI_format, response_type_value)
+                        match parameter_channel_status:
+                            case 0x00:
+                                parameter_status_description = "OK, done"
+                            case 0x02:
+                                parameter_status_description = "Command running / busy"
+                            case 0x04:
+                                parameter_status_description = "Block not finished (curve selection)"
+                            case 0x05:
+                                parameter_status_description = "Busy"
+                            case 0xC0:
+                                parameter_status_description = "UPID Error"
+                            case 0xC1:
+                                parameter_status_description = "Parameter type error"
+                            case 0xC2:
+                                parameter_status_description = "Range error"
+                            case 0xC3:
+                                parameter_status_description = "Address usage error"
+                            case 0xC5:
+                                parameter_status_description = "Error: Command 21h “Get next UPID List item” was executed without prior execution of “Start Getting UPID List”"
+                            case 0xC6:
+                                parameter_status_description = "End of UPID list reached (no next UPID list item found)"
+                            case 0xD0:
+                                parameter_status_description = "Odd address"
+                            case 0xD1:
+                                parameter_status_description = "Size error (curve selection)"
+                            case 0xD4:
+                                parameter_status_description = "Curve already defined / curve not present (curve selection)"
+                            case _:
+                                parameter_status_description = "__UNKNOWN__"
+
+                        response_type_translated_value = Realtime_Config_Response(
+                            status_number=parameter_channel_status,
+                            status_description=parameter_status_description,
+                            details=realtime_config_command.DI_parameters,
+                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].get('conversion_factor') for i in range(len(DI_values))],
+                            command_count=command_count
+                        )
                     case _:
                         raise ValueError(f"")
 
-                response_dict.update({response_name: response_type_translated_value})
+                setattr(translated_response, response_name, response_type_translated_value)
                 i += 1
 
-        return response_dict
+        return translated_response
 
-    @property
-    def format(self) -> str:
+    def get_format(self, realtime_config_command: Realtime_Config | None) -> str:
         format = "".join([
             "H"   if self.response_types_included['status_word'        ] else "",
             "2s"  if self.response_types_included['state_var'          ] else "",
@@ -294,12 +376,17 @@ class Response:
             "h"   if self.response_types_included['current'            ] else "",   # Is current signed?
             "H"   if self.response_types_included['warn_word'          ] else "",
             "H"   if self.response_types_included['error_code'         ] else "",
-            "16s" if self.response_types_included['monitoring_channel' ] else "",   # Format of monitoring channel depends on what the type of the selected UPID is.
-            "8s"  if self.response_types_included['realtime_config'    ] else ""    # Format of realtime config arguments depend on the parameter command ID.
+            "16s" if self.response_types_included['monitoring_channel' ] else ""    # Format of monitoring channel depends on what the type of the selected UPID is.
         ])
         
+        # Realtime config format depends on the parameter command ID and is added to the response if the request 
+        # contains a realtime config, regardless of self.response_types_included['realtime_config']. Therefore it
+        # is needed as an argument for this method.
+        if realtime_config_command is not None:
+            format += f"{realtime_config_command.get_response_byte_size()}s"
+
         # If the size of the response is less than 14 bytes (including request and response defs) 
-        # pappending is appended up till 14 bytes. Documentation says pappending is appended up till 64 bytes 
+        # padding is appended up till 14 bytes. Documentation says pappending is appended up till 64 bytes 
         # but that is not the case.
         size = struct.calcsize(format)
         if size < 6:
@@ -319,3 +406,6 @@ class Response:
             (self.response_types_included['monitoring_channel' ]  <<      7       ) |
             (self.response_types_included['realtime_config'    ]  <<      8       )
         )
+    
+    def __repr__(self) -> str:
+        return ", ".join([response_type for response_type, included in self.response_types_included.items() if included])

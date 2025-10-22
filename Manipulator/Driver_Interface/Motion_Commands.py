@@ -1,7 +1,8 @@
-from .IO import Motion_Commmand_Interface, linType
-from .Motion_Command_Parameters import MC_Parameters, MC_Parameter, linTypes
+from .IO import Motion_Commmand_Interface
+from .IO import linType
+from .IO import Command_Parameter
+from .Command_Parameters import Command_Parameters
 import copy
-from typing import Any
 
 class No_Operation(Motion_Commmand_Interface):
     
@@ -56,10 +57,10 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
             The deceleration used in m/s^2.
         """
         super().__init__(
-            (copy.deepcopy(MC_Parameters.target_position), target_position),
-            (copy.deepcopy(MC_Parameters.maximal_velocity), maximal_velocity), 
-            (copy.deepcopy(MC_Parameters.acceleration), acceleration), 
-            (copy.deepcopy(MC_Parameters.deceleration), deceleration)
+            (copy.deepcopy(Command_Parameters.target_position), target_position),
+            (copy.deepcopy(Command_Parameters.maximal_velocity), maximal_velocity), 
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration), 
+            (copy.deepcopy(Command_Parameters.deceleration), deceleration)
         )
 
 class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
@@ -79,7 +80,7 @@ class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion
         def __init__(self, demand_position: float) -> None:
 
             super().__init__(
-                (copy.deepcopy(MC_Parameters.demand_position), demand_position)
+                (copy.deepcopy(Command_Parameters.demand_position), demand_position)
             )
 
 class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):
@@ -99,8 +100,8 @@ class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motio
         def __init__(self, demand_position: float, demand_velocity: float) -> None:
 
             super().__init__(
-                (copy.deepcopy(MC_Parameters.demand_position), demand_position),
-                (copy.deepcopy(MC_Parameters.demand_velocity), demand_velocity)
+                (copy.deepcopy(Command_Parameters.demand_position), demand_position),
+                (copy.deepcopy(Command_Parameters.demand_velocity), demand_velocity)
             )
 
 class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
@@ -120,11 +121,32 @@ class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Moti
     def __init__(self, demand_position: float, demand_velocity: float, demand_acceleration: float) -> None:
 
         super().__init__(
-            (copy.deepcopy(MC_Parameters.demand_position),      demand_position),
-            (copy.deepcopy(MC_Parameters.demand_velocity),      demand_velocity), 
-            (copy.deepcopy(MC_Parameters.demand_acceleration),  demand_acceleration),
+            (copy.deepcopy(Command_Parameters.demand_position),      demand_position),
+            (copy.deepcopy(Command_Parameters.demand_velocity),      demand_velocity), 
+            (copy.deepcopy(Command_Parameters.demand_acceleration),  demand_acceleration),
         )
     
+class PV_Stream_With_Slave_Generated_Time_Stamp(Motion_Commmand_Interface):
+
+        @property
+        def MASTER_ID(self) -> int:
+            return 0x03
+    
+        @property
+        def SUB_ID(self) -> int:
+            return 0x1
+
+        @property
+        def DESCRIPTION(self) -> str:
+            return "PV stream with slave generated time stamp"
+
+        def __init__(self, demand_position: float, demand_velocity: float) -> None:
+
+            super().__init__(
+                (copy.deepcopy(Command_Parameters.demand_position), demand_position),
+                (copy.deepcopy(Command_Parameters.demand_velocity), demand_velocity)
+            )
+
 class Stop_Streaming(Motion_Commmand_Interface):
      
     @property
@@ -159,7 +181,7 @@ class Write_Live_Parameter(Motion_Commmand_Interface):
 
     def __init__(self, UPID: int, parameter_value: int, parameter_type: linType) -> None:
 
-        raw_parameter = MC_Parameter(
+        raw_parameter = Command_Parameter(
             description="Write live parameter",
             type=parameter_type,
             unit="",
@@ -167,6 +189,68 @@ class Write_Live_Parameter(Motion_Commmand_Interface):
         )
 
         super().__init__(
-            (copy.deepcopy(MC_Parameters.UPID), UPID),
+            (copy.deepcopy(Command_Parameters.UPID), UPID),
             (raw_parameter, parameter_value)
+        )
+
+class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
+    
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x0C
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0xE
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Infinite motion in positive direction."
+    
+    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration)
+        )
+
+class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
+    
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x0C
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0xF
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Infinite motion in negative direction."
+    
+    def __init__(self, velocity: float, acceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.velocity_not_signed), velocity),
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), acceleration)
+        )
+
+class VAI_Stop(Motion_Commmand_Interface):
+
+    @property
+    def MASTER_ID(self) -> int:
+        return 0x01
+    
+    @property
+    def SUB_ID(self) -> int:
+        return 0x7
+    
+    @property
+    def DESCRIPTION(self) -> str:
+        return "Stop VAI motion."
+    
+    def __init__(self, decceleration: float = 10000.0) -> None:
+        
+        super().__init__(
+            (copy.deepcopy(Command_Parameters.acceleration_not_signed), decceleration)
         )
