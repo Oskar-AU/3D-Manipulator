@@ -1,11 +1,20 @@
 import struct
 from typing import Any
-from .Realtime_Config_Base import Realtime_Config
-from .Command_Parameter_Base import Command_Parameter
-from dataclasses import dataclass
+from .Commands import Realtime_Config
+from .Commands import Command_Parameter
+from dataclasses import dataclass, fields
 
-@dataclass
-class Status_Word:
+class Response_Base:
+    def __repr__(self) -> str:
+        initialized_fields = []
+        for field in fields(self):
+            field_value = getattr(self, field.name)
+            if field_value is not None:
+                initialized_fields.append(f"{field.name}={field_value}")
+        return "(" + ", ".join(initialized_fields) + ")"
+
+@dataclass(repr=False)
+class Status_Word(Response_Base):
     operation_enabled:     bool
     switch_on_active:      bool
     enable_operation:      bool
@@ -23,8 +32,8 @@ class Status_Word:
     range_indicator_1:     bool
     range_indicator_2:     bool
 
-@dataclass
-class State_Var:
+@dataclass(repr=False)
+class State_Var(Response_Base):
     main_state:                         int
     error_code:                         int | None = None
     MC_count:                           int | None = None
@@ -41,22 +50,22 @@ class State_Var:
     moving_negative:                    bool | None = None
     jogging_negative_finished:          bool | None = None
 
-@dataclass
-class Warn_Word:
+@dataclass(repr=False)
+class Warn_Word(Response_Base):
     bit:        int
     name:       str
     meaning:    str
 
-@dataclass
-class Realtime_Config_Response:
+@dataclass(repr=False)
+class Realtime_Config_Response(Response_Base):
     status_number: int
     status_description: str
     details: tuple[Command_Parameter]
     values: tuple[int]
     command_count: int
 
-@dataclass
-class Translated_Response:
+@dataclass(repr=False)
+class Translated_Response(Response_Base):
     status_word: Status_Word | None = None
     state_var: State_Var | None = None
     actual_pos: float | None = None
@@ -299,7 +308,7 @@ class Response:
                         format = ""
                         for parameter in monitoring_channel_parameters:
                             if parameter is not None:
-                                format += parameter.get('type').get('format')
+                                format += parameter.type.format
                             else:
                                 format += "4x"
                         monitoring_channel_values = struct.unpack(format, response_type_value)
@@ -307,7 +316,7 @@ class Response:
                         for i, monitoring_channel_parameter in enumerate(monitoring_channel_parameters):
                             if monitoring_channel_parameter is not None:
                                 response_type_translated_value.update({
-                                    monitoring_channel_parameter.get('description'): monitoring_channel_values[i] / monitoring_channel_parameter.get('conversion_factor')
+                                    monitoring_channel_parameter.description: monitoring_channel_values[i] / monitoring_channel_parameter.conversion_factor
                                 })
 
                     case "realtime_config":
@@ -347,7 +356,7 @@ class Response:
                             status_number=parameter_channel_status,
                             status_description=parameter_status_description,
                             details=realtime_config_command.DI_parameters,
-                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].get('conversion_factor') for i in range(len(DI_values))],
+                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].conversion_factor for i in range(len(DI_values))],
                             command_count=command_count
                         )
                     case _:
@@ -397,3 +406,6 @@ class Response:
             (self.response_types_included['monitoring_channel' ]  <<      7       ) |
             (self.response_types_included['realtime_config'    ]  <<      8       )
         )
+    
+    def __repr__(self) -> str:
+        return ", ".join([response_type for response_type, included in self.response_types_included.items() if included])
