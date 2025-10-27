@@ -1,53 +1,8 @@
 import numpy as np
 import numpy.typing as npt
 
-
-def move_to_starting_position(point_cloud: npt.ArrayLike, velocity: float = 0.008, eps: float = 1e-3):
-    try:
-        point_cloud_array = np.asarray(point_cloud, dtype=float)
-        if len(point_cloud_array) == 0:
-            raise ValueError("Point cloud is empty")
-        if point_cloud_array.shape[1] != 3:
-            raise ValueError(f"Point cloud must have 3 columns (X, Y, Z), got {point_cloud_array.shape[1]}")
-        
-        target_mm = point_cloud_array[0]  # First waypoint
-        target_m = target_mm * 1e-3  # Convert to meters
-        
-    except Exception as e:
-        raise ValueError(f"Failed to extract target position from point cloud: {e}")
-    
-    def step(current_pos_m: np.ndarray):
-        # Calculate direct vector to target
-        direction = target_m - current_pos_m
-        distance = np.linalg.norm(direction)
-        
-        # Check if target reached
-        if distance <= eps:
-            return np.zeros(3, float), True
-        
-        # Calculate velocity vector toward target
-        velocity_vector = (direction / distance) * velocity
-        return velocity_vector, False
-    
-    return step
-
 def move_to_starting_position_velocity(point_cloud: npt.ArrayLike, max_velocity: float = 0.005, 
                                      a_max: float = 0.20, eps: float = 1e-3):
-    """
-    Enhanced starting position movement with velocity tracking and acceleration limits.
-    
-    This version uses both current position and velocity to provide smooth acceleration
-    and deceleration when moving to the starting position, avoiding jerky motion.
-    
-    Args:
-        point_cloud: Array of waypoints in millimeters
-        max_velocity: Maximum velocity in m/s (default 5 mm/s)
-        a_max: Maximum acceleration in m/s^2 (default 0.20 m/s^2)
-        eps: Completion tolerance in meters (default 1 mm)
-    
-    Returns:
-        step function that takes (current_pos_m, current_vel_mps) -> (velocity_cmd, complete)
-    """
     try:
         point_cloud_array = np.asarray(point_cloud, dtype=float)
         if len(point_cloud_array) == 0:
@@ -106,51 +61,11 @@ def move_to_starting_position_velocity(point_cloud: npt.ArrayLike, max_velocity:
     
     return step
 
-def path_calculator(point_cloud: npt.ArrayLike, velocity: float, eps: float = 5e-4):
 
-    P = np.asarray(point_cloud, float) * 1e-3  # mm -> m
-    N = len(P)
-    idx = 0  # next point
-
-    def step(current_pos_m: np.ndarray):
-        nonlocal idx
-
-        # Skip already-reached points
-        while idx < N and np.linalg.norm(P[idx] - current_pos_m) <= eps:
-            idx += 1
-
-        if idx >= N:
-            return np.zeros(3, float), True
-
-        target = P[idx]
-        d = target - current_pos_m
-        dist = float(np.linalg.norm(d))
-        if dist <= eps or dist == 0.0:
-            return np.zeros(3, float), (idx >= N)
-
-        v_axis = (d / dist) * float(velocity)  # per-axis velocity in m/s
-        return v_axis, False
-
-    return step
 
 def path_follower_velocity(waypoints_mm: npt.ArrayLike, max_velocity: float = 0.02, 
                            a_max: float = 0.30, eps: float = 1e-3):
-    """
-    Simple waypoint-by-waypoint path follower using the same methodology as 
-    move_to_starting_position_velocity but for multiple waypoints.
     
-    This version moves smoothly from waypoint to waypoint with velocity tracking 
-    and acceleration limits, applying the same braking distance logic at each target.
-    
-    Args:
-        waypoints_mm: Array of waypoints in millimeters (N, 3)
-        max_velocity: Maximum velocity in m/s (default 20 mm/s)
-        a_max: Maximum acceleration in m/s^2 (default 0.30 m/s^2)
-        eps: Completion tolerance in meters (default 1 mm)
-    
-    Returns:
-        step function that takes (current_pos_m, current_vel_mps) -> (velocity_cmd, complete)
-    """
     try:
         waypoints_array = np.asarray(waypoints_mm, dtype=float)
         if len(waypoints_array) == 0:

@@ -105,10 +105,10 @@ class Manipulator:
                     self.move_all_with_constant_velocity(np.zeros(3))  # Stop
                     return True
                 
-                # Execute velocity command and track it
-                self.move_all_with_constant_velocity(next_velocity_ms)
+                # Store the calculated velocity for the NEXT cycle (no immediate execution)
                 last_commanded_velocity_ms = next_velocity_ms.copy()
                 
+                cycle_count += 1
                 if cycle_count > max_cycles:
                     print(f"Timeout in {phase_name} after {max_cycles} cycles")
                     self.move_all_with_constant_velocity(np.zeros(3))
