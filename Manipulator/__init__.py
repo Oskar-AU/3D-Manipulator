@@ -77,6 +77,7 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     path_logger_file_handler.setFormatter(formatter_single_file)
 
     path_logger = logging.getLogger('PATH')
+    path_logger.setLevel(file_handler_level)
     path_logger.addHandler(path_logger_file_handler)
     path_logger.addHandler(file_handler)
     path_logger.addHandler(terminal_handler)
