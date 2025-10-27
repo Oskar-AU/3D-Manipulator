@@ -72,7 +72,7 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     OS_logger.addHandler(terminal_handler)
     OS_logger.addHandler(file_handler)
 
-    path_logger_file_handler = logging.FileHandler(path + '/' + 'path', file_mode)
+    path_logger_file_handler = logging.FileHandler(path + '/' + 'path.log', file_mode)
     path_logger_file_handler.setLevel(logging.DEBUG)
     path_logger_file_handler.setFormatter(formatter_single_file)
 
