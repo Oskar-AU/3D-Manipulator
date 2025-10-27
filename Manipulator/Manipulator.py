@@ -18,17 +18,15 @@ class Manipulator:
         )
         self.futures: list[Future | None] = [None, None, None]
 
-    def _wait_for_response_on_all(self) -> list[Any]:
-        results = []
+    def _wait_for_response_on_all(self) -> None:
         for future in self.futures:
             try:
-                result = future.result()
-                results.append(result)
-            except DriveError as e:
-                print(f"Drive error occurred: {e}")
-                # Return last known good position and zero velocity for failed drive
-                results.append((0.0, 0.0))  # (position, velocity) placeholder
-        return results
+                future.result()
+            except DriveError:
+                continue
+
+    def _read_from_futures(self) -> list[Any]:
+        return [future.result() for future in self.futures]
 
     def home(self) -> None:
         for i, driver in enumerate(self.drivers):
@@ -76,7 +74,7 @@ class Manipulator:
         velocity = np.asarray(velocity)
         for i, driver in enumerate(self.drivers):
             self.futures[i] = driver.move_with_constant_velocity(velocity[i])
-        positions, velocities = np.array(self._wait_for_response_on_all()).T
+        positions, velocities = np.array(self._read_from_futures()).T
         return positions, velocities
 
 
@@ -120,24 +118,3 @@ class Manipulator:
                 print(f"Error in {phase_name}: {e}")
                 self.move_all_with_constant_velocity(np.zeros(3))
                 return False
-    
-    def cleanup(self):
-        """Cleanup manipulator resources."""
-        try:
-            # Stop all motion
-            self.move_all_with_constant_velocity(np.zeros(3))
-        except Exception:
-            pass
-        
-        try:
-            # Close datagram socket
-            if hasattr(self, 'datagram'):
-                self.datagram.close()
-        except Exception:
-            pass
-    
-    def __del__(self):
-        """Cleanup when manipulator is destroyed."""
-        self.cleanup()
-    
-   
