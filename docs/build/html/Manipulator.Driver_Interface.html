@@ -1,0 +1,1227 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Manipulator.Driver_Interface package &#8212; Manipulator 0.0.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=7026087e"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Manipulator.Driver_Interface';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Manipulator.Driver_Interface.IO package" href="Manipulator.Driver_Interface.IO.html" />
+    <link rel="prev" title="Manipulator package" href="Manipulator.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Manipulator 0.0.0 documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="Manipulator.html">
+    Manipulator package
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="Manipulator.html">
+    Manipulator package
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Manipulator.Driver_Interface package</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html">Manipulator.Driver_Interface.IO package</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="Manipulator.html" class="nav-link">Manipulator package</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Manipulator.Driver_Interface package</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="manipulator-driver-interface-package">
+<h1>Manipulator.Driver_Interface package<a class="headerlink" href="#manipulator-driver-interface-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html">Manipulator.Driver_Interface.IO package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Commands">Manipulator.Driver_Interface.IO.Commands module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter"><code class="docutils literal notranslate"><span class="pre">Command_Parameter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter.conversion_factor"><code class="docutils literal notranslate"><span class="pre">Command_Parameter.conversion_factor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter.description"><code class="docutils literal notranslate"><span class="pre">Command_Parameter.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter.type"><code class="docutils literal notranslate"><span class="pre">Command_Parameter.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter.unit"><code class="docutils literal notranslate"><span class="pre">Command_Parameter.unit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.DESCRIPTION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.MASTER_ID</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.SUB_ID"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.SUB_ID</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.get_binary"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.get_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.get_header_decimal"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.get_header_decimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface.set_MC_parameter_value"><code class="docutils literal notranslate"><span class="pre">Motion_Commmand_Interface.set_MC_parameter_value()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config"><code class="docutils literal notranslate"><span class="pre">Realtime_Config</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config.COMMAND_ID"><code class="docutils literal notranslate"><span class="pre">Realtime_Config.COMMAND_ID</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Realtime_Config.DESCRIPTION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config.get_binary"><code class="docutils literal notranslate"><span class="pre">Realtime_Config.get_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config.get_header_decimal"><code class="docutils literal notranslate"><span class="pre">Realtime_Config.get_header_decimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config.get_response_byte_size"><code class="docutils literal notranslate"><span class="pre">Realtime_Config.get_response_byte_size()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linType"><code class="docutils literal notranslate"><span class="pre">linType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linType.byte_size"><code class="docutils literal notranslate"><span class="pre">linType.byte_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linType.format"><code class="docutils literal notranslate"><span class="pre">linType.format</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linTypes"><code class="docutils literal notranslate"><span class="pre">linTypes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linTypes.Sint16"><code class="docutils literal notranslate"><span class="pre">linTypes.Sint16</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linTypes.Sint32"><code class="docutils literal notranslate"><span class="pre">linTypes.Sint32</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linTypes.Uint16"><code class="docutils literal notranslate"><span class="pre">linTypes.Uint16</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linTypes.Uint32"><code class="docutils literal notranslate"><span class="pre">linTypes.Uint32</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Control_Words">Manipulator.Driver_Interface.IO.Control_Words module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Control_Words.Control_Word"><code class="docutils literal notranslate"><span class="pre">Control_Word</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Control_Words.Control_Word.decimal"><code class="docutils literal notranslate"><span class="pre">Control_Word.decimal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Control_Words.Control_Word.format"><code class="docutils literal notranslate"><span class="pre">Control_Word.format</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Control_Words.Control_Word.get_binary"><code class="docutils literal notranslate"><span class="pre">Control_Word.get_binary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Control_Words.Control_Word.hex"><code class="docutils literal notranslate"><span class="pre">Control_Word.hex</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Datagrams">Manipulator.Driver_Interface.IO.Datagrams module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Datagrams.linUDP"><code class="docutils literal notranslate"><span class="pre">linUDP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Datagrams.linUDP.listen"><code class="docutils literal notranslate"><span class="pre">linUDP.listen()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Datagrams.linUDP.recieve"><code class="docutils literal notranslate"><span class="pre">linUDP.recieve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Datagrams.linUDP.send"><code class="docutils literal notranslate"><span class="pre">linUDP.send()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Logger">Manipulator.Driver_Interface.IO.Logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Requests">Manipulator.Driver_Interface.IO.Requests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Requests.Request"><code class="docutils literal notranslate"><span class="pre">Request</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Requests.Request.get_binary"><code class="docutils literal notranslate"><span class="pre">Request.get_binary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO.Responses">Manipulator.Driver_Interface.IO.Responses module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response.command_count"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response.command_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response.details"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response.details</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response.status_description"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response.status_description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response.status_number"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response.status_number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Realtime_Config_Response.values"><code class="docutils literal notranslate"><span class="pre">Realtime_Config_Response.values</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Response"><code class="docutils literal notranslate"><span class="pre">Response</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Response.get_format"><code class="docutils literal notranslate"><span class="pre">Response.get_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Response.response_def"><code class="docutils literal notranslate"><span class="pre">Response.response_def</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Response.translate_response"><code class="docutils literal notranslate"><span class="pre">Response.translate_response()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Response_Base"><code class="docutils literal notranslate"><span class="pre">Response_Base</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var"><code class="docutils literal notranslate"><span class="pre">State_Var</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.MC_count"><code class="docutils literal notranslate"><span class="pre">State_Var.MC_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.clerance_check_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.clerance_check_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.error_code"><code class="docutils literal notranslate"><span class="pre">State_Var.error_code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.event_handler_active"><code class="docutils literal notranslate"><span class="pre">State_Var.event_handler_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.going_to_initial_position_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.going_to_initial_position_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.going_to_position_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.going_to_position_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.homed"><code class="docutils literal notranslate"><span class="pre">State_Var.homed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.homing_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.homing_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.in_target_position"><code class="docutils literal notranslate"><span class="pre">State_Var.in_target_position</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.jogging_negative_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.jogging_negative_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.jogging_plus_finished"><code class="docutils literal notranslate"><span class="pre">State_Var.jogging_plus_finished</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.main_state"><code class="docutils literal notranslate"><span class="pre">State_Var.main_state</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.motion_active"><code class="docutils literal notranslate"><span class="pre">State_Var.motion_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.moving_negative"><code class="docutils literal notranslate"><span class="pre">State_Var.moving_negative</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.State_Var.moving_positive"><code class="docutils literal notranslate"><span class="pre">State_Var.moving_positive</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word"><code class="docutils literal notranslate"><span class="pre">Status_Word</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.enable_operation"><code class="docutils literal notranslate"><span class="pre">Status_Word.enable_operation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.error"><code class="docutils literal notranslate"><span class="pre">Status_Word.error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.event_handler_active"><code class="docutils literal notranslate"><span class="pre">Status_Word.event_handler_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.fatal_error"><code class="docutils literal notranslate"><span class="pre">Status_Word.fatal_error</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.homed"><code class="docutils literal notranslate"><span class="pre">Status_Word.homed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.in_target_position"><code class="docutils literal notranslate"><span class="pre">Status_Word.in_target_position</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.motion_active"><code class="docutils literal notranslate"><span class="pre">Status_Word.motion_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.operation_enabled"><code class="docutils literal notranslate"><span class="pre">Status_Word.operation_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.quick_stop"><code class="docutils literal notranslate"><span class="pre">Status_Word.quick_stop</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.range_indicator_1"><code class="docutils literal notranslate"><span class="pre">Status_Word.range_indicator_1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.range_indicator_2"><code class="docutils literal notranslate"><span class="pre">Status_Word.range_indicator_2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.special_motion_active"><code class="docutils literal notranslate"><span class="pre">Status_Word.special_motion_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.switch_on_active"><code class="docutils literal notranslate"><span class="pre">Status_Word.switch_on_active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.switch_on_locked"><code class="docutils literal notranslate"><span class="pre">Status_Word.switch_on_locked</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.voltage_enable"><code class="docutils literal notranslate"><span class="pre">Status_Word.voltage_enable</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Status_Word.warning"><code class="docutils literal notranslate"><span class="pre">Status_Word.warning</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response"><code class="docutils literal notranslate"><span class="pre">Translated_Response</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.actual_pos"><code class="docutils literal notranslate"><span class="pre">Translated_Response.actual_pos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.current"><code class="docutils literal notranslate"><span class="pre">Translated_Response.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.demand_pos"><code class="docutils literal notranslate"><span class="pre">Translated_Response.demand_pos</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.error_code"><code class="docutils literal notranslate"><span class="pre">Translated_Response.error_code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.monitoring_channel"><code class="docutils literal notranslate"><span class="pre">Translated_Response.monitoring_channel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.realtime_config"><code class="docutils literal notranslate"><span class="pre">Translated_Response.realtime_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.state_var"><code class="docutils literal notranslate"><span class="pre">Translated_Response.state_var</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.status_word"><code class="docutils literal notranslate"><span class="pre">Translated_Response.status_word</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response.warn_word"><code class="docutils literal notranslate"><span class="pre">Translated_Response.warn_word</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Warn_Word"><code class="docutils literal notranslate"><span class="pre">Warn_Word</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Warn_Word.bit"><code class="docutils literal notranslate"><span class="pre">Warn_Word.bit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Warn_Word.meaning"><code class="docutils literal notranslate"><span class="pre">Warn_Word.meaning</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Warn_Word.name"><code class="docutils literal notranslate"><span class="pre">Warn_Word.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#module-Manipulator.Driver_Interface.IO">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-Manipulator.Driver_Interface.Command_Parameters">
+<span id="manipulator-driver-interface-command-parameters-module"></span><h2>Manipulator.Driver_Interface.Command_Parameters module<a class="headerlink" href="#module-Manipulator.Driver_Interface.Command_Parameters" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Command_Parameters.</span></span><span class="sig-name descname"><span class="pre">Command_Parameters</span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.UPID">
+<span class="sig-name descname"><span class="pre">UPID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='UPID',</span> <span class="pre">type=linType(format='H',</span> <span class="pre">byte_size=2),</span> <span class="pre">unit='',</span> <span class="pre">conversion_factor=1)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.UPID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.acceleration_not_signed">
+<span class="sig-name descname"><span class="pre">acceleration_not_signed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='acceleration',</span> <span class="pre">type=linType(format='I',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='m/s^2',</span> <span class="pre">conversion_factor=100000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.acceleration_not_signed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.deceleration">
+<span class="sig-name descname"><span class="pre">deceleration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Deceleration',</span> <span class="pre">type=linType(format='I',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='m/s^2',</span> <span class="pre">conversion_factor=100000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.deceleration" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_acceleration">
+<span class="sig-name descname"><span class="pre">demand_acceleration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Demand</span> <span class="pre">acceleration',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='mm/s^2',</span> <span class="pre">conversion_factor=100.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_acceleration" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_position">
+<span class="sig-name descname"><span class="pre">demand_position</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Demand</span> <span class="pre">position',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='mm',</span> <span class="pre">conversion_factor=10000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_position" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_velocity">
+<span class="sig-name descname"><span class="pre">demand_velocity</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Demand</span> <span class="pre">velocity',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='mm/s',</span> <span class="pre">conversion_factor=1000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_velocity" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.maximal_velocity">
+<span class="sig-name descname"><span class="pre">maximal_velocity</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Maximal</span> <span class="pre">velocity',</span> <span class="pre">type=linType(format='I',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='m/s',</span> <span class="pre">conversion_factor=1000000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.maximal_velocity" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.target_position">
+<span class="sig-name descname"><span class="pre">target_position</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Target</span> <span class="pre">position',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='mm',</span> <span class="pre">conversion_factor=10000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.target_position" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.timer_value">
+<span class="sig-name descname"><span class="pre">timer_value</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='Slave</span> <span class="pre">timer</span> <span class="pre">value',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='mym',</span> <span class="pre">conversion_factor=1)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.timer_value" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_not_signed">
+<span class="sig-name descname"><span class="pre">velocity_not_signed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='velocity',</span> <span class="pre">type=linType(format='I',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='m/s',</span> <span class="pre">conversion_factor=1000000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_not_signed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_signed">
+<span class="sig-name descname"><span class="pre">velocity_signed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Command_Parameter(description='velocity',</span> <span class="pre">type=linType(format='i',</span> <span class="pre">byte_size=4),</span> <span class="pre">unit='m/s',</span> <span class="pre">conversion_factor=1000000.0)</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_signed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-Manipulator.Driver_Interface.Drivers">
+<span id="manipulator-driver-interface-drivers-module"></span><h2>Manipulator.Driver_Interface.Drivers module<a class="headerlink" href="#module-Manipulator.Driver_Interface.Drivers" title="Link to this heading">#</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.DriveError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Drivers.</span></span><span class="sig-name descname"><span class="pre">DriveError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#Manipulator.Driver_Interface.Drivers.Driver" title="Manipulator.Driver_Interface.Drivers.Driver"><span class="pre">Driver</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.DriveError" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Drivers.</span></span><span class="sig-name descname"><span class="pre">Driver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">IP</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datagram</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Datagrams.linUDP" title="Manipulator.Driver_Interface.IO.Datagrams.linUDP"><span class="pre">linUDP</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitoring_channel_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Command_Parameter" title="Manipulator.Driver_Interface.IO.Commands.Command_Parameter"><span class="pre">Command_Parameter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None,</span> <span class="pre">None,</span> <span class="pre">None)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.acknowledge_error">
+<span class="sig-name descname"><span class="pre">acknowledge_error</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.acknowledge_error" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.get_MC_count">
+<span class="sig-name descname"><span class="pre">get_MC_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.get_MC_count" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.get_driver_time">
+<span class="sig-name descname"><span class="pre">get_driver_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.get_driver_time" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.get_main_state">
+<span class="sig-name descname"><span class="pre">get_main_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.get_main_state" title="Link to this definition">#</a></dt>
+<dd><p>Gets the main state of the drive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The main state of the drive.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.get_realtime_config_command_count">
+<span class="sig-name descname"><span class="pre">get_realtime_config_command_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.get_realtime_config_command_count" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.get_status_word">
+<span class="sig-name descname"><span class="pre">get_status_word</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.get_status_word" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.home">
+<span class="sig-name descname"><span class="pre">home</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.home" title="Link to this definition">#</a></dt>
+<dd><p>Sends a command to home the LinMot motors. The drive must be in state 8.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timeout</strong> (<em>float</em><em>, </em><em>optional</em>) – The time (s) to wait before the homing procedure is considered failed. Default is 30s.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether or not the procedure ended succesfully.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.ignored_if_awaiting_error_acknowledgement">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ignored_if_awaiting_error_acknowledgement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.ignored_if_awaiting_error_acknowledgement" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.initialize_stream">
+<span class="sig-name descname"><span class="pre">initialize_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'P'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'PV'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'PVA'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.initialize_stream" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.move_with_constant_velocity">
+<span class="sig-name descname"><span class="pre">move_with_constant_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.move_with_constant_velocity" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.run_on_driver_thread">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_on_driver_thread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">R</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Future</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.run_on_driver_thread" title="Link to this definition">#</a></dt>
+<dd><p>The decorator method which methods will be put into the class thread queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Requests.Request" title="Manipulator.Driver_Interface.IO.Requests.Request"><span class="pre">Request</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_attemps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Responses.Translated_Response" title="Manipulator.Driver_Interface.IO.Responses.Translated_Response"><span class="pre">Translated_Response</span></a></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.send" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Requests.Request" title="Manipulator.Driver_Interface.IO.Requests.Request"><em>Request</em></a>) – The request to send to the drive.</p></li>
+<li><p><strong>MC_count</strong> (<em>int</em><em>, </em><em>optional</em>) – The count of the motion command. Must be different than the
+previous motion command otherwise it is ignored by the drive.</p></li>
+<li><p><strong>realtime_config_command_count</strong> (<em>int</em><em>, </em><em>optional</em>) – The count of the realtime config command. Must be different than the
+previous command otherwise it is ignored by the drive.</p></li>
+<li><p><strong>attempt</strong> (<em>int</em><em>, </em><em>optional</em>) – The attempt number for the request. Should not be used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dict containing the translated response from the drive. Content depends on the request.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>IO.Translated_Response</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TimedOutError</strong> – If no response is recieved after 5 attempts.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.stop_stream">
+<span class="sig-name descname"><span class="pre">stop_stream</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.stop_stream" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.stream">
+<span class="sig-name descname"><span class="pre">stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.stream" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.switch_on">
+<span class="sig-name descname"><span class="pre">switch_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.switch_on" title="Link to this definition">#</a></dt>
+<dd><p>Switches on the drive by setting the main state to 8 from either state 0 or 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timeout</strong> (<em>float</em><em>, </em><em>optional</em>) – The time (s) to wait before considering the switch on procedure failed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether or not the procedure ended succesfully.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Driver.wait_for_change">
+<span class="sig-name descname"><span class="pre">wait_for_change</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">change_checker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Driver.wait_for_change" title="Link to this definition">#</a></dt>
+<dd><p>Procedure that waits for a given change to happen in the drive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>change_checker</strong> (<em>Callable</em><em>[</em><em>[</em><em>None</em><em>]</em><em>, </em><em>bool</em><em>]</em>) – The criteria to check at ‘delay’ intervals.</p></li>
+<li><p><strong>timeout</strong> (<em>float</em>) – The amount of time to wait for the change to happen before considering the change to not happen.</p></li>
+<li><p><strong>delay</strong> (<em>float</em><em>, </em><em>optional</em>) – The time between checking the criteria. Default is as fast as possible.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Drivers.Monitoring_Channel_Missing_Parameter_Error">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Drivers.</span></span><span class="sig-name descname"><span class="pre">Monitoring_Channel_Missing_Parameter_Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">missing_parameter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Drivers.Monitoring_Channel_Missing_Parameter_Error" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+</section>
+<section id="module-Manipulator.Driver_Interface.Motion_Commands">
+<span id="manipulator-driver-interface-motion-commands-module"></span><h2>Manipulator.Driver_Interface.Motion_Commands module<a class="headerlink" href="#module-Manipulator.Driver_Interface.Motion_Commands" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">AccVAI_Infinite_Motion_Negative_Direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">AccVAI_Infinite_Motion_Positive_Direction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.No_Operation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">No_Operation</span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.No_Operation.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.No_Operation.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.No_Operation.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">demand_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demand_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demand_acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">demand_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demand_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">demand_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">demand_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">demand_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">Stop_Streaming</span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_Stop">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">VAI_Stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">VAI_go_to_pos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximal_velocity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Motion_Commands.</span></span><span class="sig-name descname"><span class="pre">Write_Live_Parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UPID</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linType" title="Manipulator.Driver_Interface.IO.Commands.linType"><span class="pre">linType</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface" title="Manipulator.Driver_Interface.IO.Commands.Motion_Commmand_Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">Motion_Commmand_Interface</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.MASTER_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MASTER_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.MASTER_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.SUB_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SUB_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.SUB_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-Manipulator.Driver_Interface.Realtime_Config_Commands">
+<span id="manipulator-driver-interface-realtime-config-commands-module"></span><h2>Manipulator.Driver_Interface.Realtime_Config_Commands module<a class="headerlink" href="#module-Manipulator.Driver_Interface.Realtime_Config_Commands" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Realtime_Config_Commands.</span></span><span class="sig-name descname"><span class="pre">No_Operation</span></span><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config" title="Manipulator.Driver_Interface.IO.Commands.Realtime_Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Realtime_Config</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.COMMAND_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">COMMAND_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.COMMAND_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Realtime_Config_Commands.</span></span><span class="sig-name descname"><span class="pre">Read_RAM_Value_of_Parameter_by_UPID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UPID</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UPID_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.linType" title="Manipulator.Driver_Interface.IO.Commands.linType"><span class="pre">linType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">UPID_description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'UPID</span> <span class="pre">value'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UPID_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UPID_conversion_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config" title="Manipulator.Driver_Interface.IO.Commands.Realtime_Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Realtime_Config</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.COMMAND_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">COMMAND_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.COMMAND_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Manipulator.Driver_Interface.Realtime_Config_Commands.</span></span><span class="sig-name descname"><span class="pre">Read_ROM_Value_of_Parameter_by_UPID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_UPID</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="Manipulator.Driver_Interface.IO.html#Manipulator.Driver_Interface.IO.Commands.Realtime_Config" title="Manipulator.Driver_Interface.IO.Commands.Realtime_Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Realtime_Config</span></code></a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.COMMAND_ID">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">COMMAND_ID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.COMMAND_ID" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.DESCRIPTION">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DESCRIPTION</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.DESCRIPTION" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-Manipulator.Driver_Interface">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Manipulator.Driver_Interface" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="Manipulator.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Manipulator package</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="Manipulator.Driver_Interface.IO.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Manipulator.Driver_Interface.IO package</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-Manipulator.Driver_Interface.Command_Parameters">Manipulator.Driver_Interface.Command_Parameters module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters"><code class="docutils literal notranslate"><span class="pre">Command_Parameters</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.UPID"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.UPID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.acceleration_not_signed"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.acceleration_not_signed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.deceleration"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.deceleration</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_acceleration"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.demand_acceleration</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_position"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.demand_position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.demand_velocity"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.demand_velocity</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.maximal_velocity"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.maximal_velocity</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.target_position"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.target_position</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.timer_value"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.timer_value</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_not_signed"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.velocity_not_signed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Command_Parameters.Command_Parameters.velocity_signed"><code class="docutils literal notranslate"><span class="pre">Command_Parameters.velocity_signed</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-Manipulator.Driver_Interface.Drivers">Manipulator.Driver_Interface.Drivers module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.DriveError"><code class="docutils literal notranslate"><span class="pre">DriveError</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver"><code class="docutils literal notranslate"><span class="pre">Driver</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.acknowledge_error"><code class="docutils literal notranslate"><span class="pre">Driver.acknowledge_error()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.get_MC_count"><code class="docutils literal notranslate"><span class="pre">Driver.get_MC_count()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.get_driver_time"><code class="docutils literal notranslate"><span class="pre">Driver.get_driver_time()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.get_main_state"><code class="docutils literal notranslate"><span class="pre">Driver.get_main_state()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.get_realtime_config_command_count"><code class="docutils literal notranslate"><span class="pre">Driver.get_realtime_config_command_count()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.get_status_word"><code class="docutils literal notranslate"><span class="pre">Driver.get_status_word()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.home"><code class="docutils literal notranslate"><span class="pre">Driver.home()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.ignored_if_awaiting_error_acknowledgement"><code class="docutils literal notranslate"><span class="pre">Driver.ignored_if_awaiting_error_acknowledgement()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.initialize_stream"><code class="docutils literal notranslate"><span class="pre">Driver.initialize_stream()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.move_with_constant_velocity"><code class="docutils literal notranslate"><span class="pre">Driver.move_with_constant_velocity()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.run_on_driver_thread"><code class="docutils literal notranslate"><span class="pre">Driver.run_on_driver_thread()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.send"><code class="docutils literal notranslate"><span class="pre">Driver.send()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.stop_stream"><code class="docutils literal notranslate"><span class="pre">Driver.stop_stream()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.stream"><code class="docutils literal notranslate"><span class="pre">Driver.stream()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.switch_on"><code class="docutils literal notranslate"><span class="pre">Driver.switch_on()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Driver.wait_for_change"><code class="docutils literal notranslate"><span class="pre">Driver.wait_for_change()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Drivers.Monitoring_Channel_Missing_Parameter_Error"><code class="docutils literal notranslate"><span class="pre">Monitoring_Channel_Missing_Parameter_Error</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-Manipulator.Driver_Interface.Motion_Commands">Manipulator.Driver_Interface.Motion_Commands module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Negative_Direction</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Negative_Direction.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Negative_Direction.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction.SUB_ID"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Negative_Direction.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Positive_Direction</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Positive_Direction.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Positive_Direction.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction.SUB_ID"><code class="docutils literal notranslate"><span class="pre">AccVAI_Infinite_Motion_Positive_Direction.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation"><code class="docutils literal notranslate"><span class="pre">No_Operation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">No_Operation.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">No_Operation.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.No_Operation.SUB_ID"><code class="docutils literal notranslate"><span class="pre">No_Operation.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time"><code class="docutils literal notranslate"><span class="pre">PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID"><code class="docutils literal notranslate"><span class="pre">PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp.SUB_ID"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID"><code class="docutils literal notranslate"><span class="pre">PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time"><code class="docutils literal notranslate"><span class="pre">P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID"><code class="docutils literal notranslate"><span class="pre">P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming"><code class="docutils literal notranslate"><span class="pre">Stop_Streaming</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Stop_Streaming.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">Stop_Streaming.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Stop_Streaming.SUB_ID"><code class="docutils literal notranslate"><span class="pre">Stop_Streaming.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop"><code class="docutils literal notranslate"><span class="pre">VAI_Stop</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">VAI_Stop.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">VAI_Stop.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_Stop.SUB_ID"><code class="docutils literal notranslate"><span class="pre">VAI_Stop.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos"><code class="docutils literal notranslate"><span class="pre">VAI_go_to_pos</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">VAI_go_to_pos.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">VAI_go_to_pos.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.VAI_go_to_pos.SUB_ID"><code class="docutils literal notranslate"><span class="pre">VAI_go_to_pos.SUB_ID</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter"><code class="docutils literal notranslate"><span class="pre">Write_Live_Parameter</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Write_Live_Parameter.DESCRIPTION</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.MASTER_ID"><code class="docutils literal notranslate"><span class="pre">Write_Live_Parameter.MASTER_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Motion_Commands.Write_Live_Parameter.SUB_ID"><code class="docutils literal notranslate"><span class="pre">Write_Live_Parameter.SUB_ID</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-Manipulator.Driver_Interface.Realtime_Config_Commands">Manipulator.Driver_Interface.Realtime_Config_Commands module</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation"><code class="docutils literal notranslate"><span class="pre">No_Operation</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.COMMAND_ID"><code class="docutils literal notranslate"><span class="pre">No_Operation.COMMAND_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.No_Operation.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">No_Operation.DESCRIPTION</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID"><code class="docutils literal notranslate"><span class="pre">Read_RAM_Value_of_Parameter_by_UPID</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.COMMAND_ID"><code class="docutils literal notranslate"><span class="pre">Read_RAM_Value_of_Parameter_by_UPID.COMMAND_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Read_RAM_Value_of_Parameter_by_UPID.DESCRIPTION</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID"><code class="docutils literal notranslate"><span class="pre">Read_ROM_Value_of_Parameter_by_UPID</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.COMMAND_ID"><code class="docutils literal notranslate"><span class="pre">Read_ROM_Value_of_Parameter_by_UPID.COMMAND_ID</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#Manipulator.Driver_Interface.Realtime_Config_Commands.Read_ROM_Value_of_Parameter_by_UPID.DESCRIPTION"><code class="docutils literal notranslate"><span class="pre">Read_ROM_Value_of_Parameter_by_UPID.DESCRIPTION</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-Manipulator.Driver_Interface">Module contents</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Manipulator.Driver_Interface.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2025, Oskar Minds, Laurits Halaburt Jensen, Anders Ravnsholt Riis.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
