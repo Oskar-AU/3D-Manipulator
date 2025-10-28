@@ -407,12 +407,16 @@ class Driver:
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
-    def move_with_constant_velocity(self, velocity: float) -> tuple[float, float]:
+    def move_with_constant_velocity(self, velocity: float, acceleration: float = 10.0) -> tuple[float, float]:
 
-        if velocity > 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity)
-        elif velocity < 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity)
+        if velocity > 0.0 and acceleration > 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, acceleration)
+        elif velocity < 0.0 and acceleration > 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, acceleration)
+        elif velocity > 0.0 and acceleration < 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, -acceleration)
+        elif velocity < 0.0 and acceleration < 0.0:
+            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, -acceleration)
         else:
             motion_CMD = Motion_Commands.VAI_Stop()
 

@@ -8,6 +8,9 @@ import numpy as np
 import numpy.typing as npt
 import logging
 
+path_logger = logging.getLogger("PATH")
+
+
 class Manipulator:
 
     def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5):
@@ -68,8 +71,12 @@ class Manipulator:
         for driver in self.drivers:
             driver.stop_stream()
 
-    def move_all_with_constant_velocity(self, velocity: npt.ArrayLike) -> tuple[npt.NDArray, npt.NDArray]:
+    def move_all_with_constant_velocity(self, velocity: npt.ArrayLike, acceleration: npt.ArrayLike = None) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
+        if acceleration is None:
+            acceleration = np.full_like(velocity, 1.0)  # Use safe default acceleration of 1.0 m/s²
+        else:
+            acceleration = np.asarray(acceleration)
         for i, driver in enumerate(self.drivers):
             self.futures[i] = driver.move_with_constant_velocity(velocity[i])
         try:
@@ -87,10 +94,8 @@ class Manipulator:
 
         return positions, velocities
 
-
-    def execute_path_with_velocity_tracking(self, step_function, phase_name: str = "Enhanced path execution", 
-                                          max_cycles: int = 10000, debug_interval: int = 50):
-        print(f"Starting {phase_name} with velocity tracking...")
+    def path_with_velocity_tracking(self, step_function, phase_name: str = "Path Following", max_cycles: int = 10000, debug_interval: int = 50):
+        path_logger.info(f"Starting {phase_name} with velocity tracking...")
         cycle_count = 0
         last_commanded_velocity_ms = np.zeros(3, float)  # Track our commanded velocity
         
@@ -103,7 +108,7 @@ class Manipulator:
                     current_pos_m = positions_mm * 1e-3  # Convert to meters
                     current_vel_ms = actual_velocities_mm * 1e-3  # Convert to m/s
                 except Exception as e:
-                    print(f"Error getting position/velocity: {e}")
+                    path_logger.error(f"Error getting position/velocity: {e}")
                     self.error_acknowledge()
                     continue
                 
@@ -111,20 +116,24 @@ class Manipulator:
                 next_velocity_ms, complete = step_function(current_pos_m, current_vel_ms)
                 
                 if complete:
-                    print(f"{phase_name} completed!")
+                    path_logger.info(f"{phase_name} completed!")
                     self.move_all_with_constant_velocity(np.zeros(3))  # Stop
                     return True
                 
                 # Store the calculated velocity for the NEXT cycle (no immediate execution)
                 last_commanded_velocity_ms = next_velocity_ms.copy()
                 
+                # Debug output at specified intervals
+                if cycle_count % debug_interval == 0:
+                    path_logger.info(f"Cycle {cycle_count}: pos={positions_mm}, vel_cmd={next_velocity_ms}")
+                
                 cycle_count += 1
                 if cycle_count > max_cycles:
-                    print(f"Timeout in {phase_name} after {max_cycles} cycles")
+                    path_logger.info(f"Timeout in {phase_name} after {max_cycles} cycles")
                     self.move_all_with_constant_velocity(np.zeros(3))
                     return False
                 
             except Exception as e:
-                print(f"Error in {phase_name}: {e}")
+                path_logger.error(f"Error in {phase_name}: {e}")
                 self.move_all_with_constant_velocity(np.zeros(3))
                 return False
