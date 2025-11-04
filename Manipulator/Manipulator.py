@@ -38,9 +38,9 @@ class Manipulator:
             self.futures[i] = driver.switch_on()
         self._wait_for_response_on_all()
 
-    def error_acknowledge(self) -> None:
+    def error_acknowledge(self, cascade: bool = True) -> None:
         for i, driver in enumerate(self.drivers):
-            self.futures[i] = driver.acknowledge_error()
+            self.futures[i] = driver.acknowledge_error(cascade)
         self._wait_for_response_on_all()
 
     def start_stream(self, stream: Stream) -> None:

@@ -379,10 +379,12 @@ class Driver:
         self.send(IO.Request(MC_interface=Motion_Commands.Stop_Streaming()))
 
     @run_on_driver_thread
-    def acknowledge_error(self) -> None:
+    def acknowledge_error(self, cascade: bool) -> None:
         self.logger.info("Acknowledging error.")
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
-        self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word()))
+        response = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word()))
+        if response.error_code and cascade:
+            self.acknowledge_error(True)
         self.awaiting_error_acknowledgement = False
 
     @run_on_driver_thread
