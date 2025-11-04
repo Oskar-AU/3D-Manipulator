@@ -42,13 +42,13 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
 
     # Driver log handlers.
     driver_1_file_handler = logging.FileHandler(path + '/' + "DRIVE_1.log", file_mode)
-    driver_1_file_handler.setLevel(logging.DEBUG)
+    driver_1_file_handler.setLevel(file_handler_level)
     driver_1_file_handler.setFormatter(formatter_single_file)
     driver_2_file_handler = logging.FileHandler(path + '/' + "DRIVE_2.log", file_mode)
-    driver_2_file_handler.setLevel(logging.DEBUG)
+    driver_2_file_handler.setLevel(file_handler_level)
     driver_2_file_handler.setFormatter(formatter_single_file)
     driver_3_file_handler = logging.FileHandler(path + '/' + "DRIVE_3.log", file_mode)
-    driver_3_file_handler.setLevel(logging.DEBUG)
+    driver_3_file_handler.setLevel(file_handler_level)
     driver_3_file_handler.setFormatter(formatter_single_file)
 
     DRIVE_1_logger = logging.getLogger('DRIVE_1')

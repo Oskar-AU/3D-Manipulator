@@ -44,8 +44,8 @@ class Test_Stream(Stream):
         stop_streaming = False if elapsed_time < 1 else True
 
         drive_1_pos = 0
-        drive_2_pos = self.amplitude*math.sin(elapsed_time*self.frequency+0.01)
-        drive_3_pos = self.amplitude*math.cos(elapsed_time*self.frequency+0.01)
+        drive_2_pos = self.amplitude*math.sin(elapsed_time*self.frequency - math.pi/2) + self.amplitude
+        drive_3_pos = self.amplitude*math.sin(elapsed_time*self.frequency - math.pi/2) + self.amplitude
 
         drive_1_vel = 0
         drive_2_vel = 0.1

@@ -347,7 +347,7 @@ class Driver:
                     MC_interface=Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
             case 'PV':
                 self.stream_request = IO.Request(
-                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0))
+                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp(0, 0))
             case 'PVA':
                 self.stream_request = IO.Request(
                     MC_interface=Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))

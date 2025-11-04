@@ -55,16 +55,13 @@ class Manipulator:
         next_cycle_time = time.time()
         stop_streaming = False
         while not stop_streaming:
-            cycle_time = stream.cycle_time
-            next_cycle_time += cycle_time
-            current_time = time.time()
+            next_cycle_time += stream.cycle_time
             stop_streaming, stream_values = stream.get_next_coordinate_set()
             for i, driver in enumerate(self.drivers):
                 driver.stream(*stream_values[i])
             self._wait_for_response_on_all()
-            sleep_time = next_cycle_time - time.time()
-            time.sleep(sleep_time)
-            print(cycle_time, time.time()-current_time)
+            while next_cycle_time - time.time() > 0:
+                time.sleep(next_cycle_time - time.time())
         
         # Stops the stream.
         for driver in self.drivers:
