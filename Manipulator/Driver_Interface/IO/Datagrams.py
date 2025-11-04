@@ -28,7 +28,7 @@ class linUDP:
         if self.response_queue.get(IP_address) is None:
             self.response_queue.update({IP_address: queue.Queue()})
 
-    def recieve(self, IP_address: str, timeout: float = 2.0) -> bytes:
+    def recieve(self, IP_address: str, timeout: float) -> bytes:
         try:
             return self.response_queue[IP_address].get(timeout=timeout)
         except KeyError:

@@ -25,10 +25,19 @@ class Monitoring_Channel_Missing_Parameter_Error(Exception):
 
 class Driver:
 
-    def __init__(self, IP: str, name: str, datagram: IO.linUDP, monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None)) -> None:
+    def __init__(self, 
+                 IP: str, 
+                 name: str, 
+                 datagram: IO.linUDP,
+                 response_timeout: float,
+                 max_send_attempts: int,
+                 monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None),
+                 ) -> None:
         self.IP = IP
         self.name = name
         self.datagram = datagram
+        self.response_timeout = response_timeout
+        self.max_send_attempts = max_send_attempts
         if len(monitoring_channel_parameters) != 4: raise ValueError("Length of 'monitoring_channel_parameters' must be 4.")
         self.monitoring_channel_parameters = monitoring_channel_parameters
         self._send_attempt = 1
@@ -83,20 +92,12 @@ class Driver:
                 return method(self, *args, **kwargs)
         return wrapper
 
-    def send(self, request: IO.Request, max_attemps: int = 5) -> IO.Translated_Response:
+    def send(self, request: IO.Request) -> IO.Translated_Response:
         """
         Parameters
         ----------
         request : Request
             The request to send to the drive.
-        MC_count : int, optional
-            The count of the motion command. Must be different than the 
-            previous motion command otherwise it is ignored by the drive.
-        realtime_config_command_count : int, optional
-            The count of the realtime config command. Must be different than the 
-            previous command otherwise it is ignored by the drive.
-        attempt : int, optional
-            The attempt number for the request. Should not be used.
 
         Returns
         -------
@@ -136,7 +137,7 @@ class Driver:
 
         try:
             # Wait for response (default timeout 2 seconds).
-            response_raw = self.datagram.recieve(self.IP)
+            response_raw = self.datagram.recieve(self.IP, self.response_timeout)
             
             # Translating the response.
             translated_response = request.response.translate_response(response_raw, request.realtime_config, self.monitoring_channel_parameters)
@@ -156,10 +157,10 @@ class Driver:
 
             return translated_response
         except queue.Empty:
-            self.logger.warning(f"Response timed out (2s) at attempt {self._send_attempt}/5.")
-            if self._send_attempt < max_attemps:
+            self.logger.warning(f"Response timed out ({self.response_timeout}s) at attempt {self._send_attempt}/{self.max_send_attempts}.")
+            if self._send_attempt < self.max_send_attempts:
                 self._send_attempt += 1
-                return self.send(request, max_attemps)
+                return self.send(request)
             else:
                 self.logger.critical("Unable to recieve.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")

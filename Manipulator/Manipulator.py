@@ -9,12 +9,12 @@ import numpy.typing as npt
 
 class Manipulator:
 
-    def __init__(self):
+    def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5):
         self.datagram = IO.linUDP()
         self.drivers = (
-            Driver('192.168.131.251', 'DRIVE_1', self.datagram, (Command_Parameters.velocity_signed, None, None, None)),
-            Driver('192.168.131.252', 'DRIVE_2', self.datagram, (Command_Parameters.velocity_signed, None, None, None)),
-            Driver('192.168.131.253', 'DRIVE_3', self.datagram, (Command_Parameters.velocity_signed, None, None, None))
+            Driver('192.168.131.251', 'DRIVE_1', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
+            Driver('192.168.131.252', 'DRIVE_2', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
+            Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
         )
         self.futures: list[Future | None] = [None, None, None]
 
