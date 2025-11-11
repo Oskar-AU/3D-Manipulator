@@ -206,13 +206,13 @@ class Response:
                                 response_type_translated_value = State_Var(main_state=main_state)
                     
                     case "actual_pos":
-                        response_type_translated_value = response_type_value / 10000   # Converts from mym to mm.
+                        response_type_translated_value = response_type_value / 10000000  # Converts from 0.1 mym to 1.0 m.
 
                     case "demand_pos":
-                        response_type_translated_value = response_type_value / 10000   # Converts from mym to mm.
+                        response_type_translated_value = response_type_value / 10000000  # Converts from 0.1 mym to 1.0 m.
 
                     case "current":
-                        response_type_translated_value = response_type_value / 1000     # Converts from mA to A.
+                        response_type_translated_value = response_type_value / 1000      # Converts from mA to A.
 
                     case "warn_word":
                         response_type_translated_value = list()

@@ -4,8 +4,8 @@ class Command_Parameters:
     target_position = Command_Parameter(
         description="Target position", 
         type=linTypes.Sint32,
-        unit="mm",
-        conversion_factor=1e4
+        unit="m",
+        conversion_factor=1e7
     )
     maximal_velocity = Command_Parameter(
         description="Maximal velocity",
@@ -30,8 +30,8 @@ class Command_Parameters:
     demand_position = Command_Parameter(
         description="Demand position",
         type=linTypes.Sint32,
-        unit="mm",
-        conversion_factor=1e4   # 0.0001 mm resolution
+        unit="m",
+        conversion_factor=1e7
     )
     demand_velocity = Command_Parameter(
         description="Demand velocity",
@@ -42,8 +42,8 @@ class Command_Parameters:
     demand_acceleration = Command_Parameter(
         description="Demand acceleration",
         type=linTypes.Sint32,
-        unit="mm/s^2",
-        conversion_factor=1e2   # 0.01 mm/s² resolution
+        unit="m/s^2",
+        conversion_factor=1e5
     )
 
     velocity_signed = Command_Parameter(
