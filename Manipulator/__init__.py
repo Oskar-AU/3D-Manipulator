@@ -3,6 +3,14 @@ from .Manipulator import Manipulator
 import logging
 import os
 
+# Adds 'binary' as a logging level below debug.
+BINARY = 5
+def binary(self: logging.Logger, message: str, *args, **kwargs) -> None:
+    if self.isEnabledFor(BINARY):
+        self._log(BINARY, message, args, **kwargs)
+logging.addLevelName(BINARY, "BINARY")
+logging.Logger.binary = binary
+
 def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level: int = logging.DEBUG, delete_current_log_at_startup: bool = True, file_name: str = "log.log"):
     """
     Optional helper to configure logging. Application can call this but is not automatic.
@@ -16,16 +24,9 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     if not os.path.exists(path):
         os.mkdir(path)
 
-    # Adds 'binary' as a logging level below debug.
-    BINARY = 9
-    def binary(self: logging.Logger, message: str, *args, **kwargs) -> None:
-        if self.isEnabledFor(BINARY):
-            self._log(BINARY, message, args, **kwargs)
-    logging.addLevelName(BINARY, "BINARY")
-    logging.Logger.binary = binary
-
     formatter_all = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    formatter_drive = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter_single_file = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter_terminal = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 
     file_mode = 'w' if delete_current_log_at_startup else 'a'
 
@@ -37,18 +38,18 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     # Handler for terminal logging.
     terminal_handler = logging.StreamHandler()
     terminal_handler.setLevel(terminal_handler_level)
-    terminal_handler.setFormatter(formatter_all)
+    terminal_handler.setFormatter(formatter_terminal)
 
     # Driver log handlers.
     driver_1_file_handler = logging.FileHandler(path + '/' + "DRIVE_1.log", file_mode)
-    driver_1_file_handler.setLevel(logging.DEBUG)
-    driver_1_file_handler.setFormatter(formatter_drive)
+    driver_1_file_handler.setLevel(file_handler_level)
+    driver_1_file_handler.setFormatter(formatter_single_file)
     driver_2_file_handler = logging.FileHandler(path + '/' + "DRIVE_2.log", file_mode)
-    driver_2_file_handler.setLevel(logging.DEBUG)
-    driver_2_file_handler.setFormatter(formatter_drive)
+    driver_2_file_handler.setLevel(file_handler_level)
+    driver_2_file_handler.setFormatter(formatter_single_file)
     driver_3_file_handler = logging.FileHandler(path + '/' + "DRIVE_3.log", file_mode)
-    driver_3_file_handler.setLevel(logging.DEBUG)
-    driver_3_file_handler.setFormatter(formatter_drive)
+    driver_3_file_handler.setLevel(file_handler_level)
+    driver_3_file_handler.setFormatter(formatter_single_file)
 
     DRIVE_1_logger = logging.getLogger('DRIVE_1')
     DRIVE_1_logger.setLevel(file_handler_level)
@@ -70,3 +71,13 @@ def setup_logging(terminal_handler_level: int = logging.INFO, file_handler_level
     OS_logger.setLevel(logging.DEBUG)
     OS_logger.addHandler(terminal_handler)
     OS_logger.addHandler(file_handler)
+
+    path_logger_file_handler = logging.FileHandler(path + '/' + 'path.log', file_mode)
+    path_logger_file_handler.setLevel(logging.DEBUG)
+    path_logger_file_handler.setFormatter(formatter_single_file)
+
+    path_logger = logging.getLogger('PATH')
+    path_logger.setLevel(file_handler_level)
+    path_logger.addHandler(path_logger_file_handler)
+    path_logger.addHandler(file_handler)
+    path_logger.addHandler(terminal_handler)

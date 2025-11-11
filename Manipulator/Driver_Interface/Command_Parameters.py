@@ -36,8 +36,8 @@ class Command_Parameters:
     demand_velocity = Command_Parameter(
         description="Demand velocity",
         type=linTypes.Sint32,
-        unit="mm/s",
-        conversion_factor=1e3   # 0.001 mm/s resolution
+        unit="m/s",
+        conversion_factor=1e6
     )
     demand_acceleration = Command_Parameter(
         description="Demand acceleration",

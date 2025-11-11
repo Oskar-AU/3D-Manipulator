@@ -3,17 +3,18 @@ from . import IO
 from .Driver_Interface import Driver, DriveError, Command_Parameters
 from concurrent.futures import Future
 import time
+from typing import Any
 import numpy as np
 import numpy.typing as npt
 
 class Manipulator:
 
-    def __init__(self):
+    def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5):
         self.datagram = IO.linUDP()
         self.drivers = (
-            Driver('192.168.131.251', 'DRIVE_1', self.datagram, (Command_Parameters.velocity_signed, None, None, None)),
-            Driver('192.168.131.252', 'DRIVE_2', self.datagram, (Command_Parameters.timer_value, None, None, None)),
-            Driver('192.168.131.253', 'DRIVE_3', self.datagram)
+            Driver('192.168.131.251', 'DRIVE_1', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
+            Driver('192.168.131.252', 'DRIVE_2', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
+            Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
         )
         self.futures: list[Future | None] = [None, None, None]
 
@@ -23,6 +24,9 @@ class Manipulator:
                 future.result()
             except DriveError:
                 continue
+
+    def _read_from_futures(self) -> list[Any]:
+        return [future.result() for future in self.futures]
 
     def home(self) -> None:
         for i, driver in enumerate(self.drivers):
@@ -34,9 +38,9 @@ class Manipulator:
             self.futures[i] = driver.switch_on()
         self._wait_for_response_on_all()
 
-    def error_acknowledge(self) -> None:
+    def error_acknowledge(self, cascade: bool = True) -> None:
         for i, driver in enumerate(self.drivers):
-            self.futures[i] = driver.acknowledge_error()
+            self.futures[i] = driver.acknowledge_error(cascade)
         self._wait_for_response_on_all()
 
     def start_stream(self, stream: Stream) -> None:
@@ -51,23 +55,63 @@ class Manipulator:
         next_cycle_time = time.time()
         stop_streaming = False
         while not stop_streaming:
-            cycle_time = stream.cycle_time
-            next_cycle_time += cycle_time
-            current_time = time.time()
+            next_cycle_time += stream.cycle_time
             stop_streaming, stream_values = stream.get_next_coordinate_set()
             for i, driver in enumerate(self.drivers):
                 driver.stream(*stream_values[i])
             self._wait_for_response_on_all()
-            sleep_time = next_cycle_time - time.time()
-            time.sleep(sleep_time)
-            print(cycle_time, time.time()-current_time)
+            while next_cycle_time - time.time() > 0:
+                time.sleep(next_cycle_time - time.time())
         
         # Stops the stream.
         for driver in self.drivers:
             driver.stop_stream()
 
-    def move_with_constant_velocity(velocity: npt.ArrayLike) -> tuple[npt.NDArray, npt.NDArray]:
+    def move_all_with_constant_velocity(self, velocity: npt.ArrayLike) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
+        for i, driver in enumerate(self.drivers):
+            self.futures[i] = driver.move_with_constant_velocity(velocity[i])
+        positions, velocities = np.array(self._read_from_futures()).T
+        return positions, velocities
 
-    def feedback(point_cloud: npt.ArrayLike, velocity: float) -> None:
-        pass
+
+    def execute_path_with_velocity_tracking(self, step_function, phase_name: str = "Enhanced path execution", 
+                                          max_cycles: int = 10000, debug_interval: int = 50):
+        print(f"Starting {phase_name} with velocity tracking...")
+        cycle_count = 0
+        last_commanded_velocity_ms = np.zeros(3, float)  # Track our commanded velocity
+        
+        while True:
+            try:
+                # Get current position and velocity state
+                try:
+                    # Command the last velocity to maintain motion while getting state
+                    positions_mm, actual_velocities_mm = self.move_all_with_constant_velocity(last_commanded_velocity_ms)
+                    current_pos_m = positions_mm * 1e-3  # Convert to meters
+                    current_vel_ms = actual_velocities_mm * 1e-3  # Convert to m/s
+                except Exception as e:
+                    print(f"Error getting position/velocity: {e}")
+                    self.error_acknowledge()
+                    continue
+                
+                # Calculate next step using both position and velocity
+                next_velocity_ms, complete = step_function(current_pos_m, current_vel_ms)
+                
+                if complete:
+                    print(f"{phase_name} completed!")
+                    self.move_all_with_constant_velocity(np.zeros(3))  # Stop
+                    return True
+                
+                # Store the calculated velocity for the NEXT cycle (no immediate execution)
+                last_commanded_velocity_ms = next_velocity_ms.copy()
+                
+                cycle_count += 1
+                if cycle_count > max_cycles:
+                    print(f"Timeout in {phase_name} after {max_cycles} cycles")
+                    self.move_all_with_constant_velocity(np.zeros(3))
+                    return False
+                
+            except Exception as e:
+                print(f"Error in {phase_name}: {e}")
+                self.move_all_with_constant_velocity(np.zeros(3))
+                return False

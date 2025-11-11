@@ -25,11 +25,20 @@ class Monitoring_Channel_Missing_Parameter_Error(Exception):
 
 class Driver:
 
-    def __init__(self, IP: str, name: str, datagram: IO.linUDP, monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None)) -> None:
+    def __init__(self, 
+                 IP: str, 
+                 name: str, 
+                 datagram: IO.linUDP,
+                 response_timeout: float,
+                 max_send_attempts: int,
+                 monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None),
+                 ) -> None:
         self.IP = IP
         self.name = name
         self.datagram = datagram
-        if len(monitoring_channel_parameters) != 4: raise ValueError(f"Length of 'monitoring_channel_parameters' must be 4.")
+        self.response_timeout = response_timeout
+        self.max_send_attempts = max_send_attempts
+        if len(monitoring_channel_parameters) != 4: raise ValueError("Length of 'monitoring_channel_parameters' must be 4.")
         self.monitoring_channel_parameters = monitoring_channel_parameters
         self._send_attempt = 1
         self.awaiting_error_acknowledgement = False
@@ -57,9 +66,11 @@ class Driver:
             
             # Runs the method.
             try:
-                future.set_result(method(*args, **kwargs))
-            except DriveError as e:
+                method_result = method(*args, **kwargs)
+            except Exception as e:
                 future.set_exception(e)
+            else:
+                future.set_result(method_result)
 
     @staticmethod
     def run_on_driver_thread(method: Callable[parameter_types, return_type]) -> Callable[parameter_types, Future]:
@@ -81,20 +92,12 @@ class Driver:
                 return method(self, *args, **kwargs)
         return wrapper
 
-    def send(self, request: IO.Request, max_attemps: int = 5) -> IO.Translated_Response:
+    def send(self, request: IO.Request) -> IO.Translated_Response:
         """
         Parameters
         ----------
         request : Request
             The request to send to the drive.
-        MC_count : int, optional
-            The count of the motion command. Must be different than the 
-            previous motion command otherwise it is ignored by the drive.
-        realtime_config_command_count : int, optional
-            The count of the realtime config command. Must be different than the 
-            previous command otherwise it is ignored by the drive.
-        attempt : int, optional
-            The attempt number for the request. Should not be used.
 
         Returns
         -------
@@ -134,7 +137,7 @@ class Driver:
 
         try:
             # Wait for response (default timeout 2 seconds).
-            response_raw = self.datagram.recieve(self.IP)
+            response_raw = self.datagram.recieve(self.IP, self.response_timeout)
             
             # Translating the response.
             translated_response = request.response.translate_response(response_raw, request.realtime_config, self.monitoring_channel_parameters)
@@ -154,12 +157,12 @@ class Driver:
 
             return translated_response
         except queue.Empty:
-            self.logger.warning(f"Response timed out (2s) at attempt {self._send_attempt}/5.")
-            if self._send_attempt < max_attemps:
+            self.logger.warning(f"Response timed out ({self.response_timeout}s) at attempt {self._send_attempt}/{self.max_send_attempts}.")
+            if self._send_attempt < self.max_send_attempts:
                 self._send_attempt += 1
-                return self.send(request, max_attemps)
+                return self.send(request)
             else:
-                self.logger.critical(f"Unable to recieve.")
+                self.logger.critical("Unable to recieve.")
                 raise TimeoutError(f"Unable to recieve from '{self.name}'.")
 
     def get_main_state(self) -> int:
@@ -195,7 +198,7 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        self.logger.info(f"Homing procedure initiated.")
+        self.logger.info("Homing procedure initiated.")
 
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
@@ -218,7 +221,7 @@ class Driver:
         # Finialzing.
         home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
         self.send(home_off_request)
-        self.logger.info(f"Homing procedure completed.")
+        self.logger.info("Homing procedure completed.")
         return True
 
     @run_on_driver_thread
@@ -237,11 +240,11 @@ class Driver:
         bool
             Whether or not the procedure ended succesfully.
         """
-        self.logger.info(f"Switch on procedure initiated.")
+        self.logger.info("Switch on procedure initiated.")
         main_state = self.get_main_state()
         
         if main_state == 8:
-            self.logger.info(f"Switch on procedure completed (already swicthed on).")
+            self.logger.info("Switch on procedure completed (already swicthed on).")
             return True
         if main_state != 2:
             # Requesting state 2.
@@ -264,7 +267,7 @@ class Driver:
                 return False
             
             # Finalizing.
-            self.logger.info(f"Switch on procedure completed.")
+            self.logger.info("Switch on procedure completed.")
             return True
 
     def wait_for_change(self, change_checker: Callable[[None], bool], timeout: float, delay: float = 0.0) -> bool:
@@ -345,7 +348,7 @@ class Driver:
                     MC_interface=Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
             case 'PV':
                 self.stream_request = IO.Request(
-                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0))
+                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp(0, 0))
             case 'PVA':
                 self.stream_request = IO.Request(
                     MC_interface=Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))
@@ -376,10 +379,12 @@ class Driver:
         self.send(IO.Request(MC_interface=Motion_Commands.Stop_Streaming()))
 
     @run_on_driver_thread
-    def acknowledge_error(self) -> None:
+    def acknowledge_error(self, cascade: bool) -> None:
         self.logger.info("Acknowledging error.")
         self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
-        self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word()))
+        response = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word()))
+        if response.error_code and cascade:
+            self.acknowledge_error(True)
         self.awaiting_error_acknowledgement = False
 
     @run_on_driver_thread

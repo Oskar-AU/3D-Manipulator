@@ -1,7 +1,7 @@
 import struct
 from typing import Any
-from .Realtime_Config_Base import Realtime_Config
-from .Command_Parameter_Base import Command_Parameter
+from .Commands import Realtime_Config
+from .Commands import Command_Parameter
 from dataclasses import dataclass, fields
 
 class Response_Base:
@@ -308,7 +308,7 @@ class Response:
                         format = ""
                         for parameter in monitoring_channel_parameters:
                             if parameter is not None:
-                                format += parameter.get('type').get('format')
+                                format += parameter.type.format
                             else:
                                 format += "4x"
                         monitoring_channel_values = struct.unpack(format, response_type_value)
@@ -316,7 +316,7 @@ class Response:
                         for i, monitoring_channel_parameter in enumerate(monitoring_channel_parameters):
                             if monitoring_channel_parameter is not None:
                                 response_type_translated_value.update({
-                                    monitoring_channel_parameter.get('description'): monitoring_channel_values[i] / monitoring_channel_parameter.get('conversion_factor')
+                                    monitoring_channel_parameter.description: monitoring_channel_values[i] / monitoring_channel_parameter.conversion_factor
                                 })
 
                     case "realtime_config":
@@ -356,7 +356,7 @@ class Response:
                             status_number=parameter_channel_status,
                             status_description=parameter_status_description,
                             details=realtime_config_command.DI_parameters,
-                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].get('conversion_factor') for i in range(len(DI_values))],
+                            values=[DI_values[i] / realtime_config_command.DI_parameters[i].conversion_factor for i in range(len(DI_values))],
                             command_count=command_count
                         )
                     case _:
