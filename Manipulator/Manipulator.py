@@ -151,6 +151,7 @@ class Manipulator:
             except Exception as e2:
                 logger.error("Failed to stop drives.")
                 raise e2
+            raise e1
 
         return positions, velocities
 
