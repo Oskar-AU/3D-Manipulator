@@ -1,15 +1,26 @@
 import numpy as np
+import numpy.typing as npt
 from typing import Tuple
 import time
-import matplotlib.animation as ani
-import matplotlib.pyplot as plt
 
-class Path_initializer:
-    def __init__(self,path_keypoints,max_velocity: float,max_acceleration: float,min_velocity: float) -> None:
+
+class Path_follower():
+    def __init__(self, path_keypoints: npt.ArrayLike,max_velocity: float,max_acceleration: float,min_velocity: float,projected_total_weight: float=1.0, projected_exponent_weight: float=0.5, off_path_weight: float=1.0) -> None:
+        self.projected_total_weight = projected_total_weight
+        self.projected_exponent_weight = projected_exponent_weight
+        self.off_path_weight = off_path_weight
+        path_keypoints = np.asarray(path_keypoints)
         self.max_velocity = max_velocity
         self.max_acceleration = max_acceleration
         self.min_velocity = min_velocity
         self.keypoints = path_keypoints
+        self.current_pos = np.array(path_keypoints[0], dtype=np.float64)
+        self.demand_velocity = np.zeros(3)
+        self.current_vel = np.zeros(3) 
+        self.previous_vel = np.zeros(3)
+        self.time = 0
+        self.delta_t = 0.1
+        self.previous_target = np.zeros(3)
         self.draw_keypoint_vectors()
 
     def draw_keypoint_vectors(self) -> None:
@@ -22,44 +33,20 @@ class Path_initializer:
             dist = np.linalg.norm(connecting_vector)
             self.connecting_vectors[i] = connecting_vector
             self.dist_vectors[i] = dist
-        
     
-
-
-class Path_follower():
-    def __init__(self, path_class: Path_initializer) -> None:
-        self.max_velocity = path_class.max_velocity
-        self.max_acceleration = path_class.max_acceleration
-        self.min_velocity = path_class.min_velocity
-        self.keypoints = path_class.keypoints
-        self.connecting_vectors = path_class.connecting_vectors
-        self.dist_vectors = path_class.dist_vectors
-        self.current_pos = np.array(path_class.keypoints[0], dtype=np.float64)
-        self.demand_velocity = np.zeros(3)
-        self.current_vel = np.zeros(3) 
-        self.previous_vel = np.zeros(3)
-        self.time = 0
-        self.delta_t = 0.1
-        self.previous_target = np.zeros(3)
-        
-    def get_max_velocity_vector(self,vector_number):
-        connecting_vector = self.connecting_vectors[vector_number,:]
-        normalized_vector = connecting_vector/np.linalg.norm(connecting_vector)
-        v_max_vector = self.max_velocity*normalized_vector
-        return v_max_vector
-    
-    def projecting_vector(self,a):
+    def projecting_vector(self,aggregated_vector: npt.ArrayLike) -> np.ndarray:
+        aggregated_vector = np.asarray(aggregated_vector)
 
         p_k = self.target - self.current_pos
 
     
-        a_norm = np.linalg.norm(a)
+        a_norm = np.linalg.norm(aggregated_vector)
         p_k_norm = np.linalg.norm(p_k)
 
         if a_norm == 0:
             normalized_a = np.zeros(3)
         else:
-            normalized_a = a/a_norm
+            normalized_a = aggregated_vector/a_norm
 
         if p_k_norm == 0:
             normalized_p_k = np.zeros(3)
@@ -76,13 +63,10 @@ class Path_follower():
 
         return projection_vec
 
-        
-
-
 
     def aggregating_vector(self):
-        total_weight = 1
-        exponent_weight = 0.5
+        total_weight = self.projected_total_weight
+        exponent_weight = self.projected_exponent_weight
         k = self.target_number
         p_k = self.target-self.current_pos
         p_k_dist = np.linalg.norm(p_k)
@@ -103,8 +87,9 @@ class Path_follower():
         return a_vec
                 
 
-    def off_path_vector(self,projected_vector):
-        off_path_factor = 1
+    def off_path_vector(self,projected_vector: npt.ArrayLike) -> np.ndarray:
+        projected_vector = np.asarray(projected_vector)
+        off_path_factor = self.off_path_weight
         p1 = self.previous_target
         p2 = self.target
         p3 = self.current_pos
@@ -131,8 +116,8 @@ class Path_follower():
         return total_velocity_vector
 
 
-    def clip_vector(self,total_velocity_vector):
-
+    def clip_vector(self,total_velocity_vector: npt.ArrayLike) -> np.ndarray:
+        total_velocity_vector = np.asarray(total_velocity_vector)
 
         total_velocity_vector_norm = np.linalg.norm(total_velocity_vector)
         p_k = self.target-self.current_pos
@@ -149,49 +134,10 @@ class Path_follower():
             final_velocity = p_k_normalized*self.min_velocity
 
         return final_velocity 
+      
 
-            
-    
-        
-        
-
-    def adjust_velocity(self,v1):
-
-        ortho_dist_factor = 10
-        target_dist_factor = 1
-        next_vel_factor = 2
-        
-        target_path = np.array([self.previous_target,self.target])
-        current_pos = self.current_pos
-
-        
-        #Distance to target line
-        line = target_path[1]-target_path[0]
-        line2 = current_pos-target_path[0]
-
-        t = np.dot(line2,line)/np.dot(line,line)
-
-        p_closest = target_path[0]+t*line
-        ortho_vec = (p_closest - current_pos)*ortho_dist_factor
-
-        target_vec = (self.target-current_pos)*target_dist_factor
-
-        
-
-        v_tot_vec = ortho_vec+target_vec
-
-        v_tot_norm = v_tot_vec/np.linalg.norm(v_tot_vec)
-
-        v_desired = self.max_velocity*v_tot_norm
-        #print(self.aggregating_vector())
-
-
-        return v_desired
-            
-
-
-
-    def send_to_manipulator(self,v):
+    def send_to_manipulator(self,v: npt.ArrayLike) -> None:
+        v = np.asarray(v)
         self.previous_vel = self.current_vel.copy()
         self.demand_velocity = v
         #print(v)
@@ -218,15 +164,16 @@ class Path_follower():
     def follow_path(self):
      
         complete = False
-    
+        
         while complete == False:
-            final_v,complete = self(self.current_pos)
+            print(self.current_pos)
+            final_v,complete = self(self.current_pos, None)
             self.send_to_manipulator(final_v)
             self.get_current_values()
             time.sleep(0.1)
-            print(self.current_vel)
 
-    def __call__(self, current_position):
+    def __call__(self, current_position: npt.ArrayLike, _) -> Tuple[np.ndarray, bool]:
+        current_position = np.asarray(current_position)
         complete = False
         if not hasattr(self, 'target'):
             self.i = 0
@@ -272,13 +219,7 @@ class Path_follower():
                 
 
 
-path_keypoints = np.array(([0,0,0],[0,0,1],[0,1,1],[1,1,1],[1,0,1],[1,0,0],[1,1,0],[0,1,0]))
 
-path = Path_initializer(path_keypoints,0.1,10,0.01)
-
-pf = Path_follower(path)
-pf.follow_path()
-            
 
 
             
