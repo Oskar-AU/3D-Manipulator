@@ -2,12 +2,10 @@ import numpy as np
 import numpy.typing as npt
 from typing import Tuple
 import time
-import matplotlib.animation as ani
-import matplotlib.pyplot as plt
 from .Path_follower import Path_Base
 
 
-class Path_follower():
+class Path_follower(Path_Base):
     def __init__(self, path_keypoints: npt.ArrayLike,max_velocity: float,max_acceleration: float,min_velocity: float,projected_total_weight: float=1.0, projected_exponent_weight: float=0.5, off_path_weight: float=1.0) -> None:
         self.projected_total_weight = projected_total_weight
         self.projected_exponent_weight = projected_exponent_weight
@@ -126,7 +124,7 @@ class Path_follower():
         p_k = self.target-self.current_pos
         p_k_norm = np.linalg.norm(p_k)
         if p_k_norm == 0:
-            p_k_normalized == np.zeros(3)
+            p_k_normalized = np.zeros(3)
         else:
             p_k_normalized = p_k/p_k_norm
 
@@ -168,7 +166,7 @@ class Path_follower():
      
         complete = False
         
-        while complete == False:
+        while not complete:
             print(self.current_pos)
             final_v,complete = self(self.current_pos, None)
             self.send_to_manipulator(final_v)
