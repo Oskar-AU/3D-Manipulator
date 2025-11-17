@@ -8,6 +8,7 @@ import numpy as np
 import numpy.typing as npt
 import logging
 from dataclasses import dataclass, field
+from .Path_follower import Path_Base
 
 path_logger = logging.getLogger("PATH")
 
@@ -156,7 +157,7 @@ class Manipulator:
 
 
     
-    def feedback_loop(self, step_function, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None):
+    def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None):
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         
@@ -173,7 +174,7 @@ class Manipulator:
                 positions_mm, actual_velocities_ms = self.move_all_with_constant_velocity(last_commanded_velocity_ms, last_commanded_acceleration_ms2)
         
                 # Calculate next step
-                next_velocity_ms, complete = step_function(positions_mm, actual_velocities_ms)
+                next_velocity_ms, complete = stepper(positions_mm, actual_velocities_ms)
                 #next_acceleration_ms2 = np.zeros(3, float)
                 next_acceleration_ms2 = np.ones(3, float)
 

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import numpy as np
 import numpy.typing as npt
 import logging
@@ -5,7 +6,12 @@ from typing import Optional
 
 logger = logging.getLogger("PATH")
 
+class Path_Base:
 
+    @abstractmethod
+    def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike | None = None) -> tuple[npt.NDArray, bool]:
+        pass
+    
 def make_waypoint_follower(
     waypoints_mm: npt.ArrayLike,
     max_velocity: float = 0.02,     # m/s
