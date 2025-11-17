@@ -131,8 +131,7 @@ class Manipulator:
         for driver in self.drivers:
             driver.stop_stream()
 
-
-    def move_all_with_constant_velocity(self, velocity: npt.ArrayLike, acceleration: npt.ArrayLike = None) -> tuple[npt.NDArray, npt.NDArray]:
+    def move_all_with_constant_velocity(self, velocity: npt.ArrayLike, acceleration: npt.ArrayLike | None = None) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
         if acceleration is None:
             acceleration = np.full_like(velocity, 1.0)
@@ -155,53 +154,43 @@ class Manipulator:
 
         return positions, velocities
 
-
-    
-    def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None):
+    def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         
         cycle_count = 0
-        last_commanded_velocity_ms = np.zeros(3, float)
-        last_commanded_acceleration_ms2 = np.ones(3, float)
+        last_commanded_velocity = np.zeros(3, float)
+        last_commanded_acceleration = np.ones(3, float)
         
         # Time tracking for telemetry
         t0 = time.time()
         
         while True:
-            try:
-                # Get current position and velocity state
-                positions_mm, actual_velocities_ms = self.move_all_with_constant_velocity(last_commanded_velocity_ms, last_commanded_acceleration_ms2)
-        
-                # Calculate next step
-                next_velocity_ms, complete = stepper(positions_mm, actual_velocities_ms)
-                #next_acceleration_ms2 = np.zeros(3, float)
-                next_acceleration_ms2 = np.ones(3, float)
+            # Get current position and velocity state
+            positions, actual_velocities = self.move_all_with_constant_velocity(last_commanded_velocity, last_commanded_acceleration)
+    
+            # Calculate next step
+            next_velocity, complete = stepper(positions, actual_velocities)
+            #next_acceleration_ms2 = np.zeros(3, float)
+            next_acceleration = np.ones(3, float)
 
-                # Record telemetry 
-                if telemetry is not None:
-                    t_now = time.time() - t0
-                    telemetry.append(t_now, positions_mm, next_velocity_ms, actual_velocities_ms)
-                
-                if complete:
-                    path_logger.info("Path following completed!")
-                    self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
-                    return True
-                
-                last_commanded_velocity_ms = next_velocity_ms.copy()
-                last_commanded_acceleration_ms2 = next_acceleration_ms2.copy()
-                
-                # Debug output
-                if cycle_count % debug_interval == 0:
-                    path_logger.info(f"Cycle {cycle_count}: pos={positions_mm}, vel_cmd={next_velocity_ms}, vel_meas={actual_velocities_ms}")
-                
-                cycle_count += 1
-                if cycle_count > max_cycles:
-                    path_logger.info(f"Timeout after {max_cycles} cycles")
-                    self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
-                    return False
-                
-            except Exception as e:
-                path_logger.error(f"Error in feedback loop: {e}")
+            # Record telemetry 
+            if telemetry is not None:
+                t_now = time.time() - t0
+                telemetry.append(t_now, positions, next_velocity, actual_velocities)
+            
+            if complete:
+                path_logger.info("Path following completed!")
                 self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
-                return False
+            
+            last_commanded_velocity = next_velocity.copy()
+            last_commanded_acceleration = next_acceleration.copy()
+            
+            # Debug output
+            if cycle_count % debug_interval == 0:
+                path_logger.debug(f"Cycle {cycle_count}: pos={positions}, vel_cmd={next_velocity}, actual_vel={actual_velocities}.")
+            
+            cycle_count += 1
+            if cycle_count > max_cycles:
+                path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
+                self.move_all_with_constant_velocity([0, 0, 0])
