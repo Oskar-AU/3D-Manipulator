@@ -6,6 +6,7 @@ import time
 from typing import Any
 import numpy as np
 import numpy.typing as npt
+import logging
 
 class Manipulator:
 
@@ -71,7 +72,19 @@ class Manipulator:
         velocity = np.asarray(velocity)
         for i, driver in enumerate(self.drivers):
             self.futures[i] = driver.move_with_constant_velocity(velocity[i])
-        positions, velocities = np.array(self._read_from_futures()).T
+        try:
+            positions, velocities = np.array(self._read_from_futures()).T
+        except Exception as e1:
+            logger = logging.getLogger('PATH')
+            logger.info("Stopping drives.")
+            try:
+                # Stopping drives if possibles.
+                for i, driver in enumerate(self.drivers):
+                    driver.move_with_constant_velocity([0, 0, 0])
+            except Exception as e2:
+                logger.error("Failed to stop drives.")
+                raise e2
+
         return positions, velocities
 
 
