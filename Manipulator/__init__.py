@@ -1,5 +1,5 @@
 from .Driver_Interface import IO, Motion_Commands, Realtime_Config_Commands
-from .Manipulator import Manipulator
+from .Manipulator import Manipulator, Telemetry
 import logging
 import os
 

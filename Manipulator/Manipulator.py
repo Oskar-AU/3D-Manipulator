@@ -7,9 +7,68 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 import logging
+from dataclasses import dataclass, field
 
 path_logger = logging.getLogger("PATH")
 
+
+@dataclass
+class Telemetry:
+    """
+    Telemetry data recording for 3D manipulator motion analysis.
+    
+    Data alignment: All arrays are temporally aligned at sample time t[i]:
+    - positions_mm[i]: Current position at time t[i]
+    - next_velocity_ms[i]: Velocity command that will be executed at time t[i]
+    - actual_velocities_ms[i]: Measured velocity at time t[i]
+    
+    This ensures proper alignment for velocity tracking analysis.
+    """
+    t: list = field(default_factory=list)                        # seconds
+    positions_mm: list = field(default_factory=list)             # (3,)
+    next_velocity_ms: list = field(default_factory=list)         # (3,)
+    actual_velocities_ms: list = field(default_factory=list)     # (3,)
+    enabled: bool = True                                         # Recording enable flag
+
+    def start_recording(self):
+        """Enable telemetry logging."""
+        self.enabled = True
+
+    def stop_recording(self):
+        """Disable telemetry logging."""
+        self.enabled = False
+
+    def clear(self):
+        """Clear recorded data."""
+        self.t.clear()
+        self.positions_mm.clear()
+        self.next_velocity_ms.clear()
+        self.actual_velocities_ms.clear()
+
+    def append(self, t_s, positions_mm, next_velocity_ms, actual_velocities_ms):
+        """
+        Append one telemetry sample (only if enabled).
+        
+        Args:
+            t_s: Time in seconds
+            positions_mm: Current position [x, y, z] in mm
+            next_velocity_ms: Next velocity command [vx, vy, vz] in m/s
+            actual_velocities_ms: Measured velocity [vx, vy, vz] in m/s
+        """
+        if not self.enabled:
+            return  # skip logging if disabled
+        self.t.append(float(t_s))
+        self.positions_mm.append(np.asarray(positions_mm, float).copy())
+        self.next_velocity_ms.append(np.asarray(next_velocity_ms, float).copy())
+        self.actual_velocities_ms.append(np.asarray(actual_velocities_ms, float).copy())
+
+    def to_arrays(self):
+        return (
+            np.asarray(self.t),
+            np.asarray(self.positions_mm),
+            np.asarray(self.next_velocity_ms),
+            np.asarray(self.actual_velocities_ms),
+        )
 
 class Manipulator:
 
@@ -21,7 +80,7 @@ class Manipulator:
             Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
         )
         self.futures: list[Future | None] = [None, None, None]
-
+        
     def _wait_for_response_on_all(self) -> None:
         for future in self.futures:
             try:
@@ -71,10 +130,11 @@ class Manipulator:
         for driver in self.drivers:
             driver.stop_stream()
 
+
     def move_all_with_constant_velocity(self, velocity: npt.ArrayLike, acceleration: npt.ArrayLike = None) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
         if acceleration is None:
-            acceleration = np.full_like(velocity, 1.0)  # Use safe default acceleration of 1.0 m/s²
+            acceleration = np.full_like(velocity, 1.0)
         else:
             acceleration = np.asarray(acceleration)
         for i, driver in enumerate(self.drivers):
@@ -94,46 +154,53 @@ class Manipulator:
 
         return positions, velocities
 
-    def path_with_velocity_tracking(self, step_function, phase_name: str = "Path Following", max_cycles: int = 10000, debug_interval: int = 50):
-        path_logger.info(f"Starting {phase_name} with velocity tracking...")
+
+    
+    def feedback_loop(self, step_function, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None):
+       
+        path_logger.info("Starting feedback loop with velocity tracking...")
+        
         cycle_count = 0
-        last_commanded_velocity_ms = np.zeros(3, float)  # Track our commanded velocity
+        last_commanded_velocity_ms = np.zeros(3, float)
+        last_commanded_acceleration_ms2 = np.ones(3, float)
+        
+        # Time tracking for telemetry
+        t0 = time.time()
         
         while True:
             try:
                 # Get current position and velocity state
-                try:
-                    # Command the last velocity to maintain motion while getting state
-                    positions_mm, actual_velocities_mm = self.move_all_with_constant_velocity(last_commanded_velocity_ms)
-                    current_pos_m = positions_mm * 1e-3  # Convert to meters
-                    current_vel_ms = actual_velocities_mm * 1e-3  # Convert to m/s
-                except Exception as e:
-                    path_logger.error(f"Error getting position/velocity: {e}")
-                    self.error_acknowledge()
-                    continue
-                
-                # Calculate next step using both position and velocity
-                next_velocity_ms, complete = step_function(current_pos_m, current_vel_ms)
+                positions_mm, actual_velocities_ms = self.move_all_with_constant_velocity(last_commanded_velocity_ms, last_commanded_acceleration_ms2)
+        
+                # Calculate next step
+                next_velocity_ms, complete = step_function(positions_mm, actual_velocities_ms)
+                #next_acceleration_ms2 = np.zeros(3, float)
+                next_acceleration_ms2 = np.ones(3, float)
+
+                # Record telemetry 
+                if telemetry is not None:
+                    t_now = time.time() - t0
+                    telemetry.append(t_now, positions_mm, next_velocity_ms, actual_velocities_ms)
                 
                 if complete:
-                    path_logger.info(f"{phase_name} completed!")
-                    self.move_all_with_constant_velocity(np.zeros(3))  # Stop
+                    path_logger.info("Path following completed!")
+                    self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
                     return True
                 
-                # Store the calculated velocity for the NEXT cycle (no immediate execution)
                 last_commanded_velocity_ms = next_velocity_ms.copy()
+                last_commanded_acceleration_ms2 = next_acceleration_ms2.copy()
                 
-                # Debug output at specified intervals
+                # Debug output
                 if cycle_count % debug_interval == 0:
-                    path_logger.info(f"Cycle {cycle_count}: pos={positions_mm}, vel_cmd={next_velocity_ms}")
+                    path_logger.info(f"Cycle {cycle_count}: pos={positions_mm}, vel_cmd={next_velocity_ms}, vel_meas={actual_velocities_ms}")
                 
                 cycle_count += 1
                 if cycle_count > max_cycles:
-                    path_logger.info(f"Timeout in {phase_name} after {max_cycles} cycles")
-                    self.move_all_with_constant_velocity(np.zeros(3))
+                    path_logger.info(f"Timeout after {max_cycles} cycles")
+                    self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
                     return False
                 
             except Exception as e:
-                path_logger.error(f"Error in {phase_name}: {e}")
-                self.move_all_with_constant_velocity(np.zeros(3))
+                path_logger.error(f"Error in feedback loop: {e}")
+                self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
                 return False
