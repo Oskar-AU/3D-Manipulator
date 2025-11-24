@@ -155,8 +155,8 @@ class Manipulator:
         path_logger.info("Starting feedback loop with velocity tracking...")
         
         cycle_count = 0
-        last_commanded_velocity = np.zeros([0]*len(self.drivers))
-        last_commanded_acceleration = np.ones([0]*len(self.drivers))
+        last_commanded_velocity = np.zeros(len(self.drivers))
+        last_commanded_acceleration = np.ones(len(self.drivers))
         
         # Time tracking for telemetry
         t0 = time.time()
