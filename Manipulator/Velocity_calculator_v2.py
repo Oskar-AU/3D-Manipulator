@@ -15,17 +15,18 @@ class Path_follower():
         self.min_velocity = min_velocity
         self.keypoints = path_keypoints
         self.current_pos = np.array(path_keypoints[0], dtype=np.float64)
-        self.demand_velocity = np.zeros(3)
-        self.current_vel = np.zeros(3) 
-        self.previous_vel = np.zeros(3)
+        self.demand_velocity = np.zeros(path_keypoints.shape[1])
+        self.current_vel = np.zeros(path_keypoints.shape[1]) 
+        self.previous_vel = np.zeros(path_keypoints.shape[1])
         self.time = 0
         self.delta_t = 0.1
-        self.previous_target = np.zeros(3)
+        self.previous_target = np.zeros(path_keypoints.shape[1])
         self.draw_keypoint_vectors()
 
     def draw_keypoint_vectors(self) -> None:
         n = self.keypoints.shape[0]-1
-        self.connecting_vectors = np.empty((n,3))
+        l = self.keypoints.shape[1]
+        self.connecting_vectors = np.empty((n,l))
         self.dist_vectors = np.empty(n)
 
         for i in range(n):
@@ -73,7 +74,7 @@ class Path_follower():
 
         n = self.dist_vectors.shape[0]
         inner_sum = 0
-        outer_sum = np.zeros(3)
+        outer_sum = np.zeros(self.connecting_vectors.shape[1])
         for i in range(k+1, n):
             for j in range(k + 1, i + 1):
                 if j == k+1:
@@ -123,7 +124,7 @@ class Path_follower():
         p_k = self.target-self.current_pos
         p_k_norm = np.linalg.norm(p_k)
         if p_k_norm == 0:
-            p_k_normalized == np.zeros(3)
+            p_k_normalized =  np.zeros(3)
         else:
             p_k_normalized = p_k/p_k_norm
 
@@ -151,7 +152,7 @@ class Path_follower():
         sign_vec = np.sign(t_inter)
 
         t_clipped = np.clip(abs(t_inter),None,self.delta_t)
-        t_vec = np.ones(3)*self.delta_t
+        t_vec = np.ones(self.current_vel.shape)*self.delta_t
         t_rest = t_vec-t_clipped
 
         p_inter = self.current_pos+self.current_vel*t_clipped+0.5*sign_vec*self.max_acceleration*t_clipped**2
@@ -203,7 +204,7 @@ class Path_follower():
 
         if t > 0.98:
             self.i += 1
-            if self.i+1 > self.keypoints.shape[0]:
+            if self.i > self.keypoints.shape[0]:
                 complete = True
             else:
                 self.target = self.keypoints[self.i+1]
