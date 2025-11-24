@@ -179,9 +179,9 @@ class Path_follower(Path_Base):
         current_position = np.asarray(current_position)
         complete = False
         if not hasattr(self, 'target'):
-            self.i = 1
+            self.i = 0
             self.target_number = self.i
-            self.previous_target = self.keypoints[self.i-1,:]
+            self.previous_target = current_position
             self.target = self.keypoints[self.i,:]
         
         self.current_pos = current_position
@@ -203,7 +203,7 @@ class Path_follower(Path_Base):
 
         #projection factor
         t = np.dot(w, d) / np.dot(d, d)
-        print(final_v,t)
+        print(self.current_pos, t, final_v)
         if t > 0.98:
             self.i += 1
             if self.i >= self.keypoints.shape[0]:
