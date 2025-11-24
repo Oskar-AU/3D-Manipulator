@@ -131,8 +131,10 @@ class Path_follower(Path_Base):
         if abs(total_velocity_vector).max() > self.max_velocity:
             total_normalized = total_velocity_vector/total_velocity_vector_norm
             final_velocity = self.max_velocity*total_normalized
-        elif total_velocity_vector_norm == 0:
+        elif total_velocity_vector_norm < self.min_velocity:
             final_velocity = p_k_normalized*self.min_velocity
+        else:
+            final_velocity = total_velocity_vector
 
         return final_velocity 
       
