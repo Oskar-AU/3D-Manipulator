@@ -168,7 +168,7 @@ class Manipulator:
         
                 # Calculate next step
                 next_velocity, complete = stepper(positions, actual_velocities)
-                next_acceleration = np.ones([0]*len(self.drivers))
+                next_acceleration = np.ones(len(self.drivers))
 
                 # Record telemetry 
                 if telemetry is not None:
@@ -178,6 +178,7 @@ class Manipulator:
                 if complete:
                     path_logger.info("Path following completed!")
                     self.move_all_with_constant_velocity([0]*len(self.drivers))
+                    return
                 
                 last_commanded_velocity = next_velocity.copy()
                 last_commanded_acceleration = next_acceleration.copy()
@@ -198,6 +199,7 @@ class Manipulator:
                     # Stopping drives if possibles.
                     for _, driver in enumerate(self.drivers):
                         driver.move_with_constant_velocity([0]*len(self.drivers))
+                        return
                 except Exception as e2:
                     logger.error("Failed to stop drives.")
                     raise e2

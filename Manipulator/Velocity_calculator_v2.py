@@ -170,7 +170,6 @@ class Path_follower(Path_Base):
         complete = False
         
         while not complete:
-            print(self.current_pos)
             final_v,complete = self(self.current_pos, None)
             self.send_to_manipulator(final_v)
             self.get_current_values()
@@ -204,7 +203,7 @@ class Path_follower(Path_Base):
 
         #projection factor
         t = np.dot(w, d) / np.dot(d, d)
-
+        print(final_v,t)
         if t > 0.98:
             self.i += 1
             if self.i >= self.keypoints.shape[0]:
