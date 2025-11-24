@@ -73,14 +73,22 @@ class Telemetry:
 
 class Manipulator:
 
-    def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5):
+    def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5, enable_drive_1: bool = True, enable_drive_2: bool = True, enable_drive_3: bool = True):
         self.datagram = IO.linUDP()
-        self.drivers = (
-            Driver('192.168.131.251', 'DRIVE_1', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
-            Driver('192.168.131.252', 'DRIVE_2', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None)),
-            Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
-        )
-        self.futures: list[Future | None] = [None, None, None]
+        self.drivers: list[Driver] = []
+        if enable_drive_1:
+            self.drivers.append(
+                Driver('192.168.131.251', 'DRIVE_1', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+            )
+        if enable_drive_2:
+            self.drivers.append(
+                Driver('192.168.131.252', 'DRIVE_2', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+            )
+        if enable_drive_3:
+            self.drivers.append(
+                Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+            )
+        self.futures: list[Future | None] = [None]*len(self.drivers)
         
     def _wait_for_response_on_all(self) -> None:
         for future in self.futures:
@@ -139,20 +147,7 @@ class Manipulator:
             acceleration = np.asarray(acceleration)
         for i, driver in enumerate(self.drivers):
             self.futures[i] = driver.move_with_constant_velocity(velocity[i])
-        try:
-            positions, velocities = np.array(self._read_from_futures()).T
-        except Exception as e1:
-            logger = logging.getLogger('PATH')
-            logger.info("Stopping drives.")
-            try:
-                # Stopping drives if possibles.
-                for i, driver in enumerate(self.drivers):
-                    driver.move_with_constant_velocity([0, 0, 0])
-            except Exception as e2:
-                logger.error("Failed to stop drives.")
-                raise e2
-            raise e1
-
+        positions, velocities = np.array(self._read_from_futures()).T
         return positions, velocities
 
     def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
@@ -160,38 +155,50 @@ class Manipulator:
         path_logger.info("Starting feedback loop with velocity tracking...")
         
         cycle_count = 0
-        last_commanded_velocity = np.zeros(3, float)
-        last_commanded_acceleration = np.ones(3, float)
+        last_commanded_velocity = np.zeros([0]*len(self.drivers))
+        last_commanded_acceleration = np.ones([0]*len(self.drivers))
         
         # Time tracking for telemetry
         t0 = time.time()
         
         while True:
-            # Get current position and velocity state
-            positions, actual_velocities = self.move_all_with_constant_velocity(last_commanded_velocity, last_commanded_acceleration)
-    
-            # Calculate next step
-            next_velocity, complete = stepper(positions, actual_velocities)
-            #next_acceleration_ms2 = np.zeros(3, float)
-            next_acceleration = np.ones(3, float)
+            try:
+                # Get current position and velocity state
+                positions, actual_velocities = self.move_all_with_constant_velocity(last_commanded_velocity, last_commanded_acceleration)
+        
+                # Calculate next step
+                next_velocity, complete = stepper(positions, actual_velocities)
+                next_acceleration = np.ones([0]*len(self.drivers))
 
-            # Record telemetry 
-            if telemetry is not None:
-                t_now = time.time() - t0
-                telemetry.append(t_now, positions, next_velocity, actual_velocities)
+                # Record telemetry 
+                if telemetry is not None:
+                    t_now = time.time() - t0
+                    telemetry.append(t_now, positions, next_velocity, actual_velocities)
+                
+                if complete:
+                    path_logger.info("Path following completed!")
+                    self.move_all_with_constant_velocity([0]*len(self.drivers))
+                
+                last_commanded_velocity = next_velocity.copy()
+                last_commanded_acceleration = next_acceleration.copy()
+                
+                # Debug output
+                if cycle_count % debug_interval == 0:
+                    path_logger.debug(f"Cycle {cycle_count}: pos={positions}, vel_cmd={next_velocity}, actual_vel={actual_velocities}.")
+                
+                cycle_count += 1
+                if cycle_count > max_cycles:
+                    path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
+                    self.move_all_with_constant_velocity([0]*len(self.drivers))
             
-            if complete:
-                path_logger.info("Path following completed!")
-                self.move_all_with_constant_velocity(np.zeros(3), np.ones(3))
-            
-            last_commanded_velocity = next_velocity.copy()
-            last_commanded_acceleration = next_acceleration.copy()
-            
-            # Debug output
-            if cycle_count % debug_interval == 0:
-                path_logger.debug(f"Cycle {cycle_count}: pos={positions}, vel_cmd={next_velocity}, actual_vel={actual_velocities}.")
-            
-            cycle_count += 1
-            if cycle_count > max_cycles:
-                path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
-                self.move_all_with_constant_velocity([0, 0, 0])
+            except Exception as e1:
+                logger = logging.getLogger('PATH')
+                logger.info("Stopping drives.")
+                try:
+                    # Stopping drives if possibles.
+                    for _, driver in enumerate(self.drivers):
+                        driver.move_with_constant_velocity([0]*len(self.drivers))
+                except Exception as e2:
+                    logger.error("Failed to stop drives.")
+                    raise e2
+                raise e1
