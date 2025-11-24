@@ -180,10 +180,10 @@ class Path_follower(Path_Base):
         current_position = np.asarray(current_position)
         complete = False
         if not hasattr(self, 'target'):
-            self.i = 0
+            self.i = 1
             self.target_number = self.i
-            self.previous_target = self.keypoints[self.i,:]
-            self.target = self.keypoints[self.i+1,:]
+            self.previous_target = self.keypoints[self.i-1,:]
+            self.target = self.keypoints[self.i,:]
         
         self.current_pos = current_position
 
@@ -207,11 +207,11 @@ class Path_follower(Path_Base):
 
         if t > 0.98:
             self.i += 1
-            if self.i > self.keypoints.shape[0]:
+            if self.i >= self.keypoints.shape[0]:
                 complete = True
             else:
-                self.target = self.keypoints[self.i+1]
-                self.previous_target = self.keypoints[self.i]
+                self.target = self.keypoints[self.i]
+                self.previous_target = self.keypoints[self.i-1]
                 self.target_number = self.i
 
         return final_v, complete
