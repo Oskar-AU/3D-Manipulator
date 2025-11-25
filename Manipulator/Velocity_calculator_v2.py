@@ -6,7 +6,15 @@ from .Path_follower import Path_Base
 
 
 class Path_follower(Path_Base):
-    def __init__(self, path_keypoints: npt.ArrayLike,max_velocity: float,max_acceleration: float,min_velocity: float,projected_total_weight: float=1.0, projected_exponent_weight: float=0.5, off_path_weight: float=1.0) -> None:
+    def __init__(self, path_keypoints: npt.ArrayLike,
+                 max_velocity: float,
+                 max_acceleration: float,
+                 min_velocity: float = 0.001,
+                 projected_total_weight: float = 1.0, 
+                 projected_exponent_weight: float = 0.5, 
+                 off_path_weight: float = 1.0,
+                 next_target_tol: float = 0.001
+                 ) -> None:
         self.projected_total_weight = projected_total_weight
         self.projected_exponent_weight = projected_exponent_weight
         self.off_path_weight = off_path_weight
@@ -14,8 +22,8 @@ class Path_follower(Path_Base):
         self.max_velocity = max_velocity
         self.max_acceleration = max_acceleration
         self.min_velocity = min_velocity
+        self.next_target_tol = next_target_tol
         self.keypoints = path_keypoints
-        self.current_pos = np.array(path_keypoints[0], dtype=np.float64)
         self.demand_velocity = np.zeros(path_keypoints.shape[1])
         self.current_vel = np.zeros(path_keypoints.shape[1]) 
         self.previous_vel = np.zeros(path_keypoints.shape[1])
@@ -46,12 +54,12 @@ class Path_follower(Path_Base):
         p_k_norm = np.linalg.norm(p_k)
 
         if a_norm == 0:
-            normalized_a = np.zeros(3)
+            normalized_a = np.zeros(self.keypoints.shape[1])
         else:
             normalized_a = aggregated_vector/a_norm
 
         if p_k_norm == 0:
-            normalized_p_k = np.zeros(3)
+            normalized_p_k = np.zeros(self.keypoints.shape[1])
         else:
             normalized_p_k = p_k/p_k_norm
 
@@ -59,7 +67,7 @@ class Path_follower(Path_Base):
         var1_norm = np.linalg.norm(var1)
 
         if var1_norm == 0:
-            projection_vec = np.zeros(3)
+            projection_vec = np.zeros(self.keypoints.shape[1])
         else:
             projection_vec = normalized_p_k*np.linalg.norm(a_norm*(var1/var1_norm))
 
@@ -168,11 +176,12 @@ class Path_follower(Path_Base):
     def follow_path(self):
      
         complete = False
-        
+        self.current_pos = np.array(self.keypoints[0], dtype=np.float64) + np.random.normal(0, 1e-6, self.keypoints.shape[1])
         while not complete:
-            final_v,complete = self(self.current_pos, None)
+            final_v, complete = self(self.current_pos, None)
             self.send_to_manipulator(final_v)
             self.get_current_values()
+            print(self.current_pos)
             time.sleep(0.1)
 
     def __call__(self, current_position: npt.ArrayLike, _) -> Tuple[np.ndarray, bool]:
@@ -191,27 +200,31 @@ class Path_follower(Path_Base):
         total_velocity_vector = self.off_path_vector(projected_vector)
         final_v = self.clip_vector(total_velocity_vector)
         
-        p1 = self.previous_target
-        p2 = self.target
-        p3 = self.current_pos
+        while True:
+            p1 = self.previous_target
+            p2 = self.target
+            p3 = self.current_pos
 
-        #line distance
-        d = p2 - p1
+            #line distance
+            previous_to_target = p2 - p1
 
-        #p1 to p3 vector
-        w = p3 - p1
+            #p1 to p3 vector
+            previous_to_current_vector = p3 - p1
 
-        #projection factor
-        t = np.dot(w, d) / np.dot(d, d)
-        print(self.current_pos, t, final_v)
-        if t > 0.98:
-            self.i += 1
-            if self.i >= self.keypoints.shape[0]:
-                complete = True
+            #projection factor
+            relative_dis_to_target = np.dot(previous_to_current_vector, previous_to_target) / np.dot(previous_to_target, previous_to_target)
+
+            if relative_dis_to_target >= 1 or np.linalg.norm(p2 - p3) <= self.next_target_tol:
+                self.i += 1
+                if self.i >= self.keypoints.shape[0]:
+                    complete = True
+                    break
+                else:
+                    self.target = self.keypoints[self.i]
+                    self.previous_target = self.keypoints[self.i-1]
+                    self.target_number = self.i
             else:
-                self.target = self.keypoints[self.i]
-                self.previous_target = self.keypoints[self.i-1]
-                self.target_number = self.i
+                break
 
         return final_v, complete
     
