@@ -179,7 +179,7 @@ class Manipulator:
             self.futures[i] = driver.go_to_pos(position[i], velocity[i], acceleration[i])
         return np.array(self._read_from_futures()).T
 
-    def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
+    def feedback_loop(self, stepper: Path_Base, max_cycles: int | None = None, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         
@@ -224,9 +224,11 @@ class Manipulator:
                     path_logger.debug(f"Cycle {cycle_count}: pos={positions}, vel_cmd={next_velocity}, actual_vel={actual_velocities}.")
                 
                 cycle_count += 1
-                if cycle_count > max_cycles:
+
+                if cycle_count is not None and cycle_count > max_cycles:
                     path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
                     self.move_all_with_constant_velocity([0]*len(self.drivers))
+                    return
             
             except Exception as e1:
                 logger = logging.getLogger('PATH')
