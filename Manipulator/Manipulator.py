@@ -100,9 +100,9 @@ class Manipulator:
     def _read_from_futures(self) -> list[Any]:
         return [future.result() for future in self.futures]
 
-    def home(self) -> None:
+    def home(self, timeout: float = 30.0, overwrite_already_homed_check: bool = False) -> None:
         for i, driver in enumerate(self.drivers):
-            self.futures[i] = driver.home()
+            self.futures[i] = driver.home(timeout, overwrite_already_homed_check)
         self._wait_for_response_on_all()
 
     def switch_on(self) -> None:
@@ -110,9 +110,9 @@ class Manipulator:
             self.futures[i] = driver.switch_on()
         self._wait_for_response_on_all()
 
-    def error_acknowledge(self, cascade: bool = True) -> None:
+    def error_acknowledge(self) -> None:
         for i, driver in enumerate(self.drivers):
-            self.futures[i] = driver.acknowledge_error(cascade)
+            self.futures[i] = driver.acknowledge_error()
         self._wait_for_response_on_all()
 
     def start_stream(self, stream: Stream) -> None:
