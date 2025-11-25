@@ -142,11 +142,11 @@ class Manipulator:
     def move_all_with_constant_velocity(self, velocity: npt.ArrayLike, acceleration: npt.ArrayLike | None = None) -> tuple[npt.NDArray, npt.NDArray]:
         velocity = np.asarray(velocity)
         if acceleration is None:
-            acceleration = np.full_like(velocity, 1.0)
+            acceleration = np.full_like(velocity, 10.0)
         else:
             acceleration = np.asarray(acceleration)
         for i, driver in enumerate(self.drivers):
-            self.futures[i] = driver.move_with_constant_velocity(velocity[i])
+            self.futures[i] = driver.move_with_constant_velocity(velocity[i], acceleration[i])
         positions, velocities = np.array(self._read_from_futures()).T
         return positions, velocities
 
