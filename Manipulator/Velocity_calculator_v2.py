@@ -252,7 +252,7 @@ class Path_follower(Path_Base):
         
         self.current_pos = current_position
 
-        a_vec = self.aggregating_vector()
+        a_vec = self.aggregating_vector_update()
         projected_vector = self.full_angle_projection_vector(a_vec)
         total_velocity_vector = self.off_path_vector(projected_vector)
         final_v = self.clip_vector_full_angle(total_velocity_vector)
