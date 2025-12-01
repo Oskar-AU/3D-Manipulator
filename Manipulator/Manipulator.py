@@ -179,13 +179,13 @@ class Manipulator:
             self.futures[i] = driver.go_to_pos(position[i], velocity[i], acceleration[i])
         return np.array(self._read_from_futures()).T
 
-    def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
+    def feedback_loop(self, stepper: Path_Base, max_cycles: int | None = None, debug_interval: int = 1, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         
         cycle_count = 0
         last_commanded_velocity = np.zeros(len(self.drivers))
-        last_commanded_acceleration = np.ones(len(self.drivers))
+        last_commanded_acceleration = np.ones(len(self.drivers))*3
         
         # Time tracking for telemetry
         t0 = time.time()
@@ -204,7 +204,7 @@ class Manipulator:
         
                 # Calculate next step
                 next_velocity, complete = stepper(positions, actual_velocities)
-                next_acceleration = np.ones(len(self.drivers))
+                next_acceleration = np.ones(len(self.drivers))*3
 
                 # Record telemetry 
                 if telemetry is not None:
@@ -221,12 +221,14 @@ class Manipulator:
                 
                 # Debug output
                 if cycle_count % debug_interval == 0:
-                    path_logger.debug(f"Cycle {cycle_count}: pos={positions}, vel_cmd={next_velocity}, actual_vel={actual_velocities}.")
+                    path_logger.debug(f"Cycle {cycle_count}: current_pos={positions}, cmd_vel={next_velocity}, actual_vel={actual_velocities}.")
                 
                 cycle_count += 1
-                if cycle_count > max_cycles:
+
+                if cycle_count is not None and cycle_count > max_cycles:
                     path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
                     self.move_all_with_constant_velocity([0]*len(self.drivers))
+                    return
             
             except Exception as e1:
                 logger = logging.getLogger('PATH')

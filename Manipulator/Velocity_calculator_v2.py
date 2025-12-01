@@ -72,6 +72,15 @@ class Path_follower(Path_Base):
             projection_vec = normalized_p_k*np.linalg.norm(a_norm*(var1/var1_norm))
 
         return projection_vec
+    
+    def full_angle_projection_vector(self, aggregated_vector: npt.ArrayLike) -> np.array:
+
+        p_k = self.target - self.current_pos
+
+        projected_vector = (np.dot(aggregated_vector, p_k)/np.linalg.norm(p_k)**2)*p_k
+
+        return projected_vector
+
 
 
     def aggregating_vector(self):
@@ -133,11 +142,11 @@ class Path_follower(Path_Base):
         p_k = self.target-self.current_pos
         p_k_norm = np.linalg.norm(p_k)
         if p_k_norm == 0:
-            p_k_normalized = np.zeros(3)
+            p_k_normalized = np.zeros(self.keypoints.shape[1])
         else:
             p_k_normalized = p_k/p_k_norm
-
-        if abs(total_velocity_vector).max() > self.max_velocity:
+        
+        if np.abs(total_velocity_vector).max() > self.max_velocity:
             total_normalized = total_velocity_vector/total_velocity_vector_norm
             final_velocity = self.max_velocity*total_normalized
         elif total_velocity_vector_norm < self.min_velocity:
@@ -151,7 +160,33 @@ class Path_follower(Path_Base):
 
 
 
+        delta = final_velocity - self.previous_vel
+
+        if abs(delta).max() < 0.0001:
+            final_velocity = self.previous_vel
+        
+
+
         return final_velocity 
+    
+    def clip_vector_full_angle(self,total_velocity_vector: npt.ArrayLike) -> np.ndarray:
+        total_velocity_vector = np.asarray(total_velocity_vector)
+
+        p_k = self.target-self.current_pos
+        p_k_norm = np.linalg.norm(p_k)
+        p_k_normalized = p_k/p_k_norm
+
+        dot_product = np.dot(total_velocity_vector, p_k)
+
+        if dot_product < 0:
+            final_velocity = self.min_velocity*p_k_normalized
+            print('hej')
+        elif np.abs(total_velocity_vector).max() > self.max_velocity:
+            final_velocity = self.max_velocity*p_k_normalized
+        else:
+            final_velocity = total_velocity_vector
+
+        return final_velocity
       
 
     def send_to_manipulator(self,v: npt.ArrayLike) -> None:
@@ -202,9 +237,10 @@ class Path_follower(Path_Base):
         self.current_pos = current_position
 
         a_vec = self.aggregating_vector()
-        projected_vector = self.projecting_vector(a_vec)
+        projected_vector = self.full_angle_projection_vector(a_vec)
         total_velocity_vector = self.off_path_vector(projected_vector)
-        final_v = self.clip_vector(total_velocity_vector)
+        final_v = self.clip_vector_full_angle(total_velocity_vector)
+        self.previous_vel = final_v
         
         while True:
             p1 = self.previous_target
