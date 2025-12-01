@@ -15,6 +15,7 @@ class Path_follower(Path_Base):
                  projected_exponent_weight: float = 0.5, 
                  off_path_weight: float = 1.0,
                  next_target_tol: float = 0.001,
+                 end_vector_weight: float = 1,
                  telemetry: Telemetry | None = None
                  ) -> None:
         self.projected_total_weight = projected_total_weight
@@ -26,6 +27,7 @@ class Path_follower(Path_Base):
         self.min_velocity = min_velocity
         self.next_target_tol = next_target_tol
         self.keypoints = path_keypoints
+        self.end_vector_weight = end_vector_weight
         self.demand_velocity = np.zeros(path_keypoints.shape[1])
         self.current_vel = np.zeros(path_keypoints.shape[1]) 
         self.previous_vel = np.zeros(path_keypoints.shape[1])
@@ -34,6 +36,23 @@ class Path_follower(Path_Base):
         self.previous_target = np.zeros(path_keypoints.shape[1])
         self.telemetry = telemetry
         self.draw_keypoint_vectors()
+        self.add_end_vector()
+
+    def add_end_vector(self):
+        second_last_row = self.keypoints[-2]
+        last_row = self.keypoints[-1]
+        keypoints = self.keypoints.copy()
+
+        end_vector = second_last_row - last_row
+
+        end_norm = np.linalg.norm(end_vector)
+        end_normalized = end_vector/end_norm
+
+        weighted_end = self.end_vector_weight*end_normalized
+
+        self.keypoints = np.vstack([keypoints, weighted_end])
+    
+        
 
     def draw_keypoint_vectors(self) -> None:
         n = self.keypoints.shape[0]-1
@@ -281,7 +300,7 @@ class Path_follower(Path_Base):
 
             if relative_dis_to_target >= 1 or np.linalg.norm(p2 - p3) <= self.next_target_tol:
                 self.i += 1
-                if self.i >= self.keypoints.shape[0]:
+                if self.i + 1>= self.keypoints.shape[0]:
                     complete = True
                     break
                 else:
