@@ -104,6 +104,32 @@ class Path_follower(Path_Base):
 
         a_vec = total_weight*(p_k + outer_sum)
         return a_vec
+    
+
+    def aggregating_vector_update(self):
+        total_weight = self.projected_total_weight
+        exponent_weight = self.projected_exponent_weight
+        k = self.target_number
+        p_k = self.target-self.current_pos
+        p_k_dist = np.linalg.norm(p_k)
+
+        n = self.dist_vectors.shape[0]
+
+        exponent_sum = 0
+        future_points_sum = 0
+        for i in range(k+1, n):
+            p_i = self.connecting_vectors[i]
+            for j in range(k, i):
+                if j == k:
+                    exponent_sum = p_k_dist
+                else:
+                    exponent_sum += self.dist_vectors[j]
+            future_points_sum += p_i*np.exp(-(1/exponent_weight)*exponent_sum)
+            exponent_sum = 0
+        
+        a_vec = total_weight*(p_k+future_points_sum)
+
+        return a_vec
                 
 
     def off_path_vector(self,projected_vector: npt.ArrayLike) -> np.ndarray:
