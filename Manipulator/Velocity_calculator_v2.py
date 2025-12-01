@@ -144,6 +144,12 @@ class Path_follower(Path_Base):
             final_velocity = p_k_normalized*self.min_velocity
         else:
             final_velocity = total_velocity_vector
+        
+        for i in range(final_velocity.shape[0]):
+            if final_velocity[i] < 0.0001:
+                final_velocity[i] = 0
+
+
 
         return final_velocity 
       
