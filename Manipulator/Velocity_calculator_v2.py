@@ -9,7 +9,7 @@ from .Manipulator import Telemetry
 class Path_follower(Path_Base):
     def __init__(self, path_keypoints: npt.ArrayLike,
                  max_velocity: float,
-                 max_acceleration: float,
+                 max_acceleration: float = 1,
                  min_velocity: float = 0.001,
                  projected_total_weight: float = 1.0, 
                  projected_exponent_weight: float = 0.5, 
@@ -116,26 +116,24 @@ class Path_follower(Path_Base):
         p_k = self.target-self.current_pos
         p_k_dist = np.linalg.norm(p_k)
 
-        n = self.dist_vectors.shape[0]
+        n = self.keypoints.shape[0]
 
-        exponent_sum = 0
         future_points_sum = 0
-        for i in range(k+1, n):
-            p_i = self.connecting_vectors[i]
+        for i in range(k + 1, n):
+            p_i = self.connecting_vectors[i - 1]
             for j in range(k, i):
                 if j == k:
                     exponent_sum = p_k_dist
                 else:
-                    exponent_sum += self.dist_vectors[j]
+                    exponent_sum += self.dist_vectors[j - 1]
             future_points_sum += p_i*np.exp(-(1/exponent_weight)*exponent_sum)
-            exponent_sum = 0
         
         a_vec = total_weight*(p_k+future_points_sum)
 
         return a_vec
                 
 
-    def off_path_vector(self,projected_vector: npt.ArrayLike) -> np.ndarray:
+    def off_path_vector(self, projected_vector: npt.ArrayLike) -> np.ndarray:
         projected_vector = np.asarray(projected_vector)
         off_path_factor = self.off_path_weight
         p1 = self.previous_target
@@ -186,7 +184,7 @@ class Path_follower(Path_Base):
 
         return final_velocity 
     
-    def clip_vector_full_angle(self,total_velocity_vector: npt.ArrayLike) -> np.ndarray:
+    def clip_vector_full_angle(self, total_velocity_vector: npt.ArrayLike) -> np.ndarray:
         total_velocity_vector = np.asarray(total_velocity_vector)
 
         p_k = self.target-self.current_pos
@@ -195,17 +193,14 @@ class Path_follower(Path_Base):
 
         dot_product = np.dot(total_velocity_vector, p_k)
 
-        if dot_product < self.min_velocity:
+        velocity_projected_on_path = dot_product / p_k_norm**2 * p_k
+
+        if np.linalg.norm(velocity_projected_on_path) < self.min_velocity or dot_product < 0:
             final_velocity = self.min_velocity*p_k_normalized
         elif np.abs(total_velocity_vector).max() > self.max_velocity:
             final_velocity = self.max_velocity*p_k_normalized
         else:
             final_velocity = total_velocity_vector
-
-        delta_v = final_velocity - self.previous_vel
-        delta_v_norm = np.linalg.norm(delta_v)
-        if delta_v_norm < 0.001:
-            final_velocity = self.previous_vel.copy()
 
         return final_velocity
       
