@@ -9,6 +9,8 @@ import numpy.typing as npt
 import logging
 from dataclasses import dataclass, field
 from .Path_follower import Path_Base
+from pathlib import Path
+import pandas as pd
 
 path_logger = logging.getLogger("PATH")
 
@@ -25,10 +27,11 @@ class Telemetry:
     
     This ensures proper alignment for velocity tracking analysis.
     """
-    t: list = field(default_factory=list)                        # seconds
-    positions_mm: list = field(default_factory=list)             # (3,)
-    next_velocity_ms: list = field(default_factory=list)         # (3,)
-    actual_velocities_ms: list = field(default_factory=list)     # (3,)
+    data: dict[str, list[Any]] = field(default_factory=dict)
+    # t: list = field(default_factory=list)                        # seconds
+    # positions_mm: list = field(default_factory=list)             # (3,)
+    # next_velocity_ms: list = field(default_factory=list)         # (3,)
+    # actual_velocities_ms: list = field(default_factory=list)     # (3,)
     enabled: bool = True                                         # Recording enable flag
 
     def start_recording(self):
@@ -39,37 +42,30 @@ class Telemetry:
         """Disable telemetry logging."""
         self.enabled = False
 
-    def clear(self):
-        """Clear recorded data."""
-        self.t.clear()
-        self.positions_mm.clear()
-        self.next_velocity_ms.clear()
-        self.actual_velocities_ms.clear()
-
-    def append(self, t_s, positions_mm, next_velocity_ms, actual_velocities_ms):
+    def append(self, key: str, value: Any) -> None:
         """
         Append one telemetry sample (only if enabled).
         
-        Args:
-            t_s: Time in seconds
-            positions_mm: Current position [x, y, z] in mm
-            next_velocity_ms: Next velocity command [vx, vy, vz] in m/s
-            actual_velocities_ms: Measured velocity [vx, vy, vz] in m/s
         """
         if not self.enabled:
             return  # skip logging if disabled
-        self.t.append(float(t_s))
-        self.positions_mm.append(np.asarray(positions_mm, float).copy())
-        self.next_velocity_ms.append(np.asarray(next_velocity_ms, float).copy())
-        self.actual_velocities_ms.append(np.asarray(actual_velocities_ms, float).copy())
+        if self.data.get(key) is None:
+            self.data.update({key: [value]})
+        else:
+            self.data[key].append(value)
 
-    def to_arrays(self):
-        return (
-            np.asarray(self.t),
-            np.asarray(self.positions_mm),
-            np.asarray(self.next_velocity_ms),
-            np.asarray(self.actual_velocities_ms),
-        )
+    def export_to_csv(self, path: Path | str) -> None:
+        df = pd.DataFrame()
+        for key, value in self.data.items():
+            value = np.asarray(value)
+            if value.ndim == 1:
+                df[key] = value
+            elif value.ndim == 2:
+                for i, column in enumerate(value.T):
+                    df[f"{key}_{i}"] = column
+            else:
+                raise ValueError(f"Cannot export data structure with dim {value.ndim}.")
+        df.to_csv(path, index=False)
 
 class Manipulator:
 
@@ -209,7 +205,10 @@ class Manipulator:
                 # Record telemetry 
                 if telemetry is not None:
                     t_now = time.time() - t0
-                    telemetry.append(t_now, positions, next_velocity, actual_velocities)
+                    telemetry.append('t', t_now)
+                    telemetry.append('positions', positions)
+                    telemetry.append('next_demand_velocity', next_velocity)
+                    telemetry.append('actual_velocity', actual_velocities)
                 
                 if complete:
                     path_logger.info("Path following completed!")
@@ -225,7 +224,7 @@ class Manipulator:
                 
                 cycle_count += 1
 
-                if cycle_count is not None and cycle_count > max_cycles:
+                if cycle_count is not None and max_cycles is not None and cycle_count > max_cycles:
                     path_logger.info(f"Max cycles of {max_cycles} cycles reached. Stopping drivers.")
                     self.move_all_with_constant_velocity([0]*len(self.drivers))
                     return

@@ -3,6 +3,7 @@ import numpy.typing as npt
 from typing import Tuple
 import time
 from .Path_follower import Path_Base
+from .Manipulator import Telemetry
 
 
 class Path_follower(Path_Base):
@@ -13,7 +14,8 @@ class Path_follower(Path_Base):
                  projected_total_weight: float = 1.0, 
                  projected_exponent_weight: float = 0.5, 
                  off_path_weight: float = 1.0,
-                 next_target_tol: float = 0.001
+                 next_target_tol: float = 0.001,
+                 telemetry: Telemetry | None = None
                  ) -> None:
         self.projected_total_weight = projected_total_weight
         self.projected_exponent_weight = projected_exponent_weight
@@ -30,6 +32,7 @@ class Path_follower(Path_Base):
         self.time = 0
         self.delta_t = 0.1
         self.previous_target = np.zeros(path_keypoints.shape[1])
+        self.telemetry = telemetry
         self.draw_keypoint_vectors()
 
     def draw_keypoint_vectors(self) -> None:
@@ -241,6 +244,13 @@ class Path_follower(Path_Base):
         final_v = self.clip_vector_full_angle(total_velocity_vector)
         self.previous_vel = final_v
         
+        if self.telemetry is not None:
+            self.telemetry.append('aggregating_vector', a_vec)
+            self.telemetry.append('projected_vector', projected_vector)
+            self.telemetry.append('total_velocity_vector', total_velocity_vector)
+            self.telemetry.append('target_pos', self.target)
+            self.telemetry.append('previous_target_pos', self.previous_target)
+
         while True:
             p1 = self.previous_target
             p2 = self.target
