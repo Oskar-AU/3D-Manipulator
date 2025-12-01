@@ -78,15 +78,39 @@ class Manipulator:
         self.drivers: list[Driver] = []
         if enable_drive_1:
             self.drivers.append(
-                Driver('192.168.131.251', 'DRIVE_1', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+                Driver('192.168.131.251', 
+                    'DRIVE_1', 
+                    datagram=self.datagram, 
+                    response_timeout=driver_response_timeout, 
+                    driver_max_send_attempts=driver_max_send_attempts, 
+                    min_pos=None,
+                    max_pos=None,
+                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                )
             )
         if enable_drive_2:
             self.drivers.append(
-                Driver('192.168.131.252', 'DRIVE_2', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+                Driver('192.168.131.252', 
+                    'DRIVE_2', 
+                    datagram=self.datagram, 
+                    response_timeout=driver_response_timeout, 
+                    driver_max_send_attempts=driver_max_send_attempts, 
+                    min_pos=0,
+                    max_pos=0.18,
+                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                )
             )
         if enable_drive_3:
             self.drivers.append(
-                Driver('192.168.131.253', 'DRIVE_3', self.datagram, driver_response_timeout, driver_max_send_attempts, (Command_Parameters.velocity_signed, None, None, None))
+                Driver('192.168.131.253', 
+                    'DRIVE_3', 
+                    datagram=self.datagram, 
+                    response_timeout=driver_response_timeout, 
+                    driver_max_send_attempts=driver_max_send_attempts, 
+                    min_pos=0,
+                    max_pos=0.185,
+                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                )
             )
         self.futures: list[Future | None] = [None]*len(self.drivers)
         
@@ -150,6 +174,11 @@ class Manipulator:
         positions, velocities = np.array(self._read_from_futures()).T
         return positions, velocities
 
+    def go_to_pos(self, position: npt.ArrayLike, velocity: npt.ArrayLike, acceleration: npt.ArrayLike | None = None) -> tuple[npt.NDArray, npt.NDArray]:
+        for i, driver in enumerate(self.drivers):
+            self.futures[i] = driver.go_to_pos(position[i], velocity[i], acceleration[i])
+        return np.array(self._read_from_futures()).T
+
     def feedback_loop(self, stepper: Path_Base, max_cycles: int = 20000, debug_interval: int = 50, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
@@ -164,7 +193,14 @@ class Manipulator:
         while True:
             try:
                 # Get current position and velocity state
-                positions, actual_velocities = self.move_all_with_constant_velocity(last_commanded_velocity, last_commanded_acceleration)
+                position = np.empty(len(self.drivers))
+                for i, driver in enumerate(self.drivers):
+                    position[i] = driver.min_pos if last_commanded_velocity < 0.0 else driver.max_pos
+                positions, actual_velocities = self.go_to_pos(
+                    position,
+                    np.abs(last_commanded_velocity), 
+                    np.abs(last_commanded_acceleration)
+                )
         
                 # Calculate next step
                 next_velocity, complete = stepper(positions, actual_velocities)

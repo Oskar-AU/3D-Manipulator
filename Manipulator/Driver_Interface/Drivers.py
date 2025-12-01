@@ -31,8 +31,12 @@ class Driver:
                  datagram: IO.linUDP,
                  response_timeout: float,
                  max_send_attempts: int,
+                 min_pos: float,
+                 max_pos: float,
                  monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None),
                  ) -> None:
+        self.min_pos = min_pos
+        self.max_pos = max_pos
         self.IP = IP
         self.name = name
         self.datagram = datagram
@@ -446,6 +450,22 @@ class Driver:
         else:
             motion_CMD = Motion_Commands.VAI_Stop()
 
+        response_def = IO.Response(actual_pos=True, monitoring_channel=True)
+        request = IO.Request(response_def, MC_interface=motion_CMD)
+        response = self.send(request)
+
+        try:
+            return response.actual_pos, response.monitoring_channel['velocity']
+        except KeyError:
+            raise Monitoring_Channel_Missing_Parameter_Error('velocity')
+        
+    @run_on_driver_thread
+    @ignored_if_awaiting_error_acknowledgement
+    def go_to_pos(self, position: float, velocity: float, acceleration: float) -> tuple[float, float]:
+        if velocity < 0.0 or acceleration < 0.0:
+            self.logger.error("go_to_pos recieved signed velocity or acceleration.")
+            raise ValueError("go_to_pos recieved signed velocity or acceleration.")
+        motion_CMD = Motion_Commands.VAI_go_to_pos(position, velocity, acceleration, acceleration)
         response_def = IO.Response(actual_pos=True, monitoring_channel=True)
         request = IO.Request(response_def, MC_interface=motion_CMD)
         response = self.send(request)

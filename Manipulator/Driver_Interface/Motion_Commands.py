@@ -59,9 +59,9 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
         super().__init__(
             (
                 Command_Parameters.target_position,
-                Command_Parameters.maximal_velocity,
-                Command_Parameters.acceleration_not_signed,
-                Command_Parameters.deceleration
+                Command_Parameters.velocity_unsigned,
+                Command_Parameters.acceleration_unsigned,
+                Command_Parameters.deceleration_unsigned
             ),
             (
                 target_position,
@@ -108,7 +108,7 @@ class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motio
             super().__init__(
                 (
                     Command_Parameters.demand_position,
-                    Command_Parameters.demand_velocity
+                    Command_Parameters.velocity_signed
                 ),
                 (
                     demand_position,
@@ -135,8 +135,8 @@ class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Moti
         super().__init__(
             (
                 Command_Parameters.demand_position,
-                Command_Parameters.demand_velocity,
-                Command_Parameters.demand_acceleration
+                Command_Parameters.velocity_signed,
+                Command_Parameters.acceleration_signed
             ),
             (
                 demand_position,
@@ -164,7 +164,7 @@ class PV_Stream_With_Slave_Generated_Time_Stamp(Motion_Commmand_Interface):
             super().__init__(
                 (
                     Command_Parameters.demand_position,
-                    Command_Parameters.demand_velocity
+                    Command_Parameters.velocity_signed
                 ),
                 (
                     demand_position,
@@ -242,8 +242,8 @@ class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
         
         super().__init__(
             (
-                Command_Parameters.velocity_not_signed,
-                Command_Parameters.acceleration_not_signed
+                Command_Parameters.velocity_unsigned,
+                Command_Parameters.acceleration_unsigned
             ),
             (
                 velocity,
@@ -269,8 +269,8 @@ class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
         
         super().__init__(
             (
-                Command_Parameters.velocity_not_signed,
-                Command_Parameters.acceleration_not_signed
+                Command_Parameters.velocity_unsigned,
+                Command_Parameters.acceleration_unsigned
             ),
             (
                 velocity,
@@ -294,4 +294,4 @@ class VAI_Stop(Motion_Commmand_Interface):
     
     def __init__(self, decceleration: float = 10.0) -> None:
         
-        super().__init__((Command_Parameters.acceleration_not_signed,), (decceleration,))
+        super().__init__((Command_Parameters.acceleration_unsigned,), (decceleration,))
