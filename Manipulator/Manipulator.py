@@ -82,9 +82,9 @@ class Manipulator:
                     'DRIVE_1', 
                     datagram=self.datagram, 
                     response_timeout=driver_response_timeout, 
-                    driver_max_send_attempts=driver_max_send_attempts, 
-                    min_pos=None,
-                    max_pos=None,
+                    max_send_attempts=driver_max_send_attempts, 
+                    min_pos=0,
+                    max_pos=0.185,
                     monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
                 )
             )
@@ -94,7 +94,7 @@ class Manipulator:
                     'DRIVE_2', 
                     datagram=self.datagram, 
                     response_timeout=driver_response_timeout, 
-                    driver_max_send_attempts=driver_max_send_attempts, 
+                    max_send_attempts=driver_max_send_attempts, 
                     min_pos=0,
                     max_pos=0.18,
                     monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
@@ -106,9 +106,9 @@ class Manipulator:
                     'DRIVE_3', 
                     datagram=self.datagram, 
                     response_timeout=driver_response_timeout, 
-                    driver_max_send_attempts=driver_max_send_attempts, 
-                    min_pos=0,
-                    max_pos=0.185,
+                    max_send_attempts=driver_max_send_attempts, 
+                    min_pos=None,
+                    max_pos=None,
                     monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
                 )
             )
@@ -195,7 +195,7 @@ class Manipulator:
                 # Get current position and velocity state
                 position = np.empty(len(self.drivers))
                 for i, driver in enumerate(self.drivers):
-                    position[i] = driver.min_pos if last_commanded_velocity < 0.0 else driver.max_pos
+                    position[i] = driver.min_pos if last_commanded_velocity[i] < 0.0 else driver.max_pos
                 positions, actual_velocities = self.go_to_pos(
                     position,
                     np.abs(last_commanded_velocity), 
@@ -235,8 +235,7 @@ class Manipulator:
                     # Stopping drives if possibles.
                     for _, driver in enumerate(self.drivers):
                         driver.move_with_constant_velocity([0]*len(self.drivers))
-                        return
+                        raise e1
                 except Exception as e2:
                     logger.error("Failed to stop drives.")
                     raise e2
-                raise e1

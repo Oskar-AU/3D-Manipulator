@@ -307,7 +307,7 @@ class Driver:
     def _error_handler(self, translated_response: IO.Translated_Response) -> None:
         error_code: int = translated_response.error_code
         if error_code is not None and error_code != 0:
-            self.logger.error(f"Error code {error_code} raised by drive. Drive awaiting error acknowledgement.")
+            self.logger.error(f"Error code {error_code} raised by drive.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)
         
@@ -395,16 +395,22 @@ class Driver:
         self.logger.info("Acknowledging error(s).")
         
         # Getting current error.
-        error_code = self.send(IO.Request(IO.Response(error_code=True, warn_word=False))).error_code
-        if error_code is not None:
+        try:
+            error_code = self.send(IO.Request(IO.Response(error_code=True, warn_word=False))).error_code
+        except DriveError as e:
+            error_code = e.error_code
+        if error_code is None or error_code == 0:
             self.logger.info("No errors to acknowledge.")
             return
 
-        while error_code is not None:
+        while error_code is not None and error_code != 0:
             # Attempting to acknowledge error.
             self.logger.info(f"Attempting to acknowledge error code {error_code}.")
             self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
-            new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word())).error_code
+            try:
+                new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word())).error_code
+            except DriveError as e:
+                new_error_code = e.error_code
 
             # Checking if driver raised same error again.
             if new_error_code == error_code:
