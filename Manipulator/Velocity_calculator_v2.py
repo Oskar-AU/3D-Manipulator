@@ -180,7 +180,6 @@ class Path_follower(Path_Base):
 
         if dot_product < 0:
             final_velocity = self.min_velocity*p_k_normalized
-            print('hej')
         elif np.abs(total_velocity_vector).max() > self.max_velocity:
             final_velocity = self.max_velocity*p_k_normalized
         else:
