@@ -199,6 +199,11 @@ class Path_follower(Path_Base):
         else:
             final_velocity = total_velocity_vector
 
+        delta_v = final_velocity - self.previous_vel
+        delta_v_norm = np.linalg.norm(delta_v)
+        if delta_v_norm < 0.001:
+            final_velocity = self.previous_vel.copy()
+
         return final_velocity
       
 
