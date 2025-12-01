@@ -184,7 +184,7 @@ class Driver:
 
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
-    def home(self, timeout: float = 30) -> bool:
+    def home(self, timeout: float = 30, overwrite_already_home_check: bool = False) -> bool:
         """
         Sends a command to home the LinMot motors. The drive must be in state 8.
 
@@ -192,6 +192,8 @@ class Driver:
         ----------
         timeout : float, optional
             The time (s) to wait before the homing procedure is considered failed. Default is 30s.
+        overwrite_already_home_check : bool, optional
+            Whether or not to initiate homing procedure if it is already homed.
 
         Returns
         -------
@@ -200,9 +202,15 @@ class Driver:
         """
         self.logger.info("Homing procedure initiated.")
 
+        # Checks if the driver is already homed.
+        state_var = self.send(IO.Request(IO.Response(state_var=True))).state_var
+        if state_var.homed and not overwrite_already_home_check:
+            self.logger.info("Homing procedure completed (already homed).")
+            return True
+
         # Confirms if the drive is ready to be homed.
         main_state = self.get_main_state()
-        if self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state != 8:
+        if state_var.main_state != 8:
             self.logger.error(f"Homing procedure failed: Not in correct state ({main_state} != 8).")
             return False
 
@@ -379,12 +387,30 @@ class Driver:
         self.send(IO.Request(MC_interface=Motion_Commands.Stop_Streaming()))
 
     @run_on_driver_thread
-    def acknowledge_error(self, cascade: bool) -> None:
-        self.logger.info("Acknowledging error.")
-        self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
-        response = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word()))
-        if response.error_code and cascade:
-            self.acknowledge_error(True)
+    def acknowledge_error(self) -> None:
+        self.logger.info("Acknowledging error(s).")
+        
+        # Getting current error.
+        error_code = self.send(IO.Request(IO.Response(error_code=True, warn_word=False))).error_code
+        if error_code is not None:
+            self.logger.info("No errors to acknowledge.")
+            return
+
+        while error_code is not None:
+            # Attempting to acknowledge error.
+            self.logger.info(f"Attempting to acknowledge error code {error_code}.")
+            self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
+            new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word())).error_code
+
+            # Checking if driver raised same error again.
+            if new_error_code == error_code:
+                # If yes, exit.
+                self.logger.error(f"Failed to acknowledge error code {error_code}.")
+                return
+            
+            self.logger.info(f"Error code {error_code} acknowledged.")
+            error_code = new_error_code
+
         self.awaiting_error_acknowledgement = False
 
     @run_on_driver_thread
