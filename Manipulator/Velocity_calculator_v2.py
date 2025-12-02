@@ -35,8 +35,8 @@ class Path_follower(Path_Base):
         self.delta_t = 0.1
         self.previous_target = np.zeros(path_keypoints.shape[1])
         self.telemetry = telemetry
-        self.draw_keypoint_vectors()
         self.add_end_vector()
+        self.draw_keypoint_vectors()
 
     def add_end_vector(self):
         second_last_row = self.keypoints[-2]
@@ -48,7 +48,7 @@ class Path_follower(Path_Base):
         end_norm = np.linalg.norm(end_vector)
         end_normalized = end_vector/end_norm
 
-        weighted_end = self.end_vector_weight*end_normalized
+        weighted_end = self.end_vector_weight*end_normalized + last_row
 
         self.keypoints = np.vstack([keypoints, weighted_end])
     
