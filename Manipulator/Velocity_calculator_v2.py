@@ -217,7 +217,7 @@ class Path_follower(Path_Base):
         if np.linalg.norm(velocity_projected_on_path) < self.min_velocity or dot_product < 0:
             final_velocity = self.min_velocity*p_k_normalized
         elif np.abs(total_velocity_vector).max() > self.max_velocity:
-            final_velocity = self.max_velocity*p_k_normalized
+            final_velocity = self.max_velocity * total_velocity_vector / np.linalg.norm(total_velocity_vector)
         else:
             final_velocity = total_velocity_vector
 
