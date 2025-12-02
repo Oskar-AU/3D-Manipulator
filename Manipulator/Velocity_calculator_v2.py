@@ -9,7 +9,7 @@ from .Manipulator import Telemetry
 class Path_follower(Path_Base):
     def __init__(self, path_keypoints: npt.ArrayLike,
                  max_velocity: float,
-                 max_acceleration: float = 1,
+                 max_acceleration: float = 10,
                  min_velocity: float = 0.001,
                  projected_total_weight: float = 1.0, 
                  projected_exponent_weight: float = 0.5, 
@@ -260,8 +260,13 @@ class Path_follower(Path_Base):
             print(self.current_pos)
             time.sleep(0.1)
 
-    def __call__(self, current_position: npt.ArrayLike, _) -> Tuple[np.ndarray, bool]:
+    def get_demand_accelerations(self, demand_velocity: npt.NDArray, current_velocity: npt.NDArray) -> npt.NDArray:
+        difference_in_velocities = current_velocity - demand_velocity
+        return difference_in_velocities / np.linalg.norm(difference_in_velocities) * self.max_acceleration
+
+    def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike) -> Tuple[npt.NDArray, npt.NDArray, bool]:
         current_position = np.asarray(current_position)
+        current_velocity = np.asarray(current_velocity)
         complete = False
         if not hasattr(self, 'target'):
             self.i = 0
@@ -275,6 +280,7 @@ class Path_follower(Path_Base):
         projected_vector = self.full_angle_projection_vector(a_vec)
         total_velocity_vector = self.off_path_vector(projected_vector)
         final_v = self.clip_vector_full_angle(total_velocity_vector)
+        demand_acceleration = self.get_demand_accelerations(final_v, current_velocity)
         self.previous_vel = final_v
         
         if self.telemetry is not None:
@@ -310,7 +316,7 @@ class Path_follower(Path_Base):
             else:
                 break
 
-        return final_v, complete
+        return final_v, demand_acceleration, complete
     
     
             

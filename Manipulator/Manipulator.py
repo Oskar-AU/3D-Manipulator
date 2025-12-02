@@ -199,8 +199,8 @@ class Manipulator:
                 )
         
                 # Calculate next step
-                next_velocity, complete = stepper(positions, actual_velocities)
-                next_acceleration = np.ones(len(self.drivers))*3
+                next_velocity, next_acceleration, complete = stepper(positions, actual_velocities)
+                next_acceleration = np.abs(next_acceleration)
 
                 # Record telemetry 
                 if telemetry is not None:

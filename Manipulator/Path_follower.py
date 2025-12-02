@@ -9,7 +9,7 @@ logger = logging.getLogger("PATH")
 class Path_Base:
 
     @abstractmethod
-    def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike | None = None) -> tuple[npt.NDArray, bool]:
+    def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike | None = None) -> tuple[npt.NDArray, npt.NDArray, bool]:
         pass
     
 def make_waypoint_follower(
