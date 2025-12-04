@@ -268,6 +268,61 @@ class Path_follower(Path_Base):
         difference_in_velocities = current_velocity - demand_velocity
         return difference_in_velocities / np.linalg.norm(difference_in_velocities) * self.max_acceleration
 
+    def angle_dependant_velocity(self):
+        total_weight = self.aggregation_weight
+        exponent_weight = self.future_weight
+        k = self.target_number
+        p_k = self.target-self.current_pos
+        p_k_dist = np.linalg.norm(p_k)
+        p_k_normalized = p_k / p_k_dist
+
+        n = self.keypoints.shape[0]
+
+        future_points_sum = 0
+        for i in range(k, n - 1):
+            if i != k:
+                p_k = self.connecting_vectors[i]
+            p_k1 = self.connecting_vectors[i+1]
+            p_i =  np.arccos(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1))) / np.pi
+            for j in range(k, i):
+                if j == k:
+                    exponent_sum = p_k_dist
+                else:
+                    exponent_sum += self.dist_vectors[j - 1]
+            future_points_sum += p_i*np.exp(-(1/exponent_weight)*exponent_sum)
+        
+        a_vec = total_weight*future_points_sum
+
+        a_vec = 1 - np.minimum(a_vec, 1)
+
+        a_vec *= p_k_normalized*self.max_velocity
+
+
+        return a_vec
+    
+    def clip_vector_angle(self, a_vec, off_path):
+
+        p_k = self.target-self.current_pos
+        p_k_normalized = p_k / np.linalg.norm(p_k)
+        off_path_normalized = off_path / np.linalg.norm(off_path)
+
+        if np.abs(off_path).max() > self.max_velocity:
+            off_path = off_path_normalized*self.max_velocity
+
+        v_final = off_path + a_vec
+
+        v_final_normalized = v_final / np.linalg.norm(v_final)
+        
+        
+        if np.abs(v_final).max() > self.max_velocity:
+            v_final = v_final_normalized * self.max_velocity
+        elif np.linalg.norm(a_vec) < self.min_velocity:
+            v_final = p_k_normalized * self.min_velocity
+        
+        return v_final
+
+
+
     def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike) -> Tuple[npt.NDArray, npt.NDArray, bool]:
         current_position = np.asarray(current_position)
         current_velocity = np.asarray(current_velocity)
