@@ -268,6 +268,13 @@ class Path_follower(Path_Base):
         difference_in_velocities = current_velocity - demand_velocity
         return difference_in_velocities / np.linalg.norm(difference_in_velocities) * self.max_acceleration
 
+    
+
+    def f(self, x):
+        k = 3
+        g = lambda t: 1 / (1 + np.exp(-k * (t - np.pi/2)))
+        return (g(x) - g(0)) / (g(np.pi) - g(0))
+
     def angle_dependant_velocity(self):
         total_weight = self.aggregation_weight
         exponent_weight = self.future_weight
