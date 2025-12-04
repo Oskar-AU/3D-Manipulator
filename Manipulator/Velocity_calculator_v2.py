@@ -11,15 +11,15 @@ class Path_follower(Path_Base):
                  max_velocity: float,
                  max_acceleration: float = 10,
                  min_velocity: float = 0.001,
-                 projected_total_weight: float = 1.0, 
-                 projected_exponent_weight: float = 0.5, 
+                 aggregation_weight: float = 1.0, 
+                 future_weight: float = 0.5, 
                  off_path_weight: float = 1.0,
                  next_target_tol: float = 0.001,
                  end_vector_weight: float = 1,
                  telemetry: Telemetry | None = None
                  ) -> None:
-        self.projected_total_weight = projected_total_weight
-        self.projected_exponent_weight = projected_exponent_weight
+        self.aggregation_weight = aggregation_weight
+        self.future_weight = future_weight
         self.off_path_weight = off_path_weight
         path_keypoints = np.asarray(path_keypoints)
         self.max_velocity = max_velocity
@@ -106,8 +106,8 @@ class Path_follower(Path_Base):
 
 
     def aggregating_vector(self):
-        total_weight = self.projected_total_weight
-        exponent_weight = self.projected_exponent_weight
+        total_weight = self.aggregation_weight
+        exponent_weight = self.future_weight
         k = self.target_number
         p_k = self.target-self.current_pos
         p_k_dist = np.linalg.norm(p_k)
@@ -129,8 +129,8 @@ class Path_follower(Path_Base):
     
 
     def aggregating_vector_update(self):
-        total_weight = self.projected_total_weight
-        exponent_weight = self.projected_exponent_weight
+        total_weight = self.aggregation_weight
+        exponent_weight = self.future_weight
         k = self.target_number
         p_k = self.target-self.current_pos
         p_k_dist = np.linalg.norm(p_k)
@@ -172,9 +172,13 @@ class Path_follower(Path_Base):
 
         h = p1+t*d
 
+        # Shortest vector from current pos to path
+        normal_vector = h - p3
+        self.telemetry.append("normal_vector_length", np.linalg.norm(normal_vector))
+
         #Vector from p3 to point on line
 
-        v = off_path_factor*(h - p3)
+        v = off_path_factor*normal_vector
         
         total_velocity_vector = v + projected_vector
 
@@ -289,6 +293,14 @@ class Path_follower(Path_Base):
             self.telemetry.append('total_velocity_vector', total_velocity_vector)
             self.telemetry.append('target_pos', self.target)
             self.telemetry.append('previous_target_pos', self.previous_target)
+            self.telemetry.append('future_weight', self.future_weight)
+            self.telemetry.append('aggregation_weight', self.aggregation_weight)
+            self.telemetry.append('off_path_weight', self.off_path_weight)
+            self.telemetry.append('next_target_tolerance', self.next_target_tol)
+            self.telemetry.append('max_velocity', self.max_velocity)
+            self.telemetry.append('max_acceleration', self.max_acceleration)
+            self.telemetry.append('min_velocity', self.min_velocity)
+            self.telemetry.append('end_vector_weight', self.end_vector_weight)
 
         while True:
             p1 = self.previous_target
