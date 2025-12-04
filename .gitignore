@@ -4,3 +4,4 @@ test.py
 .vscode/
 logs/
 test_*.py
+*.csv
