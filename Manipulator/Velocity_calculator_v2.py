@@ -182,7 +182,7 @@ class Path_follower(Path_Base):
         
         total_velocity_vector = v + projected_vector
 
-        return total_velocity_vector
+        return total_velocity_vector, v
 
 
     def clip_vector(self,total_velocity_vector: npt.ArrayLike) -> np.ndarray:
@@ -272,18 +272,20 @@ class Path_follower(Path_Base):
         total_weight = self.aggregation_weight
         exponent_weight = self.future_weight
         k = self.target_number
-        p_k = self.target-self.current_pos
+        p_k = self.target - self.current_pos
         p_k_dist = np.linalg.norm(p_k)
         p_k_normalized = p_k / p_k_dist
 
         n = self.keypoints.shape[0]
 
         future_points_sum = 0
-        for i in range(k, n - 1):
-            if i != k:
-                p_k = self.connecting_vectors[i]
-            p_k1 = self.connecting_vectors[i+1]
-            p_i =  np.arccos(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1))) / np.pi
+        for i in range(k + 1, n):
+            p_k = self.target-self.current_pos if i == k + 1 else self.connecting_vectors[i - 2]
+            p_k1 = self.connecting_vectors[i - 1]
+            vector_angle_cos = np.clip(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1)), -1, 1)
+            p_i = np.arccos(vector_angle_cos) / np.pi
+            k_e = 0.35
+            p_i = (p_i/np.pi *(2 - p_i/np.pi))**k_e
             for j in range(k, i):
                 if j == k:
                     exponent_sum = p_k_dist
@@ -291,23 +293,18 @@ class Path_follower(Path_Base):
                     exponent_sum += self.dist_vectors[j - 1]
             future_points_sum += p_i*np.exp(-(1/exponent_weight)*exponent_sum)
         
-        a_vec = total_weight*future_points_sum
+        aggregation = total_weight*future_points_sum
 
-        a_vec = 1 - np.minimum(a_vec, 1)
+        aggregation = 1 - np.minimum(aggregation, 1)
 
-        a_vec *= p_k_normalized*self.max_velocity
+        self.telemetry.append('aggregation_factor', aggregation)
 
-
-        return a_vec
+        return aggregation * p_k_normalized * self.max_velocity
     
     def clip_vector_angle(self, a_vec, off_path):
 
         p_k = self.target-self.current_pos
         p_k_normalized = p_k / np.linalg.norm(p_k)
-        off_path_normalized = off_path / np.linalg.norm(off_path)
-
-        if np.abs(off_path).max() > self.max_velocity:
-            off_path = off_path_normalized*self.max_velocity
 
         v_final = off_path + a_vec
 
@@ -321,8 +318,6 @@ class Path_follower(Path_Base):
         
         return v_final
 
-
-
     def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike) -> Tuple[npt.NDArray, npt.NDArray, bool]:
         current_position = np.asarray(current_position)
         current_velocity = np.asarray(current_velocity)
@@ -335,17 +330,23 @@ class Path_follower(Path_Base):
         
         self.current_pos = current_position
 
-        a_vec = self.aggregating_vector_update()
-        projected_vector = self.full_angle_projection_vector(a_vec)
-        total_velocity_vector = self.off_path_vector(projected_vector)
-        final_v = self.clip_vector_full_angle(total_velocity_vector)
+        #a_vec = self.aggregating_vector_update()
+        #projected_vector = self.full_angle_projection_vector(a_vec)
+        #total_velocity_vector, _ = self.off_path_vector(projected_vector)
+        _, off_path = self.off_path_vector([1, 1])
+        a_vec = self.angle_dependant_velocity()
+
+        
+        #final_v = self.clip_vector_full_angle(total_velocity_vector)
+        final_v = self.clip_vector_angle(a_vec, off_path)
+
         demand_acceleration = self.get_demand_accelerations(final_v, current_velocity)
         self.previous_vel = final_v
         
         if self.telemetry is not None:
             self.telemetry.append('aggregating_vector', a_vec)
-            self.telemetry.append('projected_vector', projected_vector)
-            self.telemetry.append('total_velocity_vector', total_velocity_vector)
+            #self.telemetry.append('projected_vector', projected_vector)
+            #self.telemetry.append('total_velocity_vector', total_velocity_vector)
             self.telemetry.append('target_pos', self.target)
             self.telemetry.append('previous_target_pos', self.previous_target)
             self.telemetry.append('future_weight', self.future_weight)
