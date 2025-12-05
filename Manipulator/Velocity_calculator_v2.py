@@ -4,6 +4,7 @@ from typing import Tuple
 import time
 from .Path_follower import Path_Base
 from .Manipulator import Telemetry
+from scipy.optimize import bisect
 
 
 class Path_follower(Path_Base):
@@ -16,9 +17,13 @@ class Path_follower(Path_Base):
                  off_path_weight: float = 1.0,
                  next_target_tol: float = 0.001,
                  end_vector_weight: float = 1,
+                 soft_corner_weight: float = 0.2,
+                 sharp_corner_weight: float = 0.2,
                  telemetry: Telemetry | None = None
                  ) -> None:
         self.aggregation_weight = aggregation_weight
+        self.soft_corner_weight = soft_corner_weight
+        self.sharp_corner_weight = sharp_corner_weight
         self.future_weight = future_weight
         self.off_path_weight = off_path_weight
         path_keypoints = np.asarray(path_keypoints)
@@ -268,12 +273,12 @@ class Path_follower(Path_Base):
         difference_in_velocities = current_velocity - demand_velocity
         return difference_in_velocities / np.linalg.norm(difference_in_velocities) * self.max_acceleration
 
-    
-
-    def f(self, x):
-        k = 3
-        g = lambda t: 1 / (1 + np.exp(-k * (t - np.pi/2)))
-        return (g(x) - g(0)) / (g(np.pi) - g(0))
+    def non_linearize_angle(self, normalized_angle: float) -> float:
+        a = 1.0-self.soft_corner_weight
+        b = 1.0-self.sharp_corner_weight
+        f = lambda t: 3*(a-b+1/3)*t**3 + 3*(b-2*a)*t**2 + 3*a*t - normalized_angle
+        t = bisect(f, 0, 1)
+        return 3 * t**2 - 2*t**3
 
     def angle_dependant_velocity(self):
         total_weight = self.aggregation_weight
@@ -289,10 +294,9 @@ class Path_follower(Path_Base):
         for i in range(k + 1, n):
             p_k = self.target-self.current_pos if i == k + 1 else self.connecting_vectors[i - 2]
             p_k1 = self.connecting_vectors[i - 1]
-            vector_angle_cos = np.clip(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1)), -1, 1)
-            p_i = np.arccos(vector_angle_cos) / np.pi
-            k_e = 0.35
-            p_i = (p_i/np.pi *(2 - p_i/np.pi))**k_e
+            vector_angle_cos = np.clip(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1)), -0.9999999, 0.999999)
+            p_i = self.non_linearize_angle(np.arccos(vector_angle_cos) / np.pi)
+            
             for j in range(k, i):
                 if j == k:
                     exponent_sum = p_k_dist
