@@ -274,8 +274,8 @@ class Path_follower(Path_Base):
         return difference_in_velocities / np.linalg.norm(difference_in_velocities) * self.max_acceleration
 
     def non_linearize_angle(self, normalized_angle: float) -> float:
-        a = 1.0-self.soft_corner_weight
-        b = 1.0-self.sharp_corner_weight
+        a = 1.0 - self.soft_corner_weight
+        b = 1.0 - self.sharp_corner_weight
         f = lambda t: 3*(a-b+1/3)*t**3 + 3*(b-2*a)*t**2 + 3*a*t - normalized_angle
         t = bisect(f, 0, 1)
         return 3 * t**2 - 2*t**3
@@ -291,13 +291,13 @@ class Path_follower(Path_Base):
         n = self.keypoints.shape[0]
 
         future_points_sum = 0
-        for i in range(k + 1, n):
-            p_k = self.target-self.current_pos if i == k + 1 else self.connecting_vectors[i - 2]
-            p_k1 = self.connecting_vectors[i - 1]
+        for i in range(k, n - 1):
+            p_k = self.target-self.current_pos if i == k else self.connecting_vectors[i - 1]
+            p_k1 = self.connecting_vectors[i]
             vector_angle_cos = np.clip(np.dot(p_k, p_k1) / (np.linalg.norm(p_k) * np.linalg.norm(p_k1)), -0.9999999, 0.999999)
             p_i = self.non_linearize_angle(np.arccos(vector_angle_cos) / np.pi)
             
-            for j in range(k, i):
+            for j in range(k, i + 1):
                 if j == k:
                     exponent_sum = p_k_dist
                 else:
@@ -368,6 +368,8 @@ class Path_follower(Path_Base):
             self.telemetry.append('max_acceleration', self.max_acceleration)
             self.telemetry.append('min_velocity', self.min_velocity)
             self.telemetry.append('end_vector_weight', self.end_vector_weight)
+            self.telemetry.append('soft_corner_weight', self.soft_corner_weight)
+            self.telemetry.append('sharp_corner_weight', self.sharp_corner_weight)
 
         while True:
             p1 = self.previous_target
