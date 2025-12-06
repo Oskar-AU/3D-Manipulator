@@ -67,7 +67,7 @@ class Telemetry:
                 raise ValueError(f"Cannot export data structure with dim {value.ndim}.")
         df.to_csv(path, index=False)
 
-class Manipulator:
+class Controller:
 
     def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5, enable_drive_1: bool = True, enable_drive_2: bool = True, enable_drive_3: bool = True):
         self.datagram = io.linUDP()
