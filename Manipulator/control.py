@@ -70,6 +70,36 @@ class Telemetry:
 class Controller:
 
     def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5, enable_drive_1: bool = True, enable_drive_2: bool = True, enable_drive_3: bool = True):
+        """
+        Controller for the 3D manipulator. Handles any high-level commands sent to the linMot drivers that depends on feedback between drivers. 
+        Some methods are however just wrappers from the Driver class such as 'home' and 'switch_on' to allow the same command to be sent to all
+        drivers.
+
+        Parameters
+        ----------
+        driver_response_timeout : float, optional
+            The response timeout for all drivers.
+        driver_max_send_attempts : int, optional
+            The maximum number of send attempts before communication is considered lost.
+        enable_drive_1 : bool, optional
+            Whether or not to enable driver 1. Default True.
+        enable_drive_2 : bool, optional
+            Whether or not to enable driver 2. Default True.
+        enable_drive_3 : bool, optional
+            Whether or not to enable driver 3. Default True.
+
+        Attributes
+        ----------
+        datagram : io.linUDP
+            The datagram used for communication to all drivers.
+        drivers : list[Driver]
+            All the drivers controlled by this controller.
+        futures : list[Future | None]
+            List with the same size as the number of enabled drivers that contains the Future
+            objects from the results of the latest command sent to all drivers. Used when
+            calling multithreaded Driver-class methods.
+
+        """
         self.datagram = io.linUDP()
         self.drivers: list[Driver] = []
         if enable_drive_1:
