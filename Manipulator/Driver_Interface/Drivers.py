@@ -50,7 +50,7 @@ class Driver:
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
         self.logger = logging.getLogger(self.name)
-        self.warning_words: list[IO.Responses.WarnWord] = list()
+        self.warning_words: list[IO.responses.WarnWord] = list()
         self.MC_count = 0
         self.realtime_config_command_count = 0
         self.MC_count_up_to_date = False
@@ -322,7 +322,7 @@ class Driver:
             The translated response from the drive.
         """
         # Gets the new warning word.
-        warning_words: list[IO.Responses.WarnWord] = translated_response.warn_word
+        warning_words: list[IO.responses.WarnWord] = translated_response.warn_word
 
         # Exit warning handler if the resonse didn't request a warning.        
         if warning_words is None: return None

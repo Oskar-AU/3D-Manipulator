@@ -1,4 +1,4 @@
-from .Responses import Response
+from .responses import Response
 from .control_words import ControlWord
 from .commands import MotionCommmandInterface
 from .commands import RealtimeConfig
