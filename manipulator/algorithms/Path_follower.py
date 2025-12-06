@@ -1,10 +1,65 @@
 from abc import abstractmethod
+from dataclasses import dataclass, field
+from pathlib import Path
 import numpy as np
+import pandas as pd
 import numpy.typing as npt
 import logging
-from typing import Optional
+from typing import Optional, Any
 
 logger = logging.getLogger("PATH")
+
+@dataclass
+class Telemetry:
+    """
+    Telemetry data recording for 3D manipulator motion analysis.
+    
+    Data alignment: All arrays are temporally aligned at sample time t[i]:
+    - positions_mm[i]: Current position at time t[i]
+    - next_velocity_ms[i]: Velocity command that will be executed at time t[i]
+    - actual_velocities_ms[i]: Measured velocity at time t[i]
+    
+    This ensures proper alignment for velocity tracking analysis.
+    """
+    data: dict[str, list[Any]] = field(default_factory=dict)
+    # t: list = field(default_factory=list)                        # seconds
+    # positions_mm: list = field(default_factory=list)             # (3,)
+    # next_velocity_ms: list = field(default_factory=list)         # (3,)
+    # actual_velocities_ms: list = field(default_factory=list)     # (3,)
+    enabled: bool = True                                         # Recording enable flag
+
+    def start_recording(self):
+        """Enable telemetry logging."""
+        self.enabled = True
+
+    def stop_recording(self):
+        """Disable telemetry logging."""
+        self.enabled = False
+
+    def append(self, key: str, value: Any) -> None:
+        """
+        Append one telemetry sample (only if enabled).
+        
+        """
+        if not self.enabled:
+            return  # skip logging if disabled
+        if self.data.get(key) is None:
+            self.data.update({key: [value]})
+        else:
+            self.data[key].append(value)
+
+    def export_to_csv(self, path: Path | str) -> None:
+        df = pd.DataFrame()
+        for key, value in self.data.items():
+            value = np.asarray(value)
+            if value.ndim == 1:
+                df[key] = value
+            elif value.ndim == 2:
+                for i, column in enumerate(value.T):
+                    df[f"{key}_{i}"] = column
+            else:
+                raise ValueError(f"Cannot export data structure with dim {value.ndim}.")
+        df.to_csv(path, index=False)
 
 class Path_Base:
 

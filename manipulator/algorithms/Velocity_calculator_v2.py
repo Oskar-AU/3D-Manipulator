@@ -2,8 +2,7 @@ import numpy as np
 import numpy.typing as npt
 from typing import Tuple
 import time
-from .Path_follower import Path_Base
-from .control import Telemetry
+from .Path_follower import Path_Base, Telemetry
 from scipy.optimize import bisect
 
 
