@@ -1,5 +1,5 @@
 from .hardware import io, motion_commands, realtime_config_commands
-from .Manipulator import Manipulator, Telemetry
+from .control import Manipulator, Telemetry
 import logging
 import os
 
