@@ -1,7 +1,7 @@
 from .Responses import Response
 from .Control_Words import ControlWord
-from .Commands import MotionCommmandInterface
-from .Commands import RealtimeConfig
+from .commands import MotionCommmandInterface
+from .commands import RealtimeConfig
 import struct
 import logging
 
