@@ -1,5 +1,5 @@
 from .Responses import Response
-from .Control_Words import ControlWord
+from .control_words import ControlWord
 from .commands import MotionCommmandInterface
 from .commands import RealtimeConfig
 import struct

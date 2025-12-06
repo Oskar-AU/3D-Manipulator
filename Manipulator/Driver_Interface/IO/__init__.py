@@ -1,7 +1,7 @@
 from .Datagrams import linUDP
 from .Requests import Request
 from .Responses import Response, TranslatedResponse
-from .Control_Words import ControlWord
+from .control_words import ControlWord
 from .commands import linType
 from .commands import linTypes
 from .commands import MotionCommmandInterface
