@@ -1,6 +1,6 @@
 import struct
 
-class Control_Word:
+class ControlWord:
     
     def __init__(self, 
                  switch_on: bool = False,

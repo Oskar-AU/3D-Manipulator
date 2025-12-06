@@ -1,8 +1,8 @@
-from .IO import Realtime_Config, linType, Command_Parameter
+from .IO import RealtimeConfig, linType, CommandParameter
 from .Command_Parameters import Command_Parameters
 from typing import Any
 
-class Read_ROM_Value_of_Parameter_by_UPID(Realtime_Config):
+class Read_ROM_Value_of_Parameter_by_UPID(RealtimeConfig):
     
     @property
     def COMMAND_ID(self) -> int:
@@ -15,7 +15,7 @@ class Read_ROM_Value_of_Parameter_by_UPID(Realtime_Config):
     def __init__(self, parameter_UPID: int, parameter_value: Any) -> None:
         raise NotImplementedError
 
-class Read_RAM_Value_of_Parameter_by_UPID(Realtime_Config):
+class Read_RAM_Value_of_Parameter_by_UPID(RealtimeConfig):
     
     @property
     def COMMAND_ID(self) -> int:
@@ -26,7 +26,7 @@ class Read_RAM_Value_of_Parameter_by_UPID(Realtime_Config):
         return "Read RAM value of parameter by UPID"
 
     def __init__(self, UPID: int, UPID_type: linType, UPID_description: str = "UPID value", UPID_unit: str = "", UPID_conversion_factor: int = 1) -> None:
-        DI_parameter = Command_Parameter(
+        DI_parameter = CommandParameter(
             description=UPID_description,
             type=UPID_type,
             unit=UPID_unit,
@@ -34,7 +34,7 @@ class Read_RAM_Value_of_Parameter_by_UPID(Realtime_Config):
         )
         super().__init__((Command_Parameters.UPID,), (UPID,), (Command_Parameters.UPID, DI_parameter,))
 
-class No_Operation(Realtime_Config):
+class No_Operation(RealtimeConfig):
 
     @property
     def COMMAND_ID(self) -> int:

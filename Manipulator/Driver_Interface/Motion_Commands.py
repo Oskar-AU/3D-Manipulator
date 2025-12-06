@@ -1,10 +1,10 @@
-from .IO import Motion_Commmand_Interface
+from .IO import MotionCommmandInterface
 from .IO import linType
-from .IO import Command_Parameter
+from .IO import CommandParameter
 from .Command_Parameters import Command_Parameters
 import copy
 
-class No_Operation(Motion_Commmand_Interface):
+class No_Operation(MotionCommmandInterface):
     
     @property
     def MASTER_ID(self) -> int:
@@ -22,7 +22,7 @@ class No_Operation(Motion_Commmand_Interface):
         
         super().__init__()
 
-class VAI_go_to_pos(Motion_Commmand_Interface):
+class VAI_go_to_pos(MotionCommmandInterface):
     
     @property
     def MASTER_ID(self) -> int:
@@ -71,7 +71,7 @@ class VAI_go_to_pos(Motion_Commmand_Interface):
             )
         )
 
-class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
+class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(MotionCommmandInterface):    
 
         @property
         def MASTER_ID(self) -> int:
@@ -89,7 +89,7 @@ class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion
 
             super().__init__((Command_Parameters.demand_position,), (demand_position,))
 
-class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):
+class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(MotionCommmandInterface):
 
         @property
         def MASTER_ID(self) -> int:
@@ -116,7 +116,7 @@ class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motio
                 )
             )
 
-class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion_Commmand_Interface):    
+class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(MotionCommmandInterface):    
 
     @property
     def MASTER_ID(self) -> int:
@@ -145,7 +145,7 @@ class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Moti
             )
         )
     
-class PV_Stream_With_Slave_Generated_Time_Stamp(Motion_Commmand_Interface):
+class PV_Stream_With_Slave_Generated_Time_Stamp(MotionCommmandInterface):
 
         @property
         def MASTER_ID(self) -> int:
@@ -172,7 +172,7 @@ class PV_Stream_With_Slave_Generated_Time_Stamp(Motion_Commmand_Interface):
                 )
             )
 
-class Stop_Streaming(Motion_Commmand_Interface):
+class Stop_Streaming(MotionCommmandInterface):
      
     @property
     def MASTER_ID(self) -> int:
@@ -190,7 +190,7 @@ class Stop_Streaming(Motion_Commmand_Interface):
         super().__init__()
 
 
-class Write_Live_Parameter(Motion_Commmand_Interface):
+class Write_Live_Parameter(MotionCommmandInterface):
 
     @property
     def MASTER_ID(self) -> int:
@@ -206,7 +206,7 @@ class Write_Live_Parameter(Motion_Commmand_Interface):
 
     def __init__(self, UPID: int, parameter_value: int, parameter_type: linType) -> None:
 
-        raw_parameter = Command_Parameter(
+        raw_parameter = CommandParameter(
             description="Write live parameter",
             type=parameter_type,
             unit="",
@@ -224,7 +224,7 @@ class Write_Live_Parameter(Motion_Commmand_Interface):
             )
         )
 
-class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
+class AccVAI_Infinite_Motion_Positive_Direction(MotionCommmandInterface):
     
     @property
     def MASTER_ID(self) -> int:
@@ -251,7 +251,7 @@ class AccVAI_Infinite_Motion_Positive_Direction(Motion_Commmand_Interface):
             )
         )
 
-class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
+class AccVAI_Infinite_Motion_Negative_Direction(MotionCommmandInterface):
     
     @property
     def MASTER_ID(self) -> int:
@@ -278,7 +278,7 @@ class AccVAI_Infinite_Motion_Negative_Direction(Motion_Commmand_Interface):
             )
         )
 
-class VAI_Stop(Motion_Commmand_Interface):
+class VAI_Stop(MotionCommmandInterface):
 
     @property
     def MASTER_ID(self) -> int:

@@ -15,13 +15,13 @@ class linTypes:
     Sint32 = linType(format="i", byte_size=4)
 
 @dataclass
-class Command_Parameter:
+class CommandParameter:
     description: str
     type: linType
     unit: str
     conversion_factor: int
 
-class Motion_Commmand_Interface(ABC):
+class MotionCommmandInterface(ABC):
     
     @property
     @abstractmethod
@@ -38,7 +38,7 @@ class Motion_Commmand_Interface(ABC):
     def DESCRIPTION(self) -> str:
         pass
 
-    def __init__(self, MC_parameters: tuple[Command_Parameter], values: tuple[int | float]) -> None:
+    def __init__(self, MC_parameters: tuple[CommandParameter], values: tuple[int | float]) -> None:
         """
         Base class for all motion command classes. All child classes must call this constructor.
 
@@ -125,7 +125,7 @@ class Motion_Commmand_Interface(ABC):
                       + parameter.unit for i, parameter in enumerate(self.MC_PARAMETERS)}
         return header + " w/ params " + f"{parameters}"
 
-class Realtime_Config(ABC):
+class RealtimeConfig(ABC):
     
     @property
     @abstractmethod
@@ -137,8 +137,8 @@ class Realtime_Config(ABC):
     def DESCRIPTION(self) -> str:
         pass
 
-    def __init__(self, DO_parameters: tuple[Command_Parameter] = (), DO_values: tuple[float | int] = (), 
-                 DI_parameters: tuple[Command_Parameter] = ()) -> None:
+    def __init__(self, DO_parameters: tuple[CommandParameter] = (), DO_values: tuple[float | int] = (), 
+                 DI_parameters: tuple[CommandParameter] = ()) -> None:
         """
         Base class for all realtime config commands. All child classes must call this constructor. A real-
         time command consists of output and input parameters (relative to the master).

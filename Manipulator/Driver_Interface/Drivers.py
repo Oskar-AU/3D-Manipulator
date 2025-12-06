@@ -33,7 +33,7 @@ class Driver:
                  max_send_attempts: int,
                  min_pos: float,
                  max_pos: float,
-                 monitoring_channel_parameters: tuple[IO.Command_Parameter | None] = (None, None, None, None),
+                 monitoring_channel_parameters: tuple[IO.CommandParameter | None] = (None, None, None, None),
                  ) -> None:
         self.min_pos = min_pos
         self.max_pos = max_pos
@@ -50,7 +50,7 @@ class Driver:
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
         self.logger = logging.getLogger(self.name)
-        self.warning_words: list[IO.Responses.Warn_Word] = list()
+        self.warning_words: list[IO.Responses.WarnWord] = list()
         self.MC_count = 0
         self.realtime_config_command_count = 0
         self.MC_count_up_to_date = False
@@ -96,7 +96,7 @@ class Driver:
                 return method(self, *args, **kwargs)
         return wrapper
 
-    def send(self, request: IO.Request) -> IO.Translated_Response:
+    def send(self, request: IO.Request) -> IO.TranslatedResponse:
         """
         Parameters
         ----------
@@ -219,7 +219,7 @@ class Driver:
             return False
 
         # Sending home request.
-        home_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True, home=True))
+        home_request = IO.Request(IO.Response(), IO.ControlWord(switch_on=True, home=True))
         self.send(home_request)
 
         # Waiting for homing to finish.
@@ -227,11 +227,11 @@ class Driver:
         is_homing_finished = lambda: self.send(is_homing_finished_request).state_var.homing_finished
         if not self.wait_for_change(is_homing_finished, timeout, 1):
             self.logger.error(f"Homing procedure failed: Timed out ({timeout}s). Switching off drive.")
-            self.send(IO.Request(IO.Response(), IO.Control_Word()))
+            self.send(IO.Request(IO.Response(), IO.ControlWord()))
             return False
         
         # Finialzing.
-        home_off_request = IO.Request(IO.Response(), IO.Control_Word(switch_on=True))
+        home_off_request = IO.Request(IO.Response(), IO.ControlWord(switch_on=True))
         self.send(home_off_request)
         self.logger.info("Homing procedure completed.")
         return True
@@ -260,7 +260,7 @@ class Driver:
             return True
         if main_state != 2:
             # Requesting state 2.
-            self.send(IO.Request(IO.Response(), IO.Control_Word()))
+            self.send(IO.Request(IO.Response(), IO.ControlWord()))
 
             # Waiting for main state to go state 2.
             if not self.wait_for_change(lambda: self.get_main_state() == 2, timeout=timeout, delay=0.2):
@@ -271,7 +271,7 @@ class Driver:
         
         if main_state == 2:
             # Requesting state 8.        
-            self.send(IO.Request(IO.Response(), IO.Control_Word(switch_on=True)))
+            self.send(IO.Request(IO.Response(), IO.ControlWord(switch_on=True)))
 
             # Waiting for state 8.
             if not self.wait_for_change(lambda: self.get_main_state() == 8, timeout=timeout, delay=0.2):
@@ -304,14 +304,14 @@ class Driver:
             time.sleep(delay)
         return True
     
-    def _error_handler(self, translated_response: IO.Translated_Response) -> None:
+    def _error_handler(self, translated_response: IO.TranslatedResponse) -> None:
         error_code: int = translated_response.error_code
         if error_code is not None and error_code != 0:
             self.logger.error(f"Error code {error_code} raised by drive.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)
         
-    def _warning_handler(self, translated_response: IO.Translated_Response) -> None:
+    def _warning_handler(self, translated_response: IO.TranslatedResponse) -> None:
         """
         Ensures that the warning list within this class is up to date with the physical drives
         warning word.
@@ -322,7 +322,7 @@ class Driver:
             The translated response from the drive.
         """
         # Gets the new warning word.
-        warning_words: list[IO.Responses.Warn_Word] = translated_response.warn_word
+        warning_words: list[IO.Responses.WarnWord] = translated_response.warn_word
 
         # Exit warning handler if the resonse didn't request a warning.        
         if warning_words is None: return None
@@ -406,9 +406,9 @@ class Driver:
         while error_code is not None and error_code != 0:
             # Attempting to acknowledge error.
             self.logger.info(f"Attempting to acknowledge error code {error_code}.")
-            self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.Control_Word(Error_acknowledge=True)))
+            self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.ControlWord(Error_acknowledge=True)))
             try:
-                new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.Control_Word())).error_code
+                new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.ControlWord())).error_code
             except DriveError as e:
                 new_error_code = e.error_code
 

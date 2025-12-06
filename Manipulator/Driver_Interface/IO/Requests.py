@@ -1,7 +1,7 @@
 from .Responses import Response
-from .Control_Words import Control_Word
-from .Commands import Motion_Commmand_Interface
-from .Commands import Realtime_Config
+from .Control_Words import ControlWord
+from .Commands import MotionCommmandInterface
+from .Commands import RealtimeConfig
 import struct
 import logging
 
@@ -9,9 +9,9 @@ class Request:
     
     def __init__(self, 
                  response: Response = Response(),
-                 control_word: Control_Word | None = None, 
-                 MC_interface: Motion_Commmand_Interface | None = None,
-                 realtime_config: Realtime_Config | None = None,
+                 control_word: ControlWord | None = None, 
+                 MC_interface: MotionCommmandInterface | None = None,
+                 realtime_config: RealtimeConfig | None = None,
                  logging_level: int = logging.DEBUG) -> None:
         """
         Parameters
