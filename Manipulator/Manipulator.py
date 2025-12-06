@@ -1,6 +1,6 @@
 from .Stream import Stream
 from . import io
-from .Driver_Interface import Driver, DriveError, Command_Parameters
+from .hardware import Driver, DriveError, Command_Parameters
 from concurrent.futures import Future
 import time
 from typing import Any
