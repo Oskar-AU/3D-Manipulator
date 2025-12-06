@@ -1,6 +1,6 @@
 from .Stream import Stream
 from . import io
-from .hardware import Driver, DriveError, Command_Parameters
+from .hardware import Driver, DriveError, CommandParameters
 from concurrent.futures import Future
 import time
 from typing import Any
@@ -81,7 +81,7 @@ class Manipulator:
                     max_send_attempts=driver_max_send_attempts, 
                     min_pos=0,
                     max_pos=0.185,
-                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                    monitoring_channel_parameters=(CommandParameters.velocity_signed, None, None, None),
                 )
             )
         if enable_drive_2:
@@ -93,7 +93,7 @@ class Manipulator:
                     max_send_attempts=driver_max_send_attempts, 
                     min_pos=0,
                     max_pos=0.18,
-                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                    monitoring_channel_parameters=(CommandParameters.velocity_signed, None, None, None),
                 )
             )
         if enable_drive_3:
@@ -105,7 +105,7 @@ class Manipulator:
                     max_send_attempts=driver_max_send_attempts, 
                     min_pos=None,
                     max_pos=None,
-                    monitoring_channel_parameters=(Command_Parameters.velocity_signed, None, None, None),
+                    monitoring_channel_parameters=(CommandParameters.velocity_signed, None, None, None),
                 )
             )
         self.futures: list[Future | None] = [None]*len(self.drivers)

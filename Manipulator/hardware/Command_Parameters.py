@@ -1,6 +1,6 @@
 from .io import CommandParameter, linTypes
 
-class Command_Parameters:
+class CommandParameters:
     target_position = CommandParameter(
         description="Target position", 
         type=linTypes.Sint32,

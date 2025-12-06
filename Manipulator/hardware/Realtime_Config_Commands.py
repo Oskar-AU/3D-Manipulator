@@ -1,5 +1,5 @@
 from .io import RealtimeConfig, linType, CommandParameter
-from .Command_Parameters import Command_Parameters
+from .Command_Parameters import CommandParameters
 from typing import Any
 
 class Read_ROM_Value_of_Parameter_by_UPID(RealtimeConfig):
@@ -32,7 +32,7 @@ class Read_RAM_Value_of_Parameter_by_UPID(RealtimeConfig):
             unit=UPID_unit,
             conversion_factor=UPID_conversion_factor
         )
-        super().__init__((Command_Parameters.UPID,), (UPID,), (Command_Parameters.UPID, DI_parameter,))
+        super().__init__((CommandParameters.UPID,), (UPID,), (CommandParameters.UPID, DI_parameter,))
 
 class No_Operation(RealtimeConfig):
 

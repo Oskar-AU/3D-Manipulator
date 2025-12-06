@@ -1,2 +1,2 @@
 from .Drivers import Driver, DriveError
-from .Command_Parameters import Command_Parameters
+from .Command_Parameters import CommandParameters

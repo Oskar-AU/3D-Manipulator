@@ -17,7 +17,7 @@ class DriveError(Exception):
         self.drive = drive
         super().__init__(message)
 
-class Monitoring_Channel_Missing_Parameter_Error(Exception):
+class MonitoringChannelMissingParameterError(Exception):
     def __init__(self, missing_parameter_name: str) -> None:
         message = f"Monitoring channel not configured correctly. Expected '{missing_parameter_name}' " + \
                    "but was not found. Check either driver or manipulator configuration."
@@ -463,7 +463,7 @@ class Driver:
         try:
             return response.actual_pos, response.monitoring_channel['velocity']
         except KeyError:
-            raise Monitoring_Channel_Missing_Parameter_Error('velocity')
+            raise MonitoringChannelMissingParameterError('velocity')
         
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
@@ -479,4 +479,4 @@ class Driver:
         try:
             return response.actual_pos, response.monitoring_channel['velocity']
         except KeyError:
-            raise Monitoring_Channel_Missing_Parameter_Error('velocity')
+            raise MonitoringChannelMissingParameterError('velocity')

@@ -1,7 +1,7 @@
 from .io import MotionCommmandInterface
 from .io import linType
 from .io import CommandParameter
-from .Command_Parameters import Command_Parameters
+from .Command_Parameters import CommandParameters
 import copy
 
 class No_Operation(MotionCommmandInterface):
@@ -58,10 +58,10 @@ class VAI_go_to_pos(MotionCommmandInterface):
         """
         super().__init__(
             (
-                Command_Parameters.target_position,
-                Command_Parameters.velocity_unsigned,
-                Command_Parameters.acceleration_unsigned,
-                Command_Parameters.deceleration_unsigned
+                CommandParameters.target_position,
+                CommandParameters.velocity_unsigned,
+                CommandParameters.acceleration_unsigned,
+                CommandParameters.deceleration_unsigned
             ),
             (
                 target_position,
@@ -87,7 +87,7 @@ class P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motion
 
         def __init__(self, demand_position: float) -> None:
 
-            super().__init__((Command_Parameters.demand_position,), (demand_position,))
+            super().__init__((CommandParameters.demand_position,), (demand_position,))
 
 class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(MotionCommmandInterface):
 
@@ -107,8 +107,8 @@ class PV_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Motio
 
             super().__init__(
                 (
-                    Command_Parameters.demand_position,
-                    Command_Parameters.velocity_signed
+                    CommandParameters.demand_position,
+                    CommandParameters.velocity_signed
                 ),
                 (
                     demand_position,
@@ -134,9 +134,9 @@ class PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(Moti
 
         super().__init__(
             (
-                Command_Parameters.demand_position,
-                Command_Parameters.velocity_signed,
-                Command_Parameters.acceleration_signed
+                CommandParameters.demand_position,
+                CommandParameters.velocity_signed,
+                CommandParameters.acceleration_signed
             ),
             (
                 demand_position,
@@ -163,8 +163,8 @@ class PV_Stream_With_Slave_Generated_Time_Stamp(MotionCommmandInterface):
 
             super().__init__(
                 (
-                    Command_Parameters.demand_position,
-                    Command_Parameters.velocity_signed
+                    CommandParameters.demand_position,
+                    CommandParameters.velocity_signed
                 ),
                 (
                     demand_position,
@@ -215,7 +215,7 @@ class Write_Live_Parameter(MotionCommmandInterface):
 
         super().__init__(
             (
-                Command_Parameters.UPID,
+                CommandParameters.UPID,
                 raw_parameter   
             ),
             (
@@ -242,8 +242,8 @@ class AccVAI_Infinite_Motion_Positive_Direction(MotionCommmandInterface):
         
         super().__init__(
             (
-                Command_Parameters.velocity_unsigned,
-                Command_Parameters.acceleration_unsigned
+                CommandParameters.velocity_unsigned,
+                CommandParameters.acceleration_unsigned
             ),
             (
                 velocity,
@@ -269,8 +269,8 @@ class AccVAI_Infinite_Motion_Negative_Direction(MotionCommmandInterface):
         
         super().__init__(
             (
-                Command_Parameters.velocity_unsigned,
-                Command_Parameters.acceleration_unsigned
+                CommandParameters.velocity_unsigned,
+                CommandParameters.acceleration_unsigned
             ),
             (
                 velocity,
@@ -294,4 +294,4 @@ class VAI_Stop(MotionCommmandInterface):
     
     def __init__(self, decceleration: float = 10.0) -> None:
         
-        super().__init__((Command_Parameters.acceleration_unsigned,), (decceleration,))
+        super().__init__((CommandParameters.acceleration_unsigned,), (decceleration,))
