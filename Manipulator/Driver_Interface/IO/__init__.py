@@ -1,5 +1,5 @@
 from .datagrams import linUDP
-from .Requests import Request
+from .requests import Request
 from .Responses import Response, TranslatedResponse
 from .control_words import ControlWord
 from .commands import linType
