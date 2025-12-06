@@ -1,4 +1,4 @@
-from . import io, Realtime_Config_Commands, motion_commands
+from . import io, motion_commands, realtime_config_commands
 from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
@@ -426,19 +426,19 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_driver_time(self) -> float:
-        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, io.linTypes.Uint32, 'slave timer value', 'mym')
+        realtime_config_cmd = realtime_config_commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, io.linTypes.Uint32, 'slave timer value', 'mym')
         return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @ignored_if_awaiting_error_acknowledgement
     def get_realtime_config_command_count(self) -> int:
         self.logger.debug("Requesting realtime_config count.")
-        realtime_config_cmd = Realtime_Config_Commands.No_Operation()
+        realtime_config_cmd = realtime_config_commands.No_Operation()
         return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.command_count
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_status_word(self) -> int:
-        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, io.linTypes.Uint16, 'status word', '-')
+        realtime_config_cmd = realtime_config_commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, io.linTypes.Uint16, 'status word', '-')
         return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @run_on_driver_thread

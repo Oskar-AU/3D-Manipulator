@@ -1,4 +1,4 @@
-from .hardware import io, Realtime_Config_Commands, motion_commands
+from .hardware import io, motion_commands, realtime_config_commands
 from .Manipulator import Manipulator, Telemetry
 import logging
 import os
