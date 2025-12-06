@@ -1,4 +1,4 @@
-from .IO import RealtimeConfig, linType, CommandParameter
+from .io import RealtimeConfig, linType, CommandParameter
 from .Command_Parameters import Command_Parameters
 from typing import Any
 

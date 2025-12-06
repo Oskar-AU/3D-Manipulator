@@ -1,6 +1,6 @@
-from .IO import MotionCommmandInterface
-from .IO import linType
-from .IO import CommandParameter
+from .io import MotionCommmandInterface
+from .io import linType
+from .io import CommandParameter
 from .Command_Parameters import Command_Parameters
 import copy
 

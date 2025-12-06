@@ -1,4 +1,4 @@
-from .IO import CommandParameter, linTypes
+from .io import CommandParameter, linTypes
 
 class Command_Parameters:
     target_position = CommandParameter(

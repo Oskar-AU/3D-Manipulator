@@ -1,4 +1,4 @@
-from . import IO, Motion_Commands, Realtime_Config_Commands
+from . import io, Motion_Commands, Realtime_Config_Commands
 from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
@@ -28,12 +28,12 @@ class Driver:
     def __init__(self, 
                  IP: str, 
                  name: str, 
-                 datagram: IO.linUDP,
+                 datagram: io.linUDP,
                  response_timeout: float,
                  max_send_attempts: int,
                  min_pos: float,
                  max_pos: float,
-                 monitoring_channel_parameters: tuple[IO.CommandParameter | None] = (None, None, None, None),
+                 monitoring_channel_parameters: tuple[io.CommandParameter | None] = (None, None, None, None),
                  ) -> None:
         self.min_pos = min_pos
         self.max_pos = max_pos
@@ -50,7 +50,7 @@ class Driver:
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
         self.logger = logging.getLogger(self.name)
-        self.warning_words: list[IO.responses.WarnWord] = list()
+        self.warning_words: list[io.responses.WarnWord] = list()
         self.MC_count = 0
         self.realtime_config_command_count = 0
         self.MC_count_up_to_date = False
@@ -96,7 +96,7 @@ class Driver:
                 return method(self, *args, **kwargs)
         return wrapper
 
-    def send(self, request: IO.Request) -> IO.TranslatedResponse:
+    def send(self, request: io.Request) -> io.TranslatedResponse:
         """
         Parameters
         ----------
@@ -179,11 +179,11 @@ class Driver:
             The main state of the drive.
         """
         self.logger.debug("Requesting main state.")
-        return self.send(IO.Request(IO.Response(state_var=True))).state_var.main_state
+        return self.send(io.Request(io.Response(state_var=True))).state_var.main_state
 
     def get_MC_count(self) -> int:
         self.logger.debug("Requesting MC_count.")
-        MC_count = self.send(IO.Request(IO.Response(state_var=True))).state_var.MC_count
+        MC_count = self.send(io.Request(io.Response(state_var=True))).state_var.MC_count
         return MC_count if MC_count is not None else 0
 
     @run_on_driver_thread
@@ -207,7 +207,7 @@ class Driver:
         self.logger.info("Homing procedure initiated.")
 
         # Checks if the driver is already homed.
-        state_var = self.send(IO.Request(IO.Response(state_var=True))).state_var
+        state_var = self.send(io.Request(io.Response(state_var=True))).state_var
         if state_var.homed and not overwrite_already_home_check:
             self.logger.info("Homing procedure completed (already homed).")
             return True
@@ -219,19 +219,19 @@ class Driver:
             return False
 
         # Sending home request.
-        home_request = IO.Request(IO.Response(), IO.ControlWord(switch_on=True, home=True))
+        home_request = io.Request(io.Response(), io.ControlWord(switch_on=True, home=True))
         self.send(home_request)
 
         # Waiting for homing to finish.
-        is_homing_finished_request = IO.Request(IO.Response(state_var=True))
+        is_homing_finished_request = io.Request(io.Response(state_var=True))
         is_homing_finished = lambda: self.send(is_homing_finished_request).state_var.homing_finished
         if not self.wait_for_change(is_homing_finished, timeout, 1):
             self.logger.error(f"Homing procedure failed: Timed out ({timeout}s). Switching off drive.")
-            self.send(IO.Request(IO.Response(), IO.ControlWord()))
+            self.send(io.Request(io.Response(), io.ControlWord()))
             return False
         
         # Finialzing.
-        home_off_request = IO.Request(IO.Response(), IO.ControlWord(switch_on=True))
+        home_off_request = io.Request(io.Response(), io.ControlWord(switch_on=True))
         self.send(home_off_request)
         self.logger.info("Homing procedure completed.")
         return True
@@ -260,7 +260,7 @@ class Driver:
             return True
         if main_state != 2:
             # Requesting state 2.
-            self.send(IO.Request(IO.Response(), IO.ControlWord()))
+            self.send(io.Request(io.Response(), io.ControlWord()))
 
             # Waiting for main state to go state 2.
             if not self.wait_for_change(lambda: self.get_main_state() == 2, timeout=timeout, delay=0.2):
@@ -271,7 +271,7 @@ class Driver:
         
         if main_state == 2:
             # Requesting state 8.        
-            self.send(IO.Request(IO.Response(), IO.ControlWord(switch_on=True)))
+            self.send(io.Request(io.Response(), io.ControlWord(switch_on=True)))
 
             # Waiting for state 8.
             if not self.wait_for_change(lambda: self.get_main_state() == 8, timeout=timeout, delay=0.2):
@@ -304,14 +304,14 @@ class Driver:
             time.sleep(delay)
         return True
     
-    def _error_handler(self, translated_response: IO.TranslatedResponse) -> None:
+    def _error_handler(self, translated_response: io.TranslatedResponse) -> None:
         error_code: int = translated_response.error_code
         if error_code is not None and error_code != 0:
             self.logger.error(f"Error code {error_code} raised by drive.")
             self.awaiting_error_acknowledgement = True
             raise DriveError(self, error_code)
         
-    def _warning_handler(self, translated_response: IO.TranslatedResponse) -> None:
+    def _warning_handler(self, translated_response: io.TranslatedResponse) -> None:
         """
         Ensures that the warning list within this class is up to date with the physical drives
         warning word.
@@ -322,7 +322,7 @@ class Driver:
             The translated response from the drive.
         """
         # Gets the new warning word.
-        warning_words: list[IO.responses.WarnWord] = translated_response.warn_word
+        warning_words: list[io.responses.WarnWord] = translated_response.warn_word
 
         # Exit warning handler if the resonse didn't request a warning.        
         if warning_words is None: return None
@@ -356,13 +356,13 @@ class Driver:
         self.stream_type: Literal['P', 'PV', 'PVA'] = stream_type
         match stream_type:
             case 'P':
-                self.stream_request = IO.Request(
+                self.stream_request = io.Request(
                     MC_interface=Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
             case 'PV':
-                self.stream_request = IO.Request(
+                self.stream_request = io.Request(
                     MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp(0, 0))
             case 'PVA':
-                self.stream_request = IO.Request(
+                self.stream_request = io.Request(
                     MC_interface=Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))
             case _:
                 raise ValueError(f"Parameter 'stream_type' expected eiter 'P', 'PV', or 'PVA' but got {stream_type}.")
@@ -388,7 +388,7 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def stop_stream(self) -> None:
-        self.send(IO.Request(MC_interface=Motion_Commands.Stop_Streaming()))
+        self.send(io.Request(MC_interface=Motion_Commands.Stop_Streaming()))
 
     @run_on_driver_thread
     def acknowledge_error(self) -> None:
@@ -396,7 +396,7 @@ class Driver:
         
         # Getting current error.
         try:
-            error_code = self.send(IO.Request(IO.Response(error_code=True, warn_word=False))).error_code
+            error_code = self.send(io.Request(io.Response(error_code=True, warn_word=False))).error_code
         except DriveError as e:
             error_code = e.error_code
         if error_code is None or error_code == 0:
@@ -406,9 +406,9 @@ class Driver:
         while error_code is not None and error_code != 0:
             # Attempting to acknowledge error.
             self.logger.info(f"Attempting to acknowledge error code {error_code}.")
-            self.send(IO.Request(IO.Response(error_code=False, warn_word=False), control_word=IO.ControlWord(Error_acknowledge=True)))
+            self.send(io.Request(io.Response(error_code=False, warn_word=False), control_word=io.ControlWord(Error_acknowledge=True)))
             try:
-                new_error_code = self.send(IO.Request(IO.Response(warn_word=False), control_word=IO.ControlWord())).error_code
+                new_error_code = self.send(io.Request(io.Response(warn_word=False), control_word=io.ControlWord())).error_code
             except DriveError as e:
                 new_error_code = e.error_code
 
@@ -426,20 +426,20 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_driver_time(self) -> float:
-        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, IO.linTypes.Uint32, 'slave timer value', 'mym')
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1CAF, io.linTypes.Uint32, 'slave timer value', 'mym')
+        return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @ignored_if_awaiting_error_acknowledgement
     def get_realtime_config_command_count(self) -> int:
         self.logger.debug("Requesting realtime_config count.")
         realtime_config_cmd = Realtime_Config_Commands.No_Operation()
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.command_count
+        return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.command_count
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def get_status_word(self) -> int:
-        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, IO.linTypes.Uint16, 'status word', '-')
-        return self.send(IO.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
+        realtime_config_cmd = Realtime_Config_Commands.Read_RAM_Value_of_Parameter_by_UPID(0x1D51, io.linTypes.Uint16, 'status word', '-')
+        return self.send(io.Request(realtime_config=realtime_config_cmd)).realtime_config.values[1]
     
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
@@ -456,8 +456,8 @@ class Driver:
         else:
             motion_CMD = Motion_Commands.VAI_Stop()
 
-        response_def = IO.Response(actual_pos=True, monitoring_channel=True)
-        request = IO.Request(response_def, MC_interface=motion_CMD)
+        response_def = io.Response(actual_pos=True, monitoring_channel=True)
+        request = io.Request(response_def, MC_interface=motion_CMD)
         response = self.send(request)
 
         try:
@@ -472,8 +472,8 @@ class Driver:
             self.logger.error("go_to_pos recieved signed velocity or acceleration.")
             raise ValueError("go_to_pos recieved signed velocity or acceleration.")
         motion_CMD = Motion_Commands.VAI_go_to_pos(position, velocity, acceleration, acceleration)
-        response_def = IO.Response(actual_pos=True, monitoring_channel=True)
-        request = IO.Request(response_def, MC_interface=motion_CMD)
+        response_def = io.Response(actual_pos=True, monitoring_channel=True)
+        request = io.Request(response_def, MC_interface=motion_CMD)
         response = self.send(request)
 
         try:

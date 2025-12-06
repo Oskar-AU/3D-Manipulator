@@ -1,5 +1,5 @@
 from .Stream import Stream
-from . import IO
+from . import io
 from .Driver_Interface import Driver, DriveError, Command_Parameters
 from concurrent.futures import Future
 import time
@@ -70,7 +70,7 @@ class Telemetry:
 class Manipulator:
 
     def __init__(self, driver_response_timeout: float = 2, driver_max_send_attempts: int = 5, enable_drive_1: bool = True, enable_drive_2: bool = True, enable_drive_3: bool = True):
-        self.datagram = IO.linUDP()
+        self.datagram = io.linUDP()
         self.drivers: list[Driver] = []
         if enable_drive_1:
             self.drivers.append(
