@@ -1,4 +1,4 @@
-from . import io, Motion_Commands, Realtime_Config_Commands
+from . import io, Realtime_Config_Commands, motion_commands
 from typing import Callable, Self, Any, TypeVar, ParamSpec, Literal
 import logging
 import time
@@ -357,13 +357,13 @@ class Driver:
         match stream_type:
             case 'P':
                 self.stream_request = io.Request(
-                    MC_interface=Motion_Commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
+                    MC_interface=motion_commands.P_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0))
             case 'PV':
                 self.stream_request = io.Request(
-                    MC_interface=Motion_Commands.PV_Stream_With_Slave_Generated_Time_Stamp(0, 0))
+                    MC_interface=motion_commands.PV_Stream_With_Slave_Generated_Time_Stamp(0, 0))
             case 'PVA':
                 self.stream_request = io.Request(
-                    MC_interface=Motion_Commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))
+                    MC_interface=motion_commands.PVA_Stream_With_Slave_Generated_Time_Stamp_and_Configured_Period_Time(0, 0, 0))
             case _:
                 raise ValueError(f"Parameter 'stream_type' expected eiter 'P', 'PV', or 'PVA' but got {stream_type}.")
 
@@ -388,7 +388,7 @@ class Driver:
     @run_on_driver_thread
     @ignored_if_awaiting_error_acknowledgement
     def stop_stream(self) -> None:
-        self.send(io.Request(MC_interface=Motion_Commands.Stop_Streaming()))
+        self.send(io.Request(MC_interface=motion_commands.Stop_Streaming()))
 
     @run_on_driver_thread
     def acknowledge_error(self) -> None:
@@ -446,15 +446,15 @@ class Driver:
     def move_with_constant_velocity(self, velocity: float, acceleration: float = 10.0) -> tuple[float, float]:
 
         if velocity > 0.0 and acceleration > 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, acceleration)
+            motion_CMD = motion_commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, acceleration)
         elif velocity < 0.0 and acceleration > 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, acceleration)
+            motion_CMD = motion_commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, acceleration)
         elif velocity > 0.0 and acceleration < 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, -acceleration)
+            motion_CMD = motion_commands.AccVAI_Infinite_Motion_Positive_Direction(velocity, -acceleration)
         elif velocity < 0.0 and acceleration < 0.0:
-            motion_CMD = Motion_Commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, -acceleration)
+            motion_CMD = motion_commands.AccVAI_Infinite_Motion_Negative_Direction(-velocity, -acceleration)
         else:
-            motion_CMD = Motion_Commands.VAI_Stop()
+            motion_CMD = motion_commands.VAI_Stop()
 
         response_def = io.Response(actual_pos=True, monitoring_channel=True)
         request = io.Request(response_def, MC_interface=motion_CMD)
@@ -471,7 +471,7 @@ class Driver:
         if velocity < 0.0 or acceleration < 0.0:
             self.logger.error("go_to_pos recieved signed velocity or acceleration.")
             raise ValueError("go_to_pos recieved signed velocity or acceleration.")
-        motion_CMD = Motion_Commands.VAI_go_to_pos(position, velocity, acceleration, acceleration)
+        motion_CMD = motion_commands.VAI_go_to_pos(position, velocity, acceleration, acceleration)
         response_def = io.Response(actual_pos=True, monitoring_channel=True)
         request = io.Request(response_def, MC_interface=motion_CMD)
         response = self.send(request)
