@@ -2,7 +2,7 @@
 from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
-from Manipulator.control import Telemetry
+from manipulator.control import Telemetry
 
 plt.style.use("seaborn-v0_8-darkgrid")
 
