@@ -2,11 +2,10 @@ import numpy as np
 import numpy.typing as npt
 from typing import Tuple
 import time
-from .Path_follower import Path_Base, Telemetry
+from .path_followers import PathFollower, Telemetry
 from scipy.optimize import bisect
 
-
-class Path_follower(Path_Base):
+class WaypointAngleAggregation(PathFollower):
     def __init__(self, path_keypoints: npt.ArrayLike,
                  max_velocity: float,
                  max_acceleration: float = 10,

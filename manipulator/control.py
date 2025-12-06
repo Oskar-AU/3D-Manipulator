@@ -1,4 +1,3 @@
-from .algorithms.Stream import Stream
 from . import io
 from .hardware import Driver, DriveError, CommandParameters
 from concurrent.futures import Future
@@ -7,7 +6,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 import logging
-from .algorithms.Path_follower import Path_Base, Telemetry
+from .algorithms import PathFollower, Telemetry, Stream
 
 path_logger = logging.getLogger("PATH")
 
@@ -149,7 +148,7 @@ class Controller:
             self.futures[i] = driver.go_to_pos(position[i], velocity[i], acceleration[i])
         return np.array(self._read_from_futures()).T
 
-    def feedback_loop(self, stepper: Path_Base, max_cycles: int | None = None, debug_interval: int = 1, telemetry: Telemetry | None = None) -> None:
+    def feedback_loop(self, stepper: PathFollower, max_cycles: int | None = None, debug_interval: int = 1, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         

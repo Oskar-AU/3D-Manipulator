@@ -61,7 +61,7 @@ class Telemetry:
                 raise ValueError(f"Cannot export data structure with dim {value.ndim}.")
         df.to_csv(path, index=False)
 
-class Path_Base:
+class PathFollower:
 
     @abstractmethod
     def __call__(self, current_position: npt.ArrayLike, current_velocity: npt.ArrayLike | None = None) -> tuple[npt.NDArray, npt.NDArray, bool]:
