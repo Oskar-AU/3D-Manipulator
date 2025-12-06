@@ -35,6 +35,58 @@ class Driver:
                  max_pos: float,
                  monitoring_channel_parameters: tuple[io.CommandParameter | None] = (None, None, None, None),
                  ) -> None:
+        """
+        The high-level interface for the linMot drivers such as homing, switch on, basic motion commands etc. Every instance contains its 
+        own thread such that any two drivers doesn't have to wait for a response from the other. Methods that are multithreaded are decorated 
+        with the 'run_on_driver_thread'. In case the driver is in an error-state any call to a method that is decorated with the 
+        'ignored_if_awaiting_error_acknowledgement' is ignored to prevent further errors to arise. If the driver itself throws an error 
+        a DriverError exception is raised which can be used to handle errors specifically related to the linMot driver. Use the
+        'acknowledge_error' method to attempt to acknowledge any present driver errors.
+
+        Parameters
+        ----------
+        IP : str
+            The IP address of the corresponding linMot driver.
+        name : str
+            The name of the driver. Used for logging.
+        datagram : io.linUDP
+            The datagram to use for sending and recieved packages.
+        response_timeout : float
+            The response timeout of every package.
+        max_send_attempts : int
+            The maximum number of send attempts before communication is considered lost.
+        min_pos : float
+            The minimal position of the motor connected to this driver [m].
+        max_pos : float
+            The maximum position of the motor connected to this driver [m].
+        monitoring_channel_parameters : tuple[io.CommandParameter | None], optional
+            The format of the monitoring channel setup in the driver. Some methods in this class expects certain
+            monitoring channel parameters to be present. If these methods are called and the parameters are not 
+            configured in this instance or in the driver firmware accordingly, a 'MonitoringChannelMissingParameterError' 
+            exception is raised.
+
+        Additional attributes
+        ---------------------
+        awaiting_error_acknowledgement : bool
+            The awaiting error acknowledge flag. If True, and class method with the 'ignore_if_awaiting_error_acknowledgement'
+            decorator is ignored.
+        _send_attempt : int
+            Local variable that increments in case of recieve timeouts. Resets when package is recieved.
+        logger : logging.Logger
+            The logging module for this driver.
+        MC_count : int
+            The current motion command counts. Is incremented at every motion command (only 4-bits).
+        realtime_config_command_count : int
+            The current realtime config command counts. Is incremented at every motion command (only 4-bits).
+        MC_count_up_to_date : bool
+            If the motion command count is synched with the drivers motion command count.
+        realtime_config_count_up_to_date : bool
+            If the realtime config command count is synched with the drivers realtime config command count.
+        """
+        
+        if len(monitoring_channel_parameters) != 4: raise ValueError("Length of 'monitoring_channel_parameters' must be 4.")
+        
+        # Copying parameters as attributes.
         self.min_pos = min_pos
         self.max_pos = max_pos
         self.IP = IP
@@ -42,17 +94,26 @@ class Driver:
         self.datagram = datagram
         self.response_timeout = response_timeout
         self.max_send_attempts = max_send_attempts
-        if len(monitoring_channel_parameters) != 4: raise ValueError("Length of 'monitoring_channel_parameters' must be 4.")
         self.monitoring_channel_parameters = monitoring_channel_parameters
-        self._send_attempt = 1
-        self.awaiting_error_acknowledgement = False
+        
+        # Setting up the driver thread.
         self._method_queue: queue.Queue[tuple[Callable, tuple[Any], dict[Any], Future]] = queue.Queue()
         self._thread = threading.Thread(target=self._run_method_queue, name=name)
         self._thread.start()
+        
+        # The awaiting error acknowledge flag. If True, and class method with the 'ignore_if_awaiting_error_acknowledgement'
+        # decorator is ignored.
+        self.awaiting_error_acknowledgement = False
+        # Local variable that increments in case of recieve timeouts. Resets when package is recieved. 
+        self._send_attempt = 1
+        # Local logger module.
         self.logger = logging.getLogger(self.name)
+        # A list of driver warnings is kept so that it is known when a change in the warn word is registred.
         self.warning_words: list[io.responses.WarnWord] = list()
+        # The current motion command counts. Is incremented at every motion command (only 4-bits).
         self.MC_count = 0
         self.realtime_config_command_count = 0
+        # Flags to determine if the command count is up to date with the drivers command count.
         self.MC_count_up_to_date = False
         self.realtime_config_count_up_to_date = False
 
@@ -98,20 +159,24 @@ class Driver:
 
     def send(self, request: io.Request) -> io.TranslatedResponse:
         """
+        Attempts to send a request to the drive. If no response is recieved within 'resonse_timeout' it attempts again
+        until 'self._send_attempts == self.max_send_attempts'. This method is not decorated by 'run_on_driver_thread' since
+        some packages sent might not need to be run in parallel.
+
         Parameters
         ----------
-        request : Request
+        request : io.Request
             The request to send to the drive.
 
         Returns
         -------
-        IO.Translated_Response
+        io.TranslatedResponse
             A dict containing the translated response from the drive. Content depends on the request.
 
         raises
         ------
         TimedOutError
-            If no response is recieved after 5 attempts.
+            If no response is recieved after 'max_send_attempts'.
         """
         # If the request is a motion command, ensure that the count is incremented and up to date.
         if request.MC_interface is not None:
@@ -392,6 +457,11 @@ class Driver:
 
     @run_on_driver_thread
     def acknowledge_error(self) -> None:
+        """
+        Attempts to acknowledge any error(s) on the driver if any is present. This is done by first acknowledging the present error
+        and then checking if any new error is raised. If the new error is a different error, this error is also attempted to be 
+        acknowledged but if it is the same as before the error acknowledgement is considered failed and no further attempts is made.
+        """
         self.logger.info("Acknowledging error(s).")
         
         # Getting current error.
