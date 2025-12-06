@@ -1,4 +1,4 @@
-from .Datagrams import linUDP
+from .datagrams import linUDP
 from .Requests import Request
 from .Responses import Response, TranslatedResponse
 from .control_words import ControlWord
