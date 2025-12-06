@@ -1,7 +1,7 @@
 from .io import MotionCommmandInterface
 from .io import linType
 from .io import CommandParameter
-from .Command_Parameters import CommandParameters
+from .command_parameters import CommandParameters
 import copy
 
 class No_Operation(MotionCommmandInterface):

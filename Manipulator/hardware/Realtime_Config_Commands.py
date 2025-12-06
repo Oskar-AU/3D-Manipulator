@@ -1,5 +1,5 @@
 from .io import RealtimeConfig, linType, CommandParameter
-from .Command_Parameters import CommandParameters
+from .command_parameters import CommandParameters
 from typing import Any
 
 class Read_ROM_Value_of_Parameter_by_UPID(RealtimeConfig):
