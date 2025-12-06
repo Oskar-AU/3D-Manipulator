@@ -148,7 +148,7 @@ class Controller:
             self.futures[i] = driver.go_to_pos(position[i], velocity[i], acceleration[i])
         return np.array(self._read_from_futures()).T
 
-    def feedback_loop(self, stepper: PathFollower, max_cycles: int | None = None, debug_interval: int = 1, telemetry: Telemetry | None = None) -> None:
+    def follow_path(self, stepper: PathFollower, max_cycles: int | None = None, debug_interval: int = 1, telemetry: Telemetry | None = None) -> None:
        
         path_logger.info("Starting feedback loop with velocity tracking...")
         
