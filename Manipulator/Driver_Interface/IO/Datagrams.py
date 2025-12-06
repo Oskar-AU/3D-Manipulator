@@ -1,7 +1,9 @@
 import socket
 import threading
 import queue
-from .Logger import logger
+import logging
+
+logger = logging.getLogger("IO")
 
 class linUDP:
 
